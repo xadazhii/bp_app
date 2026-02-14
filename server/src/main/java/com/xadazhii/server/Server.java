@@ -9,5 +9,3 @@ public class Server {
         SpringApplication.run(Server.class, args);
     }
 }
-
-// merge test
