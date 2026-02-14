@@ -1,0 +1,166 @@
+# =============================================================================
+# IDE and editors
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.classpath
+.project
+.c9/
+*.launch
+.settings/
+*.iml
+*.iws
+*.ipr
+*.code-workspace
+
+# =============================================================================
+# Language and framework-specific files
+# =============================================================================
+
+# Java/Maven
+target/
+server/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.m2/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+out/
+
+# Node.js / npm / React
+node_modules/
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+
+# React specific
+build/
+dist/
+.next/
+.cache/
+client/build/
+client/dist/
+client/node_modules/
+client/.env.local
+client/.env.*.local
+
+# =============================================================================
+# Environment and configuration
+# =============================================================================
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# =============================================================================
+# Temporary files
+# =============================================================================
+*.tmp
+*.temp
+*.log
+*.log.*
+tmp/
+temp/
+*.backup
+*.bak
+
+# =============================================================================
+# Build and runtime directories
+# =============================================================================
+/build/
+/dist/
+/target/
+out/
+bin/
+.gradle/
+*.gradle
+
+# =============================================================================
+# Docker
+# =============================================================================
+docker-compose.override.yml
+
+# =============================================================================
+# Databases
+# =============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+
+# =============================================================================
+# Operating system
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+.localized
+Desktop.ini
+
+# =============================================================================
+# Maven and Gradle wrapper
+# =============================================================================
+gradle-wrapper.properties
+gradlew
+gradlew.bat
+
+# =============================================================================
+# Coverage reports
+# =============================================================================
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+coverage/
+.jacoco
+
+# =============================================================================
+# Security - private keys and credentials
+# =============================================================================
+*.pem
+*.key
+*.pub
+*.p12
+*.pfx
+.ssh/
+credentials/
+secrets/
+.aws/
+.kube/
+
+# =============================================================================
+# Uploaded files and runtime data - should not be committed
+# =============================================================================
+uploads/
+server/uploads/
+client/uploads/

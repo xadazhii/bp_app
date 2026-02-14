@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: diploma_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./server
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/diploma_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+      HASBI_APP_JWTSECRET: ${JWT_SECRET}
+      HASBI_APP_JWTEXPIRATIONMS: 86400000
+
+      CLOUDINARY_CLOUD_NAME: ${CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUD_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUD_API_SECRET}
+
+      APP_ADMIN_USERNAME: ${ADMIN_USERNAME}
+      APP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      APP_ADMIN_EMAIL: ${ADMIN_EMAIL}
+
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./client
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
