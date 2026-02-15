@@ -46,14 +46,7 @@ const RetroCloudIcon = () => (
         <path d="M25 45H15C6.7 45 0 38.3 0 30C0 22.5 5.5 16.2 12.7 15.2C13.8 6.7 21 0 30 0C39.5 0 47.3 7.2 48.4 16.5C51.6 13.7 55.7 12 60 12C71 12 80 21 80 32C80 32.8 79.9 33.6 79.8 34.4C85.6 35.8 90 41 90 47C90 54.2 84.2 60 77 60H25C11.2 60 25 45 25 45Z" fill="#1e293b" stroke="currentColor" strokeWidth="2"/>
     </svg>
 );
-const GameIcon = () => (
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="2" y="6" width="20" height="12" rx="2" />
-        <path d="M6 12h4m-2-2v4" />
-        <circle cx="15" cy="11" r="1" />
-        <circle cx="17" cy="13" r="1" />
-    </svg>
-);
+
 const NetworkIcon = () => (
     <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <circle cx="12" cy="12" r="10" strokeOpacity="0.5" />
