@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import AuthService from "../services/auth.service";
 import { withRouter } from "../common/with-router";
+import EventBus from "../common/EventBus";
 
 class Login extends Component {
     constructor(props) {
@@ -56,8 +57,8 @@ class Login extends Component {
 
         AuthService.login(this.state.username, this.state.password).then(
             () => {
+                EventBus.dispatch("login");
                 this.props.router.navigate("/profile");
-                window.location.reload();
             },
             error => {
                 const resMessage =

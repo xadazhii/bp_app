@@ -31,7 +31,7 @@ import com.xadazhii.server.repository.UserRepository;
 import com.xadazhii.server.security.jwt.JwtUtils;
 import com.xadazhii.server.security.services.UserDetailsImpl;
 
-@CrossOrigin(origins = "https://btsss-stu-fei.netlify.app", maxAge = 3600)
+@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -53,7 +53,6 @@ public class AuthController {
 
     @Autowired
     AllowedStudentRepository allowedStudentRepository;
-
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

@@ -9,11 +9,13 @@ export default class Register extends Component {
         this.onChangeUsername = this.onChangeUsername.bind(this);
         this.onChangeEmail = this.onChangeEmail.bind(this);
         this.onChangePassword = this.onChangePassword.bind(this);
+        this.onChangeConfirmPassword = this.onChangeConfirmPassword.bind(this);
 
         this.state = {
             username: "",
             email: "",
             password: "",
+            confirmPassword: "",
             successful: false,
             message: "",
             loading: false,
@@ -23,7 +25,7 @@ export default class Register extends Component {
 
     validate = () => {
         const errors = {};
-        const { username, email, password } = this.state;
+        const { username, email, password, confirmPassword } = this.state;
 
         if (!username) {
             errors.username = "Toto pole je povinné!";
@@ -43,6 +45,12 @@ export default class Register extends Component {
             errors.password = "Heslo musí mať 6 až 40 znakov.";
         }
 
+        if (!confirmPassword) {
+            errors.confirmPassword = "Toto pole je povinné!";
+        } else if (confirmPassword !== password) {
+            errors.confirmPassword = "Heslá sa nezhodujú!";
+        }
+
         this.setState({ errors });
         return Object.keys(errors).length === 0;
     };
@@ -57,6 +65,10 @@ export default class Register extends Component {
 
     onChangePassword(e) {
         this.setState({ password: e.target.value });
+    }
+
+    onChangeConfirmPassword(e) {
+        this.setState({ confirmPassword: e.target.value });
     }
 
     handleRegister(e) {
@@ -144,7 +156,7 @@ export default class Register extends Component {
                                     )}
                                 </div>
 
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
                                         Heslo
                                     </label>
@@ -158,6 +170,24 @@ export default class Register extends Component {
                                     {errors.password && (
                                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mt-2 text-sm">
                                             {errors.password}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mb-6">
+                                    <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">
+                                        Zopakujte heslo
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        value={this.state.confirmPassword}
+                                        onChange={this.onChangeConfirmPassword}
+                                        className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    />
+                                    {errors.confirmPassword && (
+                                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mt-2 text-sm">
+                                            {errors.confirmPassword}
                                         </div>
                                     )}
                                 </div>
@@ -183,11 +213,10 @@ export default class Register extends Component {
                         {message && (
                             <div className="mt-4">
                                 <div
-                                    className={`px-4 py-3 rounded relative ${
-                                        successful
-                                            ? "bg-green-100 border border-green-400 text-green-700"
-                                            : "bg-red-100 border border-red-400 text-red-700"
-                                    }`}
+                                    className={`px-4 py-3 rounded relative ${successful
+                                        ? "bg-green-100 border border-green-400 text-green-700"
+                                        : "bg-red-100 border border-red-400 text-red-700"
+                                        }`}
                                     role="alert"
                                 >
                                     {message}

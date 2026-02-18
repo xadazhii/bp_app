@@ -3,27 +3,27 @@ import './home.component.css';
 
 const GraduationCapIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3 text-blue-400">
-        <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.084a1 1 0 0 0 0 1.838l8.57 3.908a2 2 0 0 0 1.66 0z"/>
-        <path d="M22 10v6"/>
-        <path d="M6 12v5a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-5"/>
+        <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.084a1 1 0 0 0 0 1.838l8.57 3.908a2 2 0 0 0 1.66 0z" />
+        <path d="M22 10v6" />
+        <path d="M6 12v5a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-5" />
     </svg>
 );
 
 const CheckCircleIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3 text-blue-400">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
 );
 
 const ListOrderedIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3 text-blue-400">
-        <line x1="10" x2="21" y1="6" y2="6"/>
-        <line x1="10" x2="21" y1="12" y2="12"/>
-        <line x1="10" x2="21" y1="18" y2="18"/>
-        <path d="M4 6h1v4"/>
-        <path d="M4 10h2"/>
-        <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+        <line x1="10" x2="21" y1="6" y2="6" />
+        <line x1="10" x2="21" y1="12" y2="12" />
+        <line x1="10" x2="21" y1="18" y2="18" />
+        <path d="M4 6h1v4" />
+        <path d="M4 10h2" />
+        <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
     </svg>
 );
 

@@ -6,7 +6,7 @@ label {
 .card {
     background-color: #f7f7f7;
     padding: 20px 25px 30px;
-    margin: 50px auto 25px; 
+    margin: 50px auto 25px;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
     border-radius: 2px;
@@ -26,15 +26,15 @@ label {
 }
 
 .card-container.card {
-    width: 90%; 
-    max-width: 380px; 
-    padding: 25px; 
-    margin: 25px auto; 
+    width: 90%;
+    max-width: 380px;
+    padding: 25px;
+    margin: 25px auto;
 }
 
 .page-container {
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
 }
 
 .sidebar {
@@ -47,21 +47,21 @@ label {
 
 @media screen and (min-width: 768px) {
     .card-container.card {
-        max-width: 450px; 
-        padding: 40px 40px; 
+        max-width: 450px;
+        padding: 40px 40px;
     }
 
     .page-container {
-        flex-direction: row; 
+        flex-direction: row;
     }
 
     .sidebar {
-        width: 250px;      
-        flex-shrink: 0;   
+        width: 250px;
+        flex-shrink: 0;
     }
 
     .main-content {
-        flex-grow: 1;     
-        padding: 20px;    
+        flex-grow: 1;
+        padding: 20px;
     }
 }
