@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "https://btsss-stu-fei.netlify.app", maxAge = 3600)
+@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
 @RestController
 @RequestMapping("/api/tests")
 public class TestController {

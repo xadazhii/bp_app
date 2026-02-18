@@ -1,7 +1,6 @@
 package com.xadazhii.server.controllers;
 
 import com.xadazhii.server.models.Answer;
-import com.xadazhii.server.models.Question;
 import com.xadazhii.server.models.TestResult;
 import com.xadazhii.server.models.User;
 import com.xadazhii.server.models.UserProgress;
@@ -27,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "https://btsss-stu-fei.netlify.app", maxAge = 3600)
+@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class ProgressController {
@@ -58,7 +57,8 @@ public class ProgressController {
         User currentUser = getCurrentUser();
 
         if (userProgressRepository.existsByUserIdAndMaterialId(currentUser.getId(), progressRequest.getMaterialId())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Chyba: Tento materiál už bol označený ako dokončený!"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Chyba: Tento materiál už bol označený ako dokončený!"));
         }
 
         Material material = materialRepository.findById(progressRequest.getMaterialId())
@@ -93,13 +93,17 @@ public class ProgressController {
     public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
         long totalLectures = materialRepository.countByMaterialType("lecture");
         long completedLectures = userProgressRepository.countCompletedByUserAndType(userId, "lecture");
-        int percentLectures = (totalLectures == 0) ? 0 : (int) Math.round(((double) completedLectures / totalLectures) * 100);
-        UserStatsResponse.StatsDetail lectureStats = new UserStatsResponse.StatsDetail(completedLectures, totalLectures, percentLectures);
+        int percentLectures = (totalLectures == 0) ? 0
+                : (int) Math.round(((double) completedLectures / totalLectures) * 100);
+        UserStatsResponse.StatsDetail lectureStats = new UserStatsResponse.StatsDetail(completedLectures, totalLectures,
+                percentLectures);
 
         long totalSeminars = materialRepository.countByMaterialType("seminar");
         long completedSeminars = userProgressRepository.countCompletedByUserAndType(userId, "seminar");
-        int percentSeminars = (totalSeminars == 0) ? 0 : (int) Math.round(((double) completedSeminars / totalSeminars) * 100);
-        UserStatsResponse.StatsDetail seminarStats = new UserStatsResponse.StatsDetail(completedSeminars, totalSeminars, percentSeminars);
+        int percentSeminars = (totalSeminars == 0) ? 0
+                : (int) Math.round(((double) completedSeminars / totalSeminars) * 100);
+        UserStatsResponse.StatsDetail seminarStats = new UserStatsResponse.StatsDetail(completedSeminars, totalSeminars,
+                percentSeminars);
 
         List<TestResult> userTestResults = testResultRepository.findByStudentId(userId);
 
@@ -115,8 +119,7 @@ public class ProgressController {
             return new UserStatsResponse.UserTestResultDto(
                     result.getTest().getTitle(),
                     result.getScore(),
-                    maxScore
-            );
+                    maxScore);
         }).collect(Collectors.toList());
 
         int totalPoints = detailedResults.stream()
@@ -125,7 +128,8 @@ public class ProgressController {
 
         long completedTests = userTestResults.size();
 
-        UserStatsResponse.TestStatsDetail testStats = new UserStatsResponse.TestStatsDetail(totalPoints, completedTests, detailedResults);
+        UserStatsResponse.TestStatsDetail testStats = new UserStatsResponse.TestStatsDetail(totalPoints, completedTests,
+                detailedResults);
 
         UserStatsResponse response = new UserStatsResponse(lectureStats, seminarStats, testStats);
         return ResponseEntity.ok(response);

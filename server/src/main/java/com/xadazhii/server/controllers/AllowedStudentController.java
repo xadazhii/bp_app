@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CrossOrigin(origins = "https://btsss-stu-fei.netlify.app", maxAge = 3600)
+@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class AllowedStudentController {

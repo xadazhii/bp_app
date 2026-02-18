@@ -34,10 +34,21 @@ class App extends Component {
         EventBus.on("logout", () => {
             this.logOut();
         });
+
+        EventBus.on("login", () => {
+            const user = AuthService.getCurrentUser();
+            if (user) {
+                this.setState({
+                    currentUser: user,
+                    showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+                });
+            }
+        });
     }
 
     componentWillUnmount() {
         EventBus.remove("logout");
+        EventBus.remove("login");
     }
 
     logOut() {
@@ -89,11 +100,6 @@ class App extends Component {
                                 <Link to={"/profile"} className="nav-link" style={navLinkStyle}>
                                     Portál študenta
                                 </Link>
-                            </li>
-                            <li className="nav-item">
-                                <a href="/login" className="nav-link" onClick={this.logOut} style={navLinkStyle}>
-                                    Odhlásiť sa
-                                </a>
                             </li>
                         </div>
                     ) : (

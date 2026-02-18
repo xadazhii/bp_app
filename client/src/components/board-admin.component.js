@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import authHeader from "../services/auth-header";
+import axios from "axios";
 const UserIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -10,6 +11,13 @@ const BookOpenIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    </svg>
+);
+const DownloadIcon = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
     </svg>
 );
 const UploadIcon = (props) => (
@@ -60,6 +68,14 @@ const UserCircleIcon = (props) =>
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
     </svg>;
+
+const LogoutIcon = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+    </svg>
+);
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 export default class BoardAdmin extends Component {
     constructor(props) {
@@ -307,6 +323,33 @@ export default class BoardAdmin extends Component {
             this.setState({ gradesLoading: false });
         }
     }
+
+    handleExportGrades = async () => {
+        try {
+            this.showMessage("Pripravujem dáta na export...", "info");
+
+            const response = await axios({
+                url: `${API_URL}/api/export/students`,
+                method: 'GET',
+                headers: authHeader(),
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'results.csv');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            this.showMessage("Export bol úспеšne dokončený.", "success");
+        } catch (error) {
+            console.error("Export error:", error);
+            this.showMessage("Nepodarilo sa exportovať dáта. Skontrolujte oprávnenia.", "error");
+        }
+    };
     async fetchCalendarEvents() {
         try {
             const res = await fetch(`${API_URL}/api/calendar-events`, { headers: authHeader() });
@@ -616,8 +659,19 @@ export default class BoardAdmin extends Component {
                         >
                             <UploadIcon className="mr-3 text-current" /> Zoznam študentov
                         </button>
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem("user");
+                                window.location.href = "/login";
+                            }}
+                            className="w-full text-left flex items-center p-3 rounded-lg transition-all duration-200 font-medium text-red-400 hover:bg-red-900/30 hover:text-red-300"
+                        >
+                            <LogoutIcon className="mr-3" /> Odhlásiť sa
+                        </button>
                     </nav>
-                    <div className="mt-auto text-sm text-slate-400 mb-2 text-center">Prihlásený ako: Admin</div>
+                    <div className="mt-auto pt-4 border-t border-slate-700">
+                        <div className="text-sm text-slate-400 mb-2 text-center italic">Prihlásený ako: Admin</div>
+                    </div>
                 </aside>
                 {isSidebarOpen && (
                     <div
@@ -644,65 +698,73 @@ export default class BoardAdmin extends Component {
                                     : message.type === "error"
                                         ? "bg-red-900 text-red-300"
                                         : "bg-blue-900 text-blue-300"
-                                }`}
+                                    }`}
                             >
                                 {message.text}
                             </div>
                         )}
-                        {}
+                        { }
                         {currentPage === "user-management" && (
-                            <section className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-lg p-8">
+                            <div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa používateľov</h2>
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full bg-slate-800 rounded-lg overflow-hidden">
                                         <thead>
-                                        <tr className="border-b border-slate-700">
-                                            <th className="px-4 py-2 text-left text-slate-300">Používateľské meno</th>
-                                            <th className="px-4 py-2 text-left text-slate-300">E-mail</th>
-                                            <th className="px-4 py-2 text-left text-slate-300">Rola</th>
-                                            <th className="px-4 py-2 text-left text-slate-300">Akcie</th>
-                                        </tr>
+                                            <tr className="border-b border-slate-700">
+                                                <th className="px-4 py-2 text-left text-slate-300">Používateľské meno</th>
+                                                <th className="px-4 py-2 text-left text-slate-300">E-mail</th>
+                                                <th className="px-4 py-2 text-left text-slate-300">Rola</th>
+                                                <th className="px-4 py-2 text-left text-slate-300">Akcie</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        {users.map((user) => (
-                                            <tr key={user.id} className="border-b border-slate-700">
-                                                <td className="px-4 py-2">{user.username}</td>
-                                                <td className="px-4 py-2">{user.email}</td>
-                                                <td className="px-4 py-2">
-                                                    <select
-                                                        value={user.role}
-                                                        onChange={(e) => this.handleRoleChange(user.id, e.target.value)}
-                                                        className="bg-slate-700 text-slate-200 rounded-lg px-2 py-1"
-                                                    >
-                                                        {roles.map((role) => (
-                                                            <option key={role} value={role}>
-                                                                {role}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <button
-                                                        onClick={() => this.handleDeleteUser(user.id)}
-                                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg"
-                                                    >
-                                                        <TrashIcon className="w-4 h-4 mr-1" /> Odstrániť
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                            {users.map((user) => (
+                                                <tr key={user.id} className="border-b border-slate-700">
+                                                    <td className="px-4 py-2">{user.username}</td>
+                                                    <td className="px-4 py-2">{user.email}</td>
+                                                    <td className="px-4 py-2">
+                                                        <select
+                                                            value={user.role}
+                                                            onChange={(e) => this.handleRoleChange(user.id, e.target.value)}
+                                                            className="bg-slate-700 text-slate-200 rounded-lg px-2 py-1"
+                                                        >
+                                                            {roles.map((role) => (
+                                                                <option key={role} value={role}>
+                                                                    {role}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                        <button
+                                                            onClick={() => this.handleDeleteUser(user.id)}
+                                                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg"
+                                                        >
+                                                            <TrashIcon className="w-4 h-4 mr-1" /> Odstrániť
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
-                            </section>
+                            </div>
                         )}
                         {currentPage === "student-grades" && (
-                            <section className="backdrop-blur-sm">
+                            <div className="space-y-8">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-3xl font-bold text-blue-400">Výsledky</h2>
-                                    <div className="bg-slate-800 p-1 rounded-lg flex space-x-1">
-                                        <button onClick={() => this.setState({ gradesViewMode: 'cards' })} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${gradesViewMode === 'cards' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}>Karty</button>
-                                        <button onClick={() => this.setState({ gradesViewMode: 'table' })} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${gradesViewMode === 'table' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}>Tabuľka</button>
+                                    <div className="flex items-center space-x-4">
+                                        <button
+                                            onClick={this.handleExportGrades}
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-md active:scale-95 text-sm font-bold"
+                                        >
+                                            <DownloadIcon /> Export do CSV
+                                        </button>
+                                        <div className="bg-slate-800 p-1 rounded-lg flex space-x-1">
+                                            <button onClick={() => this.setState({ gradesViewMode: 'cards' })} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${gradesViewMode === 'cards' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}>Karty</button>
+                                            <button onClick={() => this.setState({ gradesViewMode: 'table' })} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${gradesViewMode === 'table' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}>Tabuľka</button>
+                                        </div>
                                     </div>
                                 </div>
                                 {gradesLoading ? (
@@ -766,39 +828,39 @@ export default class BoardAdmin extends Component {
                                             <div className="overflow-x-auto bg-slate-800/50 border border-slate-700 rounded-2xl shadow-lg p-1">
                                                 <table className="min-w-full">
                                                     <thead>
-                                                    <tr className="border-b border-slate-700">
-                                                        <th className="px-4 py-3 text-left text-slate-300 font-semibold sticky left-0 bg-slate-800 z-10">Študent</th>
-                                                        {studentGrades.tests.map(test => (
-                                                            <th key={test.id} className="px-4 py-3 text-center text-slate-300 font-semibold" title={test.title}>{test.title}</th>
-                                                        ))}
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {studentGrades.studentGrades.map(student => (
-                                                        <tr key={student.id} className="border-b border-slate-700 hover:bg-slate-700/50">
-                                                            <td className="px-4 py-3 font-medium sticky left-0 bg-slate-800 hover:bg-slate-700/50 z-10">
-                                                                <p className="text-white">{student.username}</p>
-                                                                <p className="text-xs text-slate-400">{student.email}</p>
-                                                            </td>
+                                                        <tr className="border-b border-slate-700">
+                                                            <th className="px-4 py-3 text-left text-slate-300 font-semibold sticky left-0 bg-slate-800 z-10">Študent</th>
                                                             {studentGrades.tests.map(test => (
-                                                                <td key={test.id} className="px-4 py-3 text-center">
-                                                                    {student.scores[test.id] !== undefined ?
-                                                                        <span>{student.scores[test.id]} <span className="text-slate-400">/ {test.maxScore}</span></span>
-                                                                        : '—'}
-                                                                </td>
+                                                                <th key={test.id} className="px-4 py-3 text-center text-slate-300 font-semibold" title={test.title}>{test.title}</th>
                                                             ))}
                                                         </tr>
-                                                    ))}
+                                                    </thead>
+                                                    <tbody>
+                                                        {studentGrades.studentGrades.map(student => (
+                                                            <tr key={student.id} className="border-b border-slate-700 hover:bg-slate-700/50">
+                                                                <td className="px-4 py-3 font-medium sticky left-0 bg-slate-800 hover:bg-slate-700/50 z-10">
+                                                                    <p className="text-white">{student.username}</p>
+                                                                    <p className="text-xs text-slate-400">{student.email}</p>
+                                                                </td>
+                                                                {studentGrades.tests.map(test => (
+                                                                    <td key={test.id} className="px-4 py-3 text-center">
+                                                                        {student.scores[test.id] !== undefined ?
+                                                                            <span>{student.scores[test.id]} <span className="text-slate-400">/ {test.maxScore}</span></span>
+                                                                            : '—'}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        ))}
                                                     </tbody>
                                                 </table>
                                             </div>
                                         )}
                                     </>
                                 )}
-                            </section>
+                            </div>
                         )}
                         {currentPage === "material-management" && (
-                            <section className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-lg p-8">
+                            <div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa materiálov</h2>
                                 <div className="mb-10 p-6 border border-slate-700 rounded-xl bg-slate-900/50">
                                     <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: beigeTextColor }}>
@@ -911,10 +973,10 @@ export default class BoardAdmin extends Component {
                                         </ul>
                                     </div>
                                 </div>
-                            </section>
+                            </div>
                         )}
                         {currentPage === "calendar-management" && (
-                            <section className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-lg p-8">
+                            <div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa udalostí</h2>
                                 <form onSubmit={this.handleAddEvent} className="flex flex-col sm:flex-row gap-4 mb-8">
                                     <input
@@ -966,15 +1028,15 @@ export default class BoardAdmin extends Component {
                                                             className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg transition-all duration-200 bg-blue-900/20 border-l-4 border-blue-500"
                                                         >
                                                             <div>
-                                <span className="font-bold text-blue-400">
-                                  {isNaN(localDate)
-                                      ? "Neplatný dátum"
-                                      : localDate.toLocaleDateString("sk-SK", {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                      })}
-                                </span>
+                                                                <span className="font-bold text-blue-400">
+                                                                    {isNaN(localDate)
+                                                                        ? "Neplatný dátum"
+                                                                        : localDate.toLocaleDateString("sk-SK", {
+                                                                            year: "numeric",
+                                                                            month: "long",
+                                                                            day: "numeric",
+                                                                        })}
+                                                                </span>
                                                                 <span className="ml-2 text-sm text-gray-100">{ev.message}</span>
                                                             </div>
                                                             <button
@@ -991,10 +1053,10 @@ export default class BoardAdmin extends Component {
                                         )}
                                     </ul>
                                 </div>
-                            </section>
+                            </div>
                         )}
                         {currentPage === "student-list-upload" && (
-                            <section className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-lg p-8">
+                            <div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Nahrať zoznam študentov</h2>
                                 <p className="text-slate-300 mb-6">
                                     Nahrajte PDF súbor obsahujúci zoznam študentov povolených na registráciu, alebo spravujte zoznam manuálne nižšie.
@@ -1082,12 +1144,12 @@ export default class BoardAdmin extends Component {
                                         </ul>
                                     )}
                                 </div>
-                            </section>
+                            </div>
                         )}
                         {currentPage === "test-management" && (
-                            <section className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-lg p-8">
+                            <div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa testov</h2>
-                                {}
+                                { }
                                 <div className="mb-10 p-6 border border-slate-700 rounded-xl bg-slate-900/50">
                                     <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: "#F5F5DC" }}>
                                         <PlusCircleIcon className="mr-2 text-blue-400" /> Pridať nový test
@@ -1187,7 +1249,7 @@ export default class BoardAdmin extends Component {
                                         </form>
                                     )}
                                 </div>
-                                {}
+                                { }
                                 {editingTestId && (
                                     <div className="mb-10 p-6 border border-slate-700 rounded-xl bg-slate-900/50">
                                         <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: "#F5F5DC" }}>
@@ -1277,7 +1339,7 @@ export default class BoardAdmin extends Component {
                                         </form>
                                     </div>
                                 )}
-                                {}
+                                { }
                                 <div className="p-6 border border-slate-700 rounded-xl bg-slate-900/50">
                                     <h4 className="text-lg font-semibold mb-4 text-blue-400">Existujúce testy</h4>
                                     <ul className="space-y-2">
@@ -1306,7 +1368,7 @@ export default class BoardAdmin extends Component {
                                         )}
                                     </ul>
                                 </div>
-                            </section>
+                            </div>
                         )}
                     </main>
                 </div>

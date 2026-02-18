@@ -7,16 +7,16 @@ const TaskIcon = () => (
 );
 const RetroClientIcon = () => (
     <svg width="60" height="60" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="6" width="40" height="32" fill="#1e293b" stroke="currentColor" strokeWidth="2"/>
-        <rect x="12" y="10" width="32" height="24" fill="#0f172a" stroke="currentColor" strokeWidth="1"/>
-        <path d="M8 38L4 52H52L56 38H8Z" fill="#1e293b" stroke="currentColor" strokeWidth="2"/>
-        <rect x="42" y="44" width="8" height="2" fill="currentColor"/>
+        <rect x="8" y="6" width="40" height="32" fill="#1e293b" stroke="currentColor" strokeWidth="2" />
+        <rect x="12" y="10" width="32" height="24" fill="#0f172a" stroke="currentColor" strokeWidth="1" />
+        <path d="M8 38L4 52H52L56 38H8Z" fill="#1e293b" stroke="currentColor" strokeWidth="2" />
+        <rect x="42" y="44" width="8" height="2" fill="currentColor" />
     </svg>
 );
 const RetroServerIcon = ({ type }) => (
     <svg width="50" height="70" viewBox="0 0 64 80" fill="none">
-        <path d="M10 10L26 2H54V64L38 72H10V10Z" fill={type === 'auth' ? "#334155" : "#1e293b"} stroke="currentColor" strokeWidth="2"/>
-        <path d="M10 10L26 2V64L10 72V10Z" fill="#0f172a" stroke="currentColor" strokeWidth="1"/>
+        <path d="M10 10L26 2H54V64L38 72H10V10Z" fill={type === 'auth' ? "#334155" : "#1e293b"} stroke="currentColor" strokeWidth="2" />
+        <path d="M10 10L26 2V64L10 72V10Z" fill="#0f172a" stroke="currentColor" strokeWidth="1" />
         {type === 'auth' ? (
             <>
                 <rect x="30" y="15" width="16" height="4" fill="#4ade80" />
@@ -24,26 +24,26 @@ const RetroServerIcon = ({ type }) => (
             </>
         ) : (
             <>
-                <rect x="30" y="12" width="20" height="6" fill="#64748b" stroke="currentColor"/>
-                <rect x="30" y="22" width="20" height="6" fill="#64748b" stroke="currentColor"/>
-                <rect x="30" y="32" width="20" height="6" fill="#64748b" stroke="currentColor"/>
+                <rect x="30" y="12" width="20" height="6" fill="#64748b" stroke="currentColor" />
+                <rect x="30" y="22" width="20" height="6" fill="#64748b" stroke="currentColor" />
+                <rect x="30" y="32" width="20" height="6" fill="#64748b" stroke="currentColor" />
             </>
         )}
     </svg>
 );
 const RetroResolverIcon = () => (
     <svg width="70" height="90" viewBox="0 0 64 90" fill="none">
-        <rect x="5" y="5" width="54" height="80" rx="4" fill="#1e293b" stroke="currentColor" strokeWidth="2"/>
-        <rect x="15" y="15" width="34" height="10" rx="2" fill="#0f172a" stroke="currentColor"/>
-        <circle cx="20" cy="20" r="2" fill="currentColor" className="animate-pulse"/>
-        <line x1="10" y1="40" x2="54" y2="40" stroke="#334155" strokeWidth="2"/>
-        <line x1="10" y1="55" x2="54" y2="55" stroke="#334155" strokeWidth="2"/>
-        <line x1="10" y1="70" x2="54" y2="70" stroke="#334155" strokeWidth="2"/>
+        <rect x="5" y="5" width="54" height="80" rx="4" fill="#1e293b" stroke="currentColor" strokeWidth="2" />
+        <rect x="15" y="15" width="34" height="10" rx="2" fill="#0f172a" stroke="currentColor" />
+        <circle cx="20" cy="20" r="2" fill="currentColor" className="animate-pulse" />
+        <line x1="10" y1="40" x2="54" y2="40" stroke="#334155" strokeWidth="2" />
+        <line x1="10" y1="55" x2="54" y2="55" stroke="#334155" strokeWidth="2" />
+        <line x1="10" y1="70" x2="54" y2="70" stroke="#334155" strokeWidth="2" />
     </svg>
 );
 const RetroCloudIcon = () => (
     <svg width="60" height="40" viewBox="0 0 100 60" fill="none">
-        <path d="M25 45H15C6.7 45 0 38.3 0 30C0 22.5 5.5 16.2 12.7 15.2C13.8 6.7 21 0 30 0C39.5 0 47.3 7.2 48.4 16.5C51.6 13.7 55.7 12 60 12C71 12 80 21 80 32C80 32.8 79.9 33.6 79.8 34.4C85.6 35.8 90 41 90 47C90 54.2 84.2 60 77 60H25C11.2 60 25 45 25 45Z" fill="#1e293b" stroke="currentColor" strokeWidth="2"/>
+        <path d="M25 45H15C6.7 45 0 38.3 0 30C0 22.5 5.5 16.2 12.7 15.2C13.8 6.7 21 0 30 0C39.5 0 47.3 7.2 48.4 16.5C51.6 13.7 55.7 12 60 12C71 12 80 21 80 32C80 32.8 79.9 33.6 79.8 34.4C85.6 35.8 90 41 90 47C90 54.2 84.2 60 77 60H25C11.2 60 25 45 25 45Z" fill="#1e293b" stroke="currentColor" strokeWidth="2" />
     </svg>
 );
 
@@ -53,7 +53,7 @@ const NetworkIcon = () => (
         <path d="M2 12h20" strokeOpacity="0.5" />
         <path d="M12 2v20" strokeOpacity="0.5" />
         <circle cx="12" cy="12" r="3" className="fill-blue-500/20" />
-        <circle cx="12" cy="12" r="6" strokeDasharray="4 4" className="animate-spin-slow" style={{animationDuration: '10s'}} />
+        <circle cx="12" cy="12" r="6" strokeDasharray="4 4" className="animate-spin-slow" style={{ animationDuration: '10s' }} />
     </svg>
 );
 const LabIcon = () => (
@@ -117,7 +117,7 @@ const PacketIcon = ({ type }) => {
     return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={color}>
             <rect x="2" y="6" width="20" height="12" rx="2" />
-            <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" fill="white" fillOpacity="0.2"/>
+            <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" fill="white" fillOpacity="0.2" />
         </svg>
     );
 };
@@ -164,8 +164,8 @@ const SimWrapper = ({ title, onStart, isRunning, info, children }) => {
                 </div>
                 {showInfo && <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-slate-800 p-4 rounded border border-slate-600 text-left text-xs text-slate-300 z-50 shadow-xl whitespace-pre-line leading-relaxed">{info}</div>}
             </div>
-            {}
-            <div className="relative w-full px-4 h-[560px] bg-slate-900/50 rounded-xl border border-slate-700/50 shadow-2xl overflow-hidden flex items-center justify-center">
+            { }
+            <div className="relative w-full px-4 h-[560px] overflow-hidden flex items-center justify-center">
                 {children}
             </div>
         </div>
@@ -190,9 +190,9 @@ const DeviceNode = ({ IconComponent, label, active, color = "blue", subLabel, sc
                 <IconComponent />
             </div>
             <div className="text-center">
-            <span className={`block text-xs font-bold tracking-widest uppercase transition-colors duration-500 ${active ? 'text-white' : 'text-slate-600'}`}>
-            {label}
-            </span>
+                <span className={`block text-xs font-bold tracking-widest uppercase transition-colors duration-500 ${active ? 'text-white' : 'text-slate-600'}`}>
+                    {label}
+                </span>
                 {subLabel && <span className="text-[10px] text-slate-500">{subLabel}</span>}
             </div>
         </div>
@@ -215,13 +215,13 @@ const ArrowLine = ({ active, keepLabel, direction = "right", color = "cyan", lab
                 />
             </div>
             <div className={`absolute ${isRight ? "-right-1" : "-left-1"} top-1/2 -translate-y-1/2 transition-colors duration-300`}
-                 style={{ color: active ? neonColor : (keepLabel ? "#334155" : "#1e293b") }}>
+                style={{ color: active ? neonColor : (keepLabel ? "#334155" : "#1e293b") }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style={{ transform: isRight ? "rotate(0deg)" : "rotate(180deg)" }}>
                     <path d="M21 12l-18 12v-24z" />
                 </svg>
             </div>
             <div className={`absolute left-1/2 -translate-x-1/2 text-[11px] font-mono font-bold whitespace-nowrap px-2 rounded bg-[#0B1120] border border-slate-700/50 transition-opacity duration-500 z-50 ${isRight ? "-top-5" : "-bottom-5"} ${(active || keepLabel) ? "opacity-100" : "opacity-0"}`}
-                 style={{ color: neonColor }}>
+                style={{ color: neonColor }}>
                 {label}
             </div>
         </div>
@@ -252,7 +252,7 @@ const PacketFlow = ({ active, direction = "right", label, color = "cyan", speed 
     };
     return (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            {}
+            { }
             <div className="w-full h-[2px] bg-slate-800 relative rounded-full overflow-hidden max-w-[80%]">
                 {active && (
                     <motion.div
@@ -263,7 +263,7 @@ const PacketFlow = ({ active, direction = "right", label, color = "cyan", speed 
                     />
                 )}
             </div>
-            {}
+            { }
             <div className={`
                 absolute bg-[#0f172a] px-3 py-1 rounded border border-slate-600 
                 text-[10px] font-bold uppercase tracking-wider 
@@ -350,7 +350,7 @@ const SimDHCP = () => {
         const currentStyles = styleMap[color] || styleMap.yellow;
         return (
             <>
-                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style={{zIndex: 1}}>
+                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style={{ zIndex: 1 }}>
                     <defs>
                         <marker id={`arrow-gray-${id}`} markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
                             <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
@@ -366,7 +366,7 @@ const SimDHCP = () => {
                         style={{ opacity: 0.5 }}
                     />
                 </svg>
-                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style={{zIndex: 2}}>
+                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style={{ zIndex: 2 }}>
                     <defs>
                         <marker id={`arrow-color-${id}`} markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
                             <path d="M0,0 L0,6 L9,3 z" fill={c} />
@@ -424,9 +424,9 @@ const SimDHCP = () => {
                     <div className={`
                         bg-transition-colors duration-1000 border px-4 py-3 rounded-lg flex flex-col items-center justify-center
                         ${step >= 4
-                        ? 'bg-green-900/20 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-                        : 'bg-[#0B1120] border-slate-700 shadow-none'
-                    }
+                            ? 'bg-green-900/20 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                            : 'bg-[#0B1120] border-slate-700 shadow-none'
+                        }
                      `}>
                         <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors duration-1000 ${step >= 4 ? 'text-green-500' : 'text-slate-500'}`}>Configured</div>
                         <div className={`text-sm font-mono font-bold transition-colors duration-1000 ${step >= 4 ? 'text-white' : 'text-slate-600'}`}>
@@ -434,10 +434,10 @@ const SimDHCP = () => {
                         </div>
                     </div>
                 </div>
-                <DhcpLink id="d1" active={step === 1} visited={step >= 1} color="yellow" dashed={true} label="DISCOVER" subLabel="Broadcast" start={{x: "25%", y: "15%"}} end={{x: "75%", y: "30%"}} />
-                <DhcpLink id="d2" active={step === 2} visited={step >= 2} color="green" label="OFFER" subLabel={`IP: ${simData.ip}`} start={{x: "75%", y: "35%"}} end={{x: "25%", y: "50%"}} />
-                <DhcpLink id="d3" active={step === 3} visited={step >= 3} color="blue" label="REQUEST" subLabel="I'll take it" start={{x: "25%", y: "55%"}} end={{x: "75%", y: "70%"}} />
-                <DhcpLink id="d4" active={step === 4} visited={step >= 4} color="purple" label="ACK" subLabel="Confirmed" start={{x: "75%", y: "75%"}} end={{x: "25%", y: "90%"}} />
+                <DhcpLink id="d1" active={step === 1} visited={step >= 1} color="yellow" dashed={true} label="DISCOVER" subLabel="Broadcast" start={{ x: "25%", y: "15%" }} end={{ x: "75%", y: "30%" }} />
+                <DhcpLink id="d2" active={step === 2} visited={step >= 2} color="green" label="OFFER" subLabel={`IP: ${simData.ip}`} start={{ x: "75%", y: "35%" }} end={{ x: "25%", y: "50%" }} />
+                <DhcpLink id="d3" active={step === 3} visited={step >= 3} color="blue" label="REQUEST" subLabel="I'll take it" start={{ x: "25%", y: "55%" }} end={{ x: "75%", y: "70%" }} />
+                <DhcpLink id="d4" active={step === 4} visited={step >= 4} color="purple" label="ACK" subLabel="Confirmed" start={{ x: "75%", y: "75%" }} end={{ x: "25%", y: "90%" }} />
             </div>
         </SimWrapper>
     );
@@ -468,7 +468,7 @@ const SimTcpUdp = () => {
     return (
         <SimWrapper title="TCP vs UDP" onStart={() => { setStep(0); setUdpStep(0); setTimeout(() => setIsRunning(true), 100); }} isRunning={isRunning} info="TCP: Handshake -> Reliable\nUDP: Fire & Forget -> Fast">
             <div className="w-full h-[520px] grid grid-cols-2 gap-0 relative">
-                {}
+                { }
                 <div className="border-r border-slate-700/50 relative p-6 flex flex-col items-center">
                     <div className="mb-4 text-center">
                         <h3 className="text-xl font-bold text-blue-400">TCP</h3>
@@ -477,12 +477,12 @@ const SimTcpUdp = () => {
                     <div className="flex justify-between items-center w-full mt-4 gap-4">
                         <DeviceNode IconComponent={RetroClientIcon} label="Client" active={step > 0} color="blue" scale={0.8} />
                         <div className="flex-1 relative h-64 flex flex-col justify-evenly">
-                            {}
+                            { }
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[20%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[40%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[60%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[80%]"></div>
-                            {}
+                            { }
                             <div className="h-6 relative w-full">
                                 <PacketFlow active={step >= 1} direction="right" label="SYN" color="cyan" speed={1.5} />
                             </div>
@@ -495,8 +495,8 @@ const SimTcpUdp = () => {
                             <div className="h-6 relative w-full flex items-center justify-center">
                                 {step >= 4 && (
                                     <motion.div
-                                        initial={{opacity:0, scale: 0.8}}
-                                        animate={{opacity:1, scale: 1}}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
                                         className="w-full text-center text-[10px] font-bold text-green-400 tracking-widest border border-green-500/30 rounded bg-green-900/20 py-1 shadow-[0_0_10px_rgba(74,222,128,0.2)]"
                                     >
                                         CONNECTED: DATA STREAM
@@ -507,7 +507,7 @@ const SimTcpUdp = () => {
                         <DeviceNode IconComponent={RetroServerIcon} label="Server" active={step > 0} color="purple" scale={0.8} />
                     </div>
                 </div>
-                {}
+                { }
                 <div className="relative p-6 flex flex-col items-center">
                     <div className="mb-4 text-center">
                         <h3 className="text-xl font-bold text-orange-400">UDP</h3>
@@ -516,12 +516,12 @@ const SimTcpUdp = () => {
                     <div className="flex justify-between items-center w-full mt-4 gap-4">
                         <DeviceNode IconComponent={RetroClientIcon} label="Client" active={udpStep > 0} color="orange" scale={0.8} />
                         <div className="flex-1 relative h-64 flex flex-col justify-evenly">
-                            {}
+                            { }
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[20%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[40%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[60%]"></div>
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[80%]"></div>
-                            {}
+                            { }
                             <div className="h-6 relative w-full"><PacketFlow active={udpStep >= 1} direction="right" label="DATA REQ" color="orange" speed={1} /></div>
                             <div className="h-6 relative w-full"><PacketFlow active={udpStep >= 2} direction="left" label="DATA RES" color="purple" speed={1} /></div>
                             <div className="h-6 relative w-full"><PacketFlow active={udpStep >= 3} direction="right" label="DATA REQ" color="orange" speed={1} /></div>
@@ -568,7 +568,7 @@ const FirewallGame = () => {
             setPackets(prev => prev.map(p => {
                 if (p.x >= 90 || p.blocked) return p;
                 let speed = 1.5;
-                if(p.type === 'ssh_attack') speed = 2.0;
+                if (p.type === 'ssh_attack') speed = 2.0;
                 let newX = p.x + speed;
                 if (p.x < 50 && newX >= 50) {
                     let shouldBlock = false;
@@ -613,10 +613,10 @@ const FirewallGame = () => {
                 </div>
             </div>
             <div className="flex-1 flex gap-8 h-[380px]">
-                {}
-                <div className="w-1/3 bg-slate-800/50 rounded-xl p-6 border border-slate-700 flex flex-col gap-4 shadow-lg">
+                { }
+                <div className="w-1/3 bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 flex flex-col gap-4 shadow-lg">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Konfigurácia Firewallu</h4>
-                    {}
+                    { }
                     <div className="flex items-center justify-between p-4 bg-slate-900/80 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
                         <div className="flex flex-col">
                             <span className="font-bold text-red-400 text-sm">Blokovať Malware</span>
@@ -629,7 +629,7 @@ const FirewallGame = () => {
                             <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${rules.blockMalware ? 'translate-x-6' : 'translate-x-0'}`} />
                         </button>
                     </div>
-                    {}
+                    { }
                     <div className="flex items-center justify-between p-4 bg-slate-900/80 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
                         <div className="flex flex-col">
                             <span className="font-bold text-blue-400 text-sm">Povoliť SSH (Port 22)</span>
@@ -660,7 +660,7 @@ const FirewallGame = () => {
                         )}
                     </div>
                 </div>
-                {}
+                { }
                 <div className="flex-1 bg-slate-900/30 rounded-xl border border-slate-700 relative overflow-hidden flex items-center px-12">
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:40px_40px] opacity-10"></div>
                     <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-700/50"></div>
@@ -693,9 +693,8 @@ const FirewallGame = () => {
                             >
                                 <div className="flex flex-col items-center">
                                     <PacketIcon type={p.type} />
-                                    <span className={`text-[8px] font-mono font-bold bg-black/70 px-1 rounded mt-1 border border-slate-700 whitespace-nowrap ${
-                                        p.type === 'malware' ? 'text-red-400' : (p.type === 'ssh_attack' ? 'text-orange-400' : 'text-green-400')
-                                    }`}>
+                                    <span className={`text-[8px] font-mono font-bold bg-black/70 px-1 rounded mt-1 border border-slate-700 whitespace-nowrap ${p.type === 'malware' ? 'text-red-400' : (p.type === 'ssh_attack' ? 'text-orange-400' : 'text-green-400')
+                                        }`}>
                                         {p.type === 'malware' ? 'VÍRUS' : (p.type === 'ssh_attack' ? 'SSH BRUTE' : 'DATA')}
                                     </span>
                                 </div>
@@ -988,14 +987,14 @@ const CyberLab = () => {
     const selectedNode = nodes.find(n => n.id === selectedNodeId);
     return (
         <div className="w-full h-[600px] flex gap-4 text-slate-200 select-none">
-            {}
+            { }
             <div className="w-16 bg-slate-900 border border-slate-700 flex flex-col items-center py-4 gap-4 rounded-xl z-20 shadow-xl">
                 <div className="flex flex-col gap-2 w-full px-2 border-b border-slate-700 pb-4">
                     <button onClick={() => setTool('cursor')} className={`p-2 rounded transition-all ${tool === 'cursor' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Presunúť">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" /><path d="M13 13l6 6" /></svg>
                     </button>
                     <button onClick={() => setTool('cable')} className={`p-2 rounded transition-all ${tool === 'cable' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Kábel">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><circle cx="5" cy="12" r="3"/><circle cx="19" cy="12" r="3"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14" /><circle cx="5" cy="12" r="3" /><circle cx="19" cy="12" r="3" /></svg>
                     </button>
                     <button onClick={() => setTool('eraser')} className={`p-2 rounded transition-all ${tool === 'eraser' ? 'bg-pink-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Guma">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -1014,14 +1013,14 @@ const CyberLab = () => {
                 </div>
                 <div className="flex flex-col gap-2 w-full px-2 overflow-y-auto custom-scrollbar border-t border-slate-700 pt-4 mt-2">
                     <span className="text-[9px] text-center text-slate-500 font-bold">DEVICES</span>
-                    <button onClick={() => addNode('pc')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="PC"><CyberDeviceIcon type="pc"/></button>
-                    <button onClick={() => addNode('server')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Server"><CyberDeviceIcon type="server"/></button>
-                    <button onClick={() => addNode('router')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Router"><CyberDeviceIcon type="router"/></button>
-                    <button onClick={() => addNode('switch')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Switch"><CyberDeviceIcon type="switch"/></button>
-                    <button onClick={() => addNode('firewall')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Firewall"><CyberDeviceIcon type="firewall"/></button>
+                    <button onClick={() => addNode('pc')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="PC"><CyberDeviceIcon type="pc" /></button>
+                    <button onClick={() => addNode('server')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Server"><CyberDeviceIcon type="server" /></button>
+                    <button onClick={() => addNode('router')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Router"><CyberDeviceIcon type="router" /></button>
+                    <button onClick={() => addNode('switch')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Switch"><CyberDeviceIcon type="switch" /></button>
+                    <button onClick={() => addNode('firewall')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Firewall"><CyberDeviceIcon type="firewall" /></button>
                 </div>
             </div>
-            {}
+            { }
             <div
                 ref={containerRef}
                 className={`flex-1 bg-[#0f172a] rounded-xl border border-slate-700 relative overflow-hidden shadow-inner 
@@ -1032,7 +1031,7 @@ const CyberLab = () => {
             >
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:20px_20px] opacity-20 pointer-events-none"></div>
                 <AnimatePresence>
-                    {}
+                    { }
                     {currentTask && !showSuccess && (
                         <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 border border-yellow-500/50 text-white px-6 py-3 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-3 max-w-md">
                             <div className="text-yellow-400 animate-pulse"><TaskIcon /></div>
@@ -1042,7 +1041,7 @@ const CyberLab = () => {
                             </div>
                         </motion.div>
                     )}
-                    {}
+                    { }
                     {isAllFinished && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -1062,7 +1061,7 @@ const CyberLab = () => {
                             </button>
                         </motion.div>
                     )}
-                    {}
+                    { }
                     {showSuccess && (
                         <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600/90 border border-green-400 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 backdrop-blur-sm">
                             <div className="text-xl">✅</div>
@@ -1118,8 +1117,8 @@ const CyberLab = () => {
                     </div>
                 ))}
             </div>
-            {}
-            <div className="w-64 bg-slate-900 rounded-xl border border-slate-700 flex flex-col p-4 shadow-xl z-20">
+            { }
+            <div className="w-64 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 flex flex-col p-4 shadow-xl z-20">
                 <h3 className="font-bold border-b border-slate-700 pb-2 mb-4 text-white">Vlastnosti</h3>
                 {selectedNode ? (
                     <div className="flex flex-col gap-4">
@@ -1132,7 +1131,7 @@ const CyberLab = () => {
                             <input
                                 className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white mt-1 focus:border-blue-500 outline-none"
                                 value={selectedNode.name}
-                                onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? {...n, name: e.target.value} : n))}
+                                onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, name: e.target.value } : n))}
                             />
                         </div>
                         {selectedNode.ip && (
@@ -1141,7 +1140,7 @@ const CyberLab = () => {
                                 <input
                                     className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-green-400 font-mono mt-1 focus:border-blue-500 outline-none"
                                     value={selectedNode.ip || ''}
-                                    onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? {...n, ip: e.target.value} : n))}
+                                    onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, ip: e.target.value } : n))}
                                 />
                             </div>
                         )}
@@ -1161,18 +1160,18 @@ const CyberLab = () => {
                 <div className="mt-auto pt-4 border-t border-slate-700">
                     <span className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Denník udalostí</span>
                     <div className="h-32 overflow-y-auto text-[10px] font-mono space-y-1 pr-1 custom-scrollbar">
-                        {logs.map((l, i) => <div key={i} className={i===0 ? "text-green-400" : "text-slate-500"}>{l}</div>)}
+                        {logs.map((l, i) => <div key={i} className={i === 0 ? "text-green-400" : "text-slate-500"}>{l}</div>)}
                     </div>
                 </div>
             </div>
         </div>
     );
 };
-const ProtocolsView = ({ onBack }) => {
+const ProtocolsView = ({ onBack, beigeTextColor }) => {
     const [activeTab, setActiveTab] = useState('dns');
     return (
         <div className="w-full flex flex-col h-full text-left">
-            {}
+            { }
             <div className="flex items-center justify-between mb-6 border-b border-slate-700 pb-4">
                 <div className="flex items-center gap-4">
                     <button
@@ -1181,40 +1180,39 @@ const ProtocolsView = ({ onBack }) => {
                     >
                         ← Späť
                     </button>
-                    <h2 className="text-xl font-bold text-white border-l border-slate-700 pl-4">Sieťové protokoly</h2>
+                    <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>Sieťové protokoly</h2>
                 </div>
-                {}
+                { }
                 <div className="flex bg-[#111827] p-1 rounded-lg border border-slate-700">
                     {['dns', 'dhcp', 'tcp/udp'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
-                                activeTab === tab
-                                    ? 'bg-blue-600 text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                            }`}
+                            className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${activeTab === tab
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
                         >
                             {tab}
                         </button>
                     ))}
                 </div>
             </div>
-            {}
-            <div className="flex-1 bg-[#111827] border border-slate-700 rounded-lg overflow-hidden relative">
+            { }
+            <div className="flex-1 overflow-hidden relative">
                 <AnimatePresence mode="wait">
                     {activeTab === 'dhcp' && (
-                        <motion.div key="dhcp" className="h-full" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+                        <motion.div key="dhcp" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <SimDHCP />
                         </motion.div>
                     )}
                     {activeTab === 'dns' && (
-                        <motion.div key="dns" className="h-full" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+                        <motion.div key="dns" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <SimDNS />
                         </motion.div>
                     )}
                     {activeTab === 'tcp/udp' && (
-                        <motion.div key="tcp" className="h-full" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+                        <motion.div key="tcp" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <SimTcpUdp />
                         </motion.div>
                     )}
@@ -1223,43 +1221,43 @@ const ProtocolsView = ({ onBack }) => {
         </div>
     );
 };
-const GamesView = ({ onBack }) => {
+const GamesView = ({ onBack, beigeTextColor }) => {
     return (
         <div className="w-full flex flex-col h-full text-left">
             <div className="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4">
                 <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors text-sm font-medium">← Späť</button>
-                <h2 className="text-xl font-bold text-white border-l border-slate-700 pl-4">Firewall Defense</h2>
+                <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>Firewall Defense</h2>
             </div>
-            <div className="flex-1 bg-[#111827] border border-slate-700 rounded-lg overflow-hidden">
+            <div className="flex-1 overflow-hidden">
                 <FirewallGame />
             </div>
         </div>
     );
 };
-const LabView = ({ onBack }) => {
+const LabView = ({ onBack, beigeTextColor }) => {
     return (
         <div className="w-full flex flex-col h-full text-left">
             <div className="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4">
                 <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors text-sm font-medium">← Späť</button>
-                <h2 className="text-xl font-bold text-white border-l border-slate-700 pl-4">CyberLab Sandbox</h2>
+                <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>CyberLab Sandbox</h2>
             </div>
-            <div className="flex-1 bg-[#111827] border border-slate-700 rounded-lg overflow-hidden">
+            <div className="flex-1 overflow-hidden">
                 <CyberLab />
             </div>
         </div>
     );
 };
-const MainMenu = ({ onSelect }) => {
+const MainMenu = ({ onSelect, beigeTextColor }) => {
     const ModuleCard = ({ title, description, icon, onClick }) => (
         <motion.div
             whileHover={{ y: -5 }}
             className="group relative flex flex-col items-center text-center p-8
-                       bg-[#1f2937] rounded-xl border border-slate-700
-                       hover:border-blue-500/50 hover:bg-[#263042] hover:shadow-2xl hover:shadow-blue-900/10
-                       transition-all duration-300 h-full justify-between"
+                       bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl
+                       hover:border-blue-500/50 hover:bg-slate-800/80 hover:shadow-2xl hover:shadow-blue-900/20
+                       transition-all duration-300 h-full justify-between shadow-lg"
         >
             <div className="flex flex-col items-center w-full">
-                {}
+                { }
                 <div className="w-20 h-20 mb-6 rounded-full bg-slate-900/50 border border-slate-700/50
                               flex items-center justify-center text-slate-400
                               group-hover:text-blue-400 group-hover:border-blue-500/50 group-hover:scale-110
@@ -1268,7 +1266,7 @@ const MainMenu = ({ onSelect }) => {
                         {icon}
                     </div>
                 </div>
-                {}
+                { }
                 <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-100 transition-colors">
                     {title}
                 </h3>
@@ -1276,7 +1274,7 @@ const MainMenu = ({ onSelect }) => {
                     {description}
                 </p>
             </div>
-            {}
+            { }
             <button
                 onClick={onClick}
                 className="w-full py-3 rounded-lg border border-slate-600 text-slate-300 font-bold text-xs uppercase tracking-widest
@@ -1288,16 +1286,11 @@ const MainMenu = ({ onSelect }) => {
         </motion.div>
     );
     return (
-        <div className="w-full h-full flex flex-col">
-            {}
-            <div className="flex flex-col w-full mb-10">
-                <h2 className="text-3xl font-bold text-white mb-6 text-left tracking-tight">
-                    Simulácia
-                </h2>
-                {}
-                <div className="w-full h-[2px] bg-slate-700 rounded-full"></div>
-            </div>
-            {}
+        <div className="space-y-10 w-full">
+            <h2 className="text-3xl font-bold tracking-tight" style={{ color: beigeTextColor }}>
+                Simulácia
+            </h2>
+            { }
             <div className="flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full h-full">
                     <ModuleCard
@@ -1323,40 +1316,33 @@ const MainMenu = ({ onSelect }) => {
         </div>
     );
 };
-const App = () => {
+const Simulation = ({ beigeTextColor }) => {
     const [view, setView] = useState('menu');
     return (
-        <div className="w-full min-h-screen flex flex-col items-center justify-start pt-1 font-sans text-slate-200">
-            {/* ЗМІНА ТУТ: max-w-[1800px]
-                Це ще ширше. Якщо і цього мало, можна поставити "w-full px-6", щоб було на 100%.
-            */}
-            <div className="w-full max-w-[1800px] relative transition-all duration-500 px-4">
-                <div className="border-slate-700 border rounded-xl shadow-2xl p-8 min-h-[600px] bg-[#161e2e]">
-                    <AnimatePresence mode="wait">
-                        {view === 'menu' && (
-                            <motion.div key="menu" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
-                                <MainMenu onSelect={setView} />
-                            </motion.div>
-                        )}
-                        {view === 'protocols' && (
-                            <motion.div key="protocols" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
-                                <ProtocolsView onBack={() => setView('menu')} />
-                            </motion.div>
-                        )}
-                        {view === 'games' && (
-                            <motion.div key="games" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
-                                <GamesView onBack={() => setView('menu')} />
-                            </motion.div>
-                        )}
-                        {view === 'lab' && (
-                            <motion.div key="lab" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
-                                <LabView onBack={() => setView('menu')} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
+        <div className="w-full transition-all duration-500">
+            <AnimatePresence mode="wait">
+                {view === 'menu' && (
+                    <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        <MainMenu onSelect={setView} beigeTextColor={beigeTextColor} />
+                    </motion.div>
+                )}
+                {view === 'protocols' && (
+                    <motion.div key="protocols" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        <ProtocolsView onBack={() => setView('menu')} beigeTextColor={beigeTextColor} />
+                    </motion.div>
+                )}
+                {view === 'games' && (
+                    <motion.div key="games" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        <GamesView onBack={() => setView('menu')} beigeTextColor={beigeTextColor} />
+                    </motion.div>
+                )}
+                {view === 'lab' && (
+                    <motion.div key="lab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        <LabView onBack={() => setView('menu')} beigeTextColor={beigeTextColor} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
-export default App;
+export default Simulation;

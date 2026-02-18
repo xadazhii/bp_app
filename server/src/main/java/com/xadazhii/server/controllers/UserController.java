@@ -97,6 +97,36 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
     }
 
+    @PutMapping("/users/{userId}/username")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateUsername(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
+
+        if (!currentUserId.equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Error: You are not authorized to change this user's name!"));
+        }
+
+        String newUsername = request.get("username");
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username cannot be empty."));
+        }
+
+        if (userRepository.existsByUsername(newUsername)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Error: User is not found."));
+
+        user.setUsername(newUsername);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Username updated successfully!"));
+    }
+
     @PutMapping("/users/{userId}/password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateUserPassword(@PathVariable Long userId, @RequestBody Map<String, String> request) {
@@ -105,7 +135,8 @@ public class UserController {
         Long currentUserId = userDetails.getId();
 
         if (!currentUserId.equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("Error: You are not authorized to change this user's password!"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Error: You are not authorized to change this user's password!"));
         }
 
         User user = userRepository.findById(userId)
@@ -115,11 +146,13 @@ public class UserController {
         String newPassword = request.get("newPassword");
 
         if (oldPassword == null || newPassword == null || newPassword.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Old password and new password must be provided."));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Old password and new password must be provided."));
         }
 
         if (!encoder.matches(oldPassword, user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Error: Incorrect old password."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Error: Incorrect old password."));
         }
 
         user.setPassword(encoder.encode(newPassword));
@@ -132,7 +165,8 @@ public class UserController {
     @GetMapping("/total-score")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getTotalScore() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Long currentUserId = userDetails.getId();
 
         List<TestResult> userResults = testResultRepository.findByStudentId(currentUserId);
@@ -140,8 +174,7 @@ public class UserController {
         int totalScore = userResults.stream()
                 .collect(Collectors.groupingBy(
                         result -> result.getTest().getId(),
-                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Integer::compare))
-                ))
+                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Integer::compare))))
                 .values().stream()
                 .mapToInt(opt -> opt.orElse(0))
                 .sum();

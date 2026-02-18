@@ -36,16 +36,18 @@ public class WebSecurityConfig {
 
   @Bean
   public WebMvcConfigurer corsConfigurer() {
-      return new WebMvcConfigurer() {
-          @Override
-          public void addCorsMappings(CorsRegistry registry) {
-              registry.addMapping("/**")
-                      .allowedOriginPatterns("https://btsss-stu-fei.netlify.app")
-                      .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                      .allowedHeaders("*")
-                      .allowCredentials(true);
-          }
-      };
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOriginPatterns("https://btsss-stu-fei.netlify.app", "http://localhost:3000",
+                "http://localhost:8081")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .exposedHeaders("Content-Disposition")
+            .allowCredentials(true);
+      }
+    };
   }
 
   @Bean
@@ -66,25 +68,25 @@ public class WebSecurityConfig {
     return new BCryptPasswordEncoder();
   }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/test/**").permitAll()
-                .antMatchers("/files/**").permitAll()
-                .antMatchers("/api/simulation/**").permitAll()
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .antMatchers("/api/export/**").permitAll()
+            .antMatchers("/api/auth/**").permitAll()
+            .antMatchers("/api/test/**").permitAll()
+            .antMatchers("/files/**").permitAll()
+            .antMatchers("/api/simulation/**").permitAll()
+            .antMatchers("/uploads/**").permitAll()
+            .anyRequest().authenticated());
 
-                .anyRequest().authenticated()
-            );
+    http.authenticationProvider(authenticationProvider());
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
+    return http.build();
+  }
 }
