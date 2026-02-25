@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +21,20 @@ public class Test {
     @Column(nullable = false)
     private String title;
 
-    @OneToMany(
-            mappedBy = "test",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
+    @Column(name = "week_number", nullable = false)
+    private Integer weekNumber = 0;
+
+    @Column(name = "exam_date_time")
+    private LocalDateTime examDateTime;
+
+    @Column(name = "time_limit_minutes")
+    private Integer timeLimit;
+
+    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Question> questions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TestResult> testResults = new ArrayList<>();
 
     public void setQuestions(List<Question> questions) {
         this.questions.clear();

@@ -65,6 +65,8 @@ class Login extends Component {
                     (error.response &&
                         error.response.data &&
                         error.response.data.message) ||
+                    (error.response && error.response.status === 401 ? "Nesprávne meno alebo heslo!" : null) ||
+                    (error.response && error.response.status === 500 ? "Chyba servera. Skúste to prosím neskôr." : null) ||
                     error.message ||
                     error.toString();
 

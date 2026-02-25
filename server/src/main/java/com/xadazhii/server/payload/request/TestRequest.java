@@ -2,12 +2,16 @@ package com.xadazhii.server.payload.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
 @Getter
 public class TestRequest {
     private String title;
+    private Integer weekNumber;
+    private LocalDateTime examDateTime;
+    private Integer timeLimit;
     private List<QuestionDTO> questions;
 
     @Setter

@@ -17,6 +17,10 @@ public class UserStatsResponse {
         private String title;
         private int score;
         private int maxScore;
+        private Long testId;
+        private Long testResultId;
+        private boolean cheated;
+        private Integer weekNumber;
     }
 
     @Getter

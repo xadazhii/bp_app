@@ -2,7 +2,9 @@ package com.xadazhii.server.repository;
 
 import com.xadazhii.server.models.UserProgress;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
 import java.util.Set;
 
@@ -18,4 +20,12 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
 
     @Query("SELECT up.user.id, up.material.materialType, COUNT(up) FROM UserProgress up WHERE up.material.materialType IN ('lecture', 'seminar') GROUP BY up.user.id, up.material.materialType")
     java.util.List<Object[]> countCompletedLearningMaterialsByUserAndType();
+
+    @Modifying
+    @Transactional
+    void deleteByMaterialId(Long materialId);
+
+    @Modifying
+    @Transactional
+    void deleteByUserId(Long userId);
 }

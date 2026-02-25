@@ -599,22 +599,22 @@ const FirewallGame = () => {
         setRules(prev => ({ ...prev, [rule]: !prev[rule] }));
     };
     return (
-        <div className="w-full h-full flex flex-col p-2">
-            <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+        <div className="w-full h-full flex flex-col p-2 overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-700 pb-4">
                 <div>
                     <h3 className="text-xl font-bold text-white">Firewall Traffic Control</h3>
                     <p className="text-sm text-slate-400">Nastavte pravidlá na ochranu servera pred útokmi.</p>
                 </div>
-                <div className="text-right flex gap-6 items-center">
+                <div className="text-left sm:text-right flex gap-4 sm:gap-6 items-center w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-2xl font-bold text-blue-400 tracking-widest">{score} <span className="text-xs text-slate-500">XP</span></div>
                     <div className={`text-sm font-bold px-3 py-1 rounded border ${serverHealth > 50 ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-red-500/30 bg-red-500/10 text-red-400'}`}>
                         SYSTEM: {serverHealth > 0 ? 'ONLINE' : 'CRITICAL'}
                     </div>
                 </div>
             </div>
-            <div className="flex-1 flex gap-8 h-[380px]">
+            <div className="flex-1 flex flex-col lg:flex-row gap-8 lg:h-[380px]">
                 { }
-                <div className="w-1/3 bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 flex flex-col gap-4 shadow-lg">
+                <div className="w-full lg:w-1/3 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-700 flex flex-col gap-4 shadow-lg shrink-0">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Konfigurácia Firewallu</h4>
                     { }
                     <div className="flex items-center justify-between p-4 bg-slate-900/80 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
@@ -986,181 +986,183 @@ const CyberLab = () => {
     }, [pingPacket]);
     const selectedNode = nodes.find(n => n.id === selectedNodeId);
     return (
-        <div className="w-full h-[600px] flex gap-4 text-slate-200 select-none">
-            { }
-            <div className="w-16 bg-slate-900 border border-slate-700 flex flex-col items-center py-4 gap-4 rounded-xl z-20 shadow-xl">
-                <div className="flex flex-col gap-2 w-full px-2 border-b border-slate-700 pb-4">
-                    <button onClick={() => setTool('cursor')} className={`p-2 rounded transition-all ${tool === 'cursor' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Presunúť">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" /><path d="M13 13l6 6" /></svg>
-                    </button>
-                    <button onClick={() => setTool('cable')} className={`p-2 rounded transition-all ${tool === 'cable' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Kábel">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14" /><circle cx="5" cy="12" r="3" /><circle cx="19" cy="12" r="3" /></svg>
-                    </button>
-                    <button onClick={() => setTool('eraser')} className={`p-2 rounded transition-all ${tool === 'eraser' ? 'bg-pink-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Guma">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                    </button>
-                </div>
-                <div className="w-full px-2">
-                    <button
-                        onClick={generateTask}
-                        className={`w-full p-2 rounded flex justify-center shadow-lg transition-all active:scale-95 ${currentTask || isAllFinished ? 'bg-slate-700 cursor-not-allowed text-slate-400' : 'bg-yellow-600 hover:bg-yellow-500 text-white shadow-yellow-500/20'}`}
-                        disabled={!!currentTask || isAllFinished}
-                        title={isAllFinished ? "Dokončené" : (currentTask ? "Úloha aktívna" : "Získať úlohu")}
-                    >
-                        <TaskIcon />
-                    </button>
-                    <div className="text-[8px] text-center text-slate-500 font-bold mt-1">ÚLOHA</div>
-                </div>
-                <div className="flex flex-col gap-2 w-full px-2 overflow-y-auto custom-scrollbar border-t border-slate-700 pt-4 mt-2">
-                    <span className="text-[9px] text-center text-slate-500 font-bold">DEVICES</span>
-                    <button onClick={() => addNode('pc')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="PC"><CyberDeviceIcon type="pc" /></button>
-                    <button onClick={() => addNode('server')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Server"><CyberDeviceIcon type="server" /></button>
-                    <button onClick={() => addNode('router')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Router"><CyberDeviceIcon type="router" /></button>
-                    <button onClick={() => addNode('switch')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Switch"><CyberDeviceIcon type="switch" /></button>
-                    <button onClick={() => addNode('firewall')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Firewall"><CyberDeviceIcon type="firewall" /></button>
-                </div>
-            </div>
-            { }
-            <div
-                ref={containerRef}
-                className={`flex-1 bg-[#0f172a] rounded-xl border border-slate-700 relative overflow-hidden shadow-inner 
-                ${tool === 'cable' ? 'cursor-crosshair' : (tool === 'eraser' ? 'cursor-not-allowed' : 'cursor-default')}`}
-                onMouseMove={handleContainerMouseMove}
-                onMouseUp={handleContainerMouseUp}
-                onClick={() => setSelectedNodeId(null)}
-            >
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:20px_20px] opacity-20 pointer-events-none"></div>
-                <AnimatePresence>
-                    { }
-                    {currentTask && !showSuccess && (
-                        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 border border-yellow-500/50 text-white px-6 py-3 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-3 max-w-md">
-                            <div className="text-yellow-400 animate-pulse"><TaskIcon /></div>
-                            <div>
-                                <div className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider">Aktuálna úloha</div>
-                                <div className="text-sm font-medium leading-tight">{currentTask.text}</div>
-                            </div>
-                        </motion.div>
-                    )}
-                    { }
-                    {isAllFinished && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-slate-800 border border-slate-600 text-white p-6 rounded-xl shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm"
-                        >
-                            <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-2xl">🏆</div>
-                            <div>
-                                <h3 className="text-lg font-bold text-white">Scenáre dokončené</h3>
-                                <p className="text-xs text-slate-400 mt-1">Úspešne ste nakonfigurovali celú sieťovú topológiu.</p>
-                            </div>
-                            <button
-                                onClick={restartTasks}
-                                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white rounded text-sm font-bold transition-all w-full"
-                            >
-                                Začať odznova
-                            </button>
-                        </motion.div>
-                    )}
-                    { }
-                    {showSuccess && (
-                        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600/90 border border-green-400 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 backdrop-blur-sm">
-                            <div className="text-xl">✅</div>
-                            <div>
-                                <div className="text-xs font-bold uppercase tracking-wider text-green-100">Splnené!</div>
-                                <div className="text-sm font-bold">Skvelá práca</div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-                <svg className="absolute inset-0 w-full h-full overflow-visible">
-                    {links.map((link, i) => {
-                        const n1 = nodes.find(n => n.id === link[0]);
-                        const n2 = nodes.find(n => n.id === link[1]);
-                        if (!n1 || !n2) return null;
-                        return (
-                            <g key={i} onClick={(e) => handleLinkClick(e, i)} className={tool === 'eraser' ? "cursor-pointer hover:opacity-50" : ""}>
-                                <line x1={n1.x + 20} y1={n1.y + 20} x2={n2.x + 20} y2={n2.y + 20} stroke="transparent" strokeWidth="15" />
-                                <line x1={n1.x + 20} y1={n1.y + 20} x2={n2.x + 20} y2={n2.y + 20} stroke="#475569" strokeWidth="2" className="pointer-events-none" />
-                            </g>
-                        );
-                    })}
-                    {tool === 'cable' && cableStartId && (() => {
-                        const startNode = nodes.find(n => n.id === cableStartId);
-                        if (!startNode) return null;
-                        return <line x1={startNode.x + 20} y1={startNode.y + 20} x2={mousePos.x} y2={mousePos.y} stroke="#4ade80" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse pointer-events-none" />
-                    })()}
-                    {pingPacket && (() => {
-                        const currId = pingPacket.path[pingPacket.step];
-                        const nextId = pingPacket.path[pingPacket.step + 1];
-                        const n1 = nodes.find(n => n.id === currId);
-                        const n2 = nodes.find(n => n.id === nextId);
-                        if (!n1 || !n2) return null;
-                        const x = (n1.x + 20) + ((n2.x + 20) - (n1.x + 20)) * pingPacket.progress;
-                        const y = (n1.y + 20) + ((n2.y + 20) - (n1.y + 20)) * pingPacket.progress;
-                        return <circle cx={x} cy={y} r="4" fill="#facc15" className="drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] pointer-events-none" />;
-                    })()}
-                </svg>
-                {nodes.map(node => (
-                    <div
-                        key={node.id}
-                        onMouseDown={(e) => handleMouseDown(e, node.id)}
-                        onMouseUp={(e) => handleMouseUpNode(e, node.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`absolute w-10 h-10 flex items-center justify-center transition-transform active:scale-95 
-                        ${tool === 'cursor' ? 'cursor-grab active:cursor-grabbing' : (tool === 'eraser' ? 'cursor-pointer hover:scale-110 hover:bg-red-500/20 rounded-full' : 'cursor-crosshair')}`}
-                        style={{ left: node.x, top: node.y, zIndex: 10 }}
-                    >
-                        {selectedNodeId === node.id && tool === 'cursor' && <div className="absolute inset-[-8px] border-2 border-blue-500 rounded-lg animate-pulse bg-blue-500/10 pointer-events-none"></div>}
-                        {cableStartId === node.id && <div className="absolute inset-[-8px] border-2 border-green-500 rounded-full animate-ping opacity-50 pointer-events-none"></div>}
-                        <CyberDeviceIcon type={node.type} />
-                        <div className="absolute top-11 left-1/2 -translate-x-1/2 bg-slate-900/80 px-2 py-0.5 rounded text-[9px] whitespace-nowrap border border-slate-700 text-slate-300 pointer-events-none">{node.name}</div>
+        <div className="w-full h-[600px] flex gap-4 text-slate-200 select-none overflow-x-auto overflow-y-hidden pb-4">
+            <div className="flex gap-4 min-w-[700px] w-full h-full">
+                { }
+                <div className="w-16 bg-slate-900 border border-slate-700 flex flex-col items-center py-4 gap-4 rounded-xl z-20 shadow-xl shrink-0">
+                    <div className="flex flex-col gap-2 w-full px-2 border-b border-slate-700 pb-4">
+                        <button onClick={() => setTool('cursor')} className={`p-2 rounded transition-all ${tool === 'cursor' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Presunúť">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" /><path d="M13 13l6 6" /></svg>
+                        </button>
+                        <button onClick={() => setTool('cable')} className={`p-2 rounded transition-all ${tool === 'cable' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Kábel">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14" /><circle cx="5" cy="12" r="3" /><circle cx="19" cy="12" r="3" /></svg>
+                        </button>
+                        <button onClick={() => setTool('eraser')} className={`p-2 rounded transition-all ${tool === 'eraser' ? 'bg-pink-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`} title="Guma">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
                     </div>
-                ))}
-            </div>
-            { }
-            <div className="w-64 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 flex flex-col p-4 shadow-xl z-20">
-                <h3 className="font-bold border-b border-slate-700 pb-2 mb-4 text-white">Vlastnosti</h3>
-                {selectedNode ? (
-                    <div className="flex flex-col gap-4">
-                        <div>
-                            <span className="text-xs text-slate-500 uppercase font-bold">Typ</span>
-                            <div className="text-slate-200 capitalize">{selectedNode.type}</div>
+                    <div className="w-full px-2">
+                        <button
+                            onClick={generateTask}
+                            className={`w-full p-2 rounded flex justify-center shadow-lg transition-all active:scale-95 ${currentTask || isAllFinished ? 'bg-slate-700 cursor-not-allowed text-slate-400' : 'bg-yellow-600 hover:bg-yellow-500 text-white shadow-yellow-500/20'}`}
+                            disabled={!!currentTask || isAllFinished}
+                            title={isAllFinished ? "Dokončené" : (currentTask ? "Úloha aktívna" : "Získať úlohu")}
+                        >
+                            <TaskIcon />
+                        </button>
+                        <div className="text-[8px] text-center text-slate-500 font-bold mt-1">ÚLOHA</div>
+                    </div>
+                    <div className="flex flex-col gap-2 w-full px-2 overflow-y-auto custom-scrollbar border-t border-slate-700 pt-4 mt-2">
+                        <span className="text-[9px] text-center text-slate-500 font-bold">DEVICES</span>
+                        <button onClick={() => addNode('pc')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="PC"><CyberDeviceIcon type="pc" /></button>
+                        <button onClick={() => addNode('server')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Server"><CyberDeviceIcon type="server" /></button>
+                        <button onClick={() => addNode('router')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Router"><CyberDeviceIcon type="router" /></button>
+                        <button onClick={() => addNode('switch')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Switch"><CyberDeviceIcon type="switch" /></button>
+                        <button onClick={() => addNode('firewall')} className="p-2 bg-slate-800 rounded hover:bg-blue-600/50 flex justify-center" title="Firewall"><CyberDeviceIcon type="firewall" /></button>
+                    </div>
+                </div>
+                { }
+                <div
+                    ref={containerRef}
+                    className={`flex-1 bg-[#0f172a] rounded-xl border border-slate-700 relative overflow-hidden shadow-inner 
+                ${tool === 'cable' ? 'cursor-crosshair' : (tool === 'eraser' ? 'cursor-not-allowed' : 'cursor-default')}`}
+                    onMouseMove={handleContainerMouseMove}
+                    onMouseUp={handleContainerMouseUp}
+                    onClick={() => setSelectedNodeId(null)}
+                >
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:20px_20px] opacity-20 pointer-events-none"></div>
+                    <AnimatePresence>
+                        { }
+                        {currentTask && !showSuccess && (
+                            <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 border border-yellow-500/50 text-white px-6 py-3 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-3 max-w-md">
+                                <div className="text-yellow-400 animate-pulse"><TaskIcon /></div>
+                                <div>
+                                    <div className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider">Aktuálna úloha</div>
+                                    <div className="text-sm font-medium leading-tight">{currentTask.text}</div>
+                                </div>
+                            </motion.div>
+                        )}
+                        { }
+                        {isAllFinished && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-slate-800 border border-slate-600 text-white p-6 rounded-xl shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm"
+                            >
+                                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-2xl">🏆</div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white">Scenáre dokončené</h3>
+                                    <p className="text-xs text-slate-400 mt-1">Úspešne ste nakonfigurovali celú sieťovú topológiu.</p>
+                                </div>
+                                <button
+                                    onClick={restartTasks}
+                                    className="px-6 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white rounded text-sm font-bold transition-all w-full"
+                                >
+                                    Začať odznova
+                                </button>
+                            </motion.div>
+                        )}
+                        { }
+                        {showSuccess && (
+                            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600/90 border border-green-400 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 backdrop-blur-sm">
+                                <div className="text-xl">✅</div>
+                                <div>
+                                    <div className="text-xs font-bold uppercase tracking-wider text-green-100">Splnené!</div>
+                                    <div className="text-sm font-bold">Skvelá práca</div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                    <svg className="absolute inset-0 w-full h-full overflow-visible">
+                        {links.map((link, i) => {
+                            const n1 = nodes.find(n => n.id === link[0]);
+                            const n2 = nodes.find(n => n.id === link[1]);
+                            if (!n1 || !n2) return null;
+                            return (
+                                <g key={i} onClick={(e) => handleLinkClick(e, i)} className={tool === 'eraser' ? "cursor-pointer hover:opacity-50" : ""}>
+                                    <line x1={n1.x + 20} y1={n1.y + 20} x2={n2.x + 20} y2={n2.y + 20} stroke="transparent" strokeWidth="15" />
+                                    <line x1={n1.x + 20} y1={n1.y + 20} x2={n2.x + 20} y2={n2.y + 20} stroke="#475569" strokeWidth="2" className="pointer-events-none" />
+                                </g>
+                            );
+                        })}
+                        {tool === 'cable' && cableStartId && (() => {
+                            const startNode = nodes.find(n => n.id === cableStartId);
+                            if (!startNode) return null;
+                            return <line x1={startNode.x + 20} y1={startNode.y + 20} x2={mousePos.x} y2={mousePos.y} stroke="#4ade80" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse pointer-events-none" />
+                        })()}
+                        {pingPacket && (() => {
+                            const currId = pingPacket.path[pingPacket.step];
+                            const nextId = pingPacket.path[pingPacket.step + 1];
+                            const n1 = nodes.find(n => n.id === currId);
+                            const n2 = nodes.find(n => n.id === nextId);
+                            if (!n1 || !n2) return null;
+                            const x = (n1.x + 20) + ((n2.x + 20) - (n1.x + 20)) * pingPacket.progress;
+                            const y = (n1.y + 20) + ((n2.y + 20) - (n1.y + 20)) * pingPacket.progress;
+                            return <circle cx={x} cy={y} r="4" fill="#facc15" className="drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] pointer-events-none" />;
+                        })()}
+                    </svg>
+                    {nodes.map(node => (
+                        <div
+                            key={node.id}
+                            onMouseDown={(e) => handleMouseDown(e, node.id)}
+                            onMouseUp={(e) => handleMouseUpNode(e, node.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className={`absolute w-10 h-10 flex items-center justify-center transition-transform active:scale-95 
+                        ${tool === 'cursor' ? 'cursor-grab active:cursor-grabbing' : (tool === 'eraser' ? 'cursor-pointer hover:scale-110 hover:bg-red-500/20 rounded-full' : 'cursor-crosshair')}`}
+                            style={{ left: node.x, top: node.y, zIndex: 10 }}
+                        >
+                            {selectedNodeId === node.id && tool === 'cursor' && <div className="absolute inset-[-8px] border-2 border-blue-500 rounded-lg animate-pulse bg-blue-500/10 pointer-events-none"></div>}
+                            {cableStartId === node.id && <div className="absolute inset-[-8px] border-2 border-green-500 rounded-full animate-ping opacity-50 pointer-events-none"></div>}
+                            <CyberDeviceIcon type={node.type} />
+                            <div className="absolute top-11 left-1/2 -translate-x-1/2 bg-slate-900/80 px-2 py-0.5 rounded text-[9px] whitespace-nowrap border border-slate-700 text-slate-300 pointer-events-none">{node.name}</div>
                         </div>
-                        <div>
-                            <span className="text-xs text-slate-500 uppercase font-bold">Názov</span>
-                            <input
-                                className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white mt-1 focus:border-blue-500 outline-none"
-                                value={selectedNode.name}
-                                onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, name: e.target.value } : n))}
-                            />
-                        </div>
-                        {selectedNode.ip && (
+                    ))}
+                </div>
+                { }
+                <div className="w-64 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 flex flex-col p-4 shadow-xl z-20">
+                    <h3 className="font-bold border-b border-slate-700 pb-2 mb-4 text-white">Vlastnosti</h3>
+                    {selectedNode ? (
+                        <div className="flex flex-col gap-4">
                             <div>
-                                <span className="text-xs text-slate-500 uppercase font-bold">IP Adresa</span>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Typ</span>
+                                <div className="text-slate-200 capitalize">{selectedNode.type}</div>
+                            </div>
+                            <div>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Názov</span>
                                 <input
-                                    className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-green-400 font-mono mt-1 focus:border-blue-500 outline-none"
-                                    value={selectedNode.ip || ''}
-                                    onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, ip: e.target.value } : n))}
+                                    className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-white mt-1 focus:border-blue-500 outline-none"
+                                    value={selectedNode.name}
+                                    onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, name: e.target.value } : n))}
                                 />
                             </div>
-                        )}
-                        <div className="mt-4 border-t border-slate-700 pt-4 flex gap-2">
-                            {['pc', 'server'].includes(selectedNode.type) && (
-                                <button onClick={sendPing} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded text-xs font-bold transition-colors">PING TEST</button>
+                            {selectedNode.ip && (
+                                <div>
+                                    <span className="text-xs text-slate-500 uppercase font-bold">IP Adresa</span>
+                                    <input
+                                        className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-green-400 font-mono mt-1 focus:border-blue-500 outline-none"
+                                        value={selectedNode.ip || ''}
+                                        onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode.id ? { ...n, ip: e.target.value } : n))}
+                                    />
+                                </div>
                             )}
-                            <button onClick={deleteSelected} className="flex-1 bg-red-900/50 hover:bg-red-900 border border-red-800 text-red-200 py-1.5 rounded text-xs font-bold transition-colors">ODSTRÁNIŤ</button>
+                            <div className="mt-4 border-t border-slate-700 pt-4 flex gap-2">
+                                {['pc', 'server'].includes(selectedNode.type) && (
+                                    <button onClick={sendPing} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded text-xs font-bold transition-colors">PING TEST</button>
+                                )}
+                                <button onClick={deleteSelected} className="flex-1 bg-red-900/50 hover:bg-red-900 border border-red-800 text-red-200 py-1.5 rounded text-xs font-bold transition-colors">ODSTRÁNIŤ</button>
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center justify-center h-40 text-slate-600">
-                        <span className="text-4xl mb-2">👆</span>
-                        <span className="text-xs">Vyberte zariadenie na konfiguráciu</span>
-                    </div>
-                )}
-                <div className="mt-auto pt-4 border-t border-slate-700">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Denník udalostí</span>
-                    <div className="h-32 overflow-y-auto text-[10px] font-mono space-y-1 pr-1 custom-scrollbar">
-                        {logs.map((l, i) => <div key={i} className={i === 0 ? "text-green-400" : "text-slate-500"}>{l}</div>)}
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-40 text-slate-600">
+                            <span className="text-4xl mb-2">👆</span>
+                            <span className="text-xs">Vyberte zariadenie na konfiguráciu</span>
+                        </div>
+                    )}
+                    <div className="mt-auto pt-4 border-t border-slate-700">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Denník udalostí</span>
+                        <div className="h-32 overflow-y-auto text-[10px] font-mono space-y-1 pr-1 custom-scrollbar">
+                            {logs.map((l, i) => <div key={i} className={i === 0 ? "text-green-400" : "text-slate-500"}>{l}</div>)}
+                        </div>
                     </div>
                 </div>
             </div>

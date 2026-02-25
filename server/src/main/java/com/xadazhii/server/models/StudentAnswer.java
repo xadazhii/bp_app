@@ -34,4 +34,10 @@ public class StudentAnswer {
     @Column(name = "is_correct", nullable = false)
     private boolean isCorrect;
 
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
+    @Column(name = "earned_points")
+    private Integer earnedPoints;
+
 }

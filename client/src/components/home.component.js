@@ -72,11 +72,11 @@ export default class Home extends Component {
             <div className="bg-slate-900 text-slate-200 min-h-screen font-sans antialiased">
                 <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
 
-                    <header className="text-center mb-16">
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight" style={{ color: beigeTextColor }}>
+                    <header className="text-center mb-10 sm:mb-16">
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight break-words" style={{ color: beigeTextColor }}>
                             {this.courseData.title}
                         </h1>
-                        <p className="mt-6 max-w-3xl mx-auto text-lg" style={{ color: beigeTextColor }}>
+                        <p className="mt-4 sm:mt-6 max-w-3xl mx-auto text-base sm:text-lg px-2 sm:px-0" style={{ color: beigeTextColor }}>
                             {this.courseData.intro}
                         </p>
                     </header>

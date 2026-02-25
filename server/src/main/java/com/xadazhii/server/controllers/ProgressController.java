@@ -26,119 +26,132 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
+@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class ProgressController {
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private MaterialRepository materialRepository;
+        @Autowired
+        private MaterialRepository materialRepository;
 
-    @Autowired
-    private UserProgressRepository userProgressRepository;
+        @Autowired
+        private UserProgressRepository userProgressRepository;
 
-    @Autowired
-    private TestResultRepository testResultRepository;
+        @Autowired
+        private TestResultRepository testResultRepository;
 
-    @GetMapping("/progress/completed-ids")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Set<Long>> getCompletedMaterialIds() {
-        User currentUser = getCurrentUser();
-        Set<Long> completedIds = userProgressRepository.findCompletedMaterialIdsByUserId(currentUser.getId());
-        return ResponseEntity.ok(completedIds);
-    }
-
-    @PostMapping("/progress")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> markAsCompleted(@Valid @RequestBody ProgressRequest progressRequest) {
-        User currentUser = getCurrentUser();
-
-        if (userProgressRepository.existsByUserIdAndMaterialId(currentUser.getId(), progressRequest.getMaterialId())) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Chyba: Tento materiál už bol označený ako dokončený!"));
+        @GetMapping("/progress/completed-ids")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<Set<Long>> getCompletedMaterialIds() {
+                User currentUser = getCurrentUser();
+                Set<Long> completedIds = userProgressRepository.findCompletedMaterialIdsByUserId(currentUser.getId());
+                return ResponseEntity.ok(completedIds);
         }
 
-        Material material = materialRepository.findById(progressRequest.getMaterialId())
-                .orElseThrow(() -> new RuntimeException("Chyba: Materiál nebol nájdený."));
+        @PostMapping("/progress")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<?> markAsCompleted(@Valid @RequestBody ProgressRequest progressRequest) {
+                User currentUser = getCurrentUser();
 
-        UserProgress progress = new UserProgress(currentUser, material);
-        userProgressRepository.save(progress);
+                if (userProgressRepository.existsByUserIdAndMaterialId(currentUser.getId(),
+                                progressRequest.getMaterialId())) {
+                        return ResponseEntity.badRequest()
+                                        .body(new MessageResponse(
+                                                        "Chyba: Tento materiál už bol označený ako dokončený!"));
+                }
 
-        return ResponseEntity.ok(new MessageResponse("Materiál bol úspešne označený ako dokončený!"));
-    }
+                Material material = materialRepository.findById(progressRequest.getMaterialId())
+                                .orElseThrow(() -> new RuntimeException("Chyba: Materiál nebol nájdený."));
 
-    @PostMapping("/tests/submit")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> submitTest(@Valid @RequestBody TestSubmitRequest testRequest) {
-        User currentUser = getCurrentUser();
+                UserProgress progress = new UserProgress(currentUser, material);
+                userProgressRepository.save(progress);
 
-        Material material = materialRepository.findById(testRequest.getMaterialId())
-                .orElseThrow(() -> new RuntimeException("Chyba: Test nebol nájdený."));
+                return ResponseEntity.ok(new MessageResponse("Materiál bol úspešne označený ako dokončený!"));
+        }
 
-        UserProgress progress = new UserProgress(currentUser, material, testRequest.getScore());
-        userProgressRepository.save(progress);
+        @PostMapping("/tests/submit")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<?> submitTest(@Valid @RequestBody TestSubmitRequest testRequest) {
+                User currentUser = getCurrentUser();
 
-        currentUser.setPoints(currentUser.getPoints() + testRequest.getScore());
-        userRepository.save(currentUser);
+                Material material = materialRepository.findById(testRequest.getMaterialId())
+                                .orElseThrow(() -> new RuntimeException("Chyba: Test nebol nájdený."));
 
-        return ResponseEntity.ok(new MessageResponse("Výsledky testu boli úspešne uložené!"));
-    }
+                UserProgress progress = new UserProgress(currentUser, material, testRequest.getScore());
+                userProgressRepository.save(progress);
 
-    @GetMapping("/users/{userId}/stats")
-    @PreAuthorize("isAuthenticated()")
-    @Transactional(readOnly = true)
-    public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
-        long totalLectures = materialRepository.countByMaterialType("lecture");
-        long completedLectures = userProgressRepository.countCompletedByUserAndType(userId, "lecture");
-        int percentLectures = (totalLectures == 0) ? 0
-                : (int) Math.round(((double) completedLectures / totalLectures) * 100);
-        UserStatsResponse.StatsDetail lectureStats = new UserStatsResponse.StatsDetail(completedLectures, totalLectures,
-                percentLectures);
+                currentUser.setPoints(currentUser.getPoints() + testRequest.getScore());
+                userRepository.save(currentUser);
 
-        long totalSeminars = materialRepository.countByMaterialType("seminar");
-        long completedSeminars = userProgressRepository.countCompletedByUserAndType(userId, "seminar");
-        int percentSeminars = (totalSeminars == 0) ? 0
-                : (int) Math.round(((double) completedSeminars / totalSeminars) * 100);
-        UserStatsResponse.StatsDetail seminarStats = new UserStatsResponse.StatsDetail(completedSeminars, totalSeminars,
-                percentSeminars);
+                return ResponseEntity.ok(new MessageResponse("Výsledky testu boli úspešne uložené!"));
+        }
 
-        List<TestResult> userTestResults = testResultRepository.findByStudentId(userId);
+        @GetMapping("/users/{userId}/stats")
+        @PreAuthorize("isAuthenticated()")
+        @Transactional(readOnly = true)
+        public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
+                long totalLectures = materialRepository.countByMaterialType("lecture");
+                long completedLectures = userProgressRepository.countCompletedByUserAndType(userId, "lecture");
+                int percentLectures = (totalLectures == 0) ? 0
+                                : (int) Math.round(((double) completedLectures / totalLectures) * 100);
+                UserStatsResponse.StatsDetail lectureStats = new UserStatsResponse.StatsDetail(completedLectures,
+                                totalLectures,
+                                percentLectures);
 
-        List<UserStatsResponse.UserTestResultDto> detailedResults = userTestResults.stream().map(result -> {
+                long totalSeminars = materialRepository.countByMaterialType("seminar");
+                long completedSeminars = userProgressRepository.countCompletedByUserAndType(userId, "seminar");
+                int percentSeminars = (totalSeminars == 0) ? 0
+                                : (int) Math.round(((double) completedSeminars / totalSeminars) * 100);
+                UserStatsResponse.StatsDetail seminarStats = new UserStatsResponse.StatsDetail(completedSeminars,
+                                totalSeminars,
+                                percentSeminars);
 
-            int maxScore = result.getTest().getQuestions().stream()
-                    .mapToInt(question -> question.getAnswers().stream()
-                            .mapToInt(Answer::getPointsWeight)
-                            .max()
-                            .orElse(0))
-                    .sum();
+                List<TestResult> userTestResults = testResultRepository.findByStudentId(userId);
 
-            return new UserStatsResponse.UserTestResultDto(
-                    result.getTest().getTitle(),
-                    result.getScore(),
-                    maxScore);
-        }).collect(Collectors.toList());
+                List<UserStatsResponse.UserTestResultDto> detailedResults = userTestResults.stream().map(result -> {
 
-        int totalPoints = detailedResults.stream()
-                .mapToInt(UserStatsResponse.UserTestResultDto::getScore)
-                .sum();
+                        int maxScore = result.getTest().getQuestions().stream()
+                                        .mapToInt(question -> question.getAnswers().stream()
+                                                        .mapToInt(Answer::getPointsWeight)
+                                                        .max()
+                                                        .orElse(0))
+                                        .sum();
 
-        long completedTests = userTestResults.size();
+                        return new UserStatsResponse.UserTestResultDto(
+                                        result.getTest().getTitle(),
+                                        result.getScore(),
+                                        maxScore,
+                                        result.getTest().getId(),
+                                        result.getId(),
+                                        result.isCheated(),
+                                        result.getTest().getWeekNumber());
+                }).collect(Collectors.toList());
 
-        UserStatsResponse.TestStatsDetail testStats = new UserStatsResponse.TestStatsDetail(totalPoints, completedTests,
-                detailedResults);
+                int totalPoints = detailedResults.stream()
+                                .filter(r -> (r.getWeekNumber() != null && r.getWeekNumber() >= 1
+                                                && r.getWeekNumber() <= 12)
+                                                || (r.getWeekNumber() != null && r.getWeekNumber() == 14))
+                                .mapToInt(UserStatsResponse.UserTestResultDto::getScore)
+                                .sum();
 
-        UserStatsResponse response = new UserStatsResponse(lectureStats, seminarStats, testStats);
-        return ResponseEntity.ok(response);
-    }
+                long completedTests = userTestResults.size();
 
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        return userRepository.findByUsername(currentUserName)
-                .orElseThrow(() -> new UsernameNotFoundException("Používateľ " + currentUserName + " nebol nájdený"));
-    }
+                UserStatsResponse.TestStatsDetail testStats = new UserStatsResponse.TestStatsDetail(totalPoints,
+                                completedTests,
+                                detailedResults);
+
+                UserStatsResponse response = new UserStatsResponse(lectureStats, seminarStats, testStats);
+                return ResponseEntity.ok(response);
+        }
+
+        private User getCurrentUser() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUserName = authentication.getName();
+                return userRepository.findByUsername(currentUserName)
+                                .orElseThrow(() -> new UsernameNotFoundException(
+                                                "Používateľ " + currentUserName + " nebol nájdený"));
+        }
 }
