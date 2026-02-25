@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import React, { useState, useRef } from "react";
 import authHeader from "../../services/auth-header";
 import heic2any from "heic2any";
 import { UserCircleIcon, KeyIcon, CameraIcon, ExclamationTriangleIcon, CheckCircleIcon } from '../common/ProfileIcons';

@@ -19,6 +19,7 @@ import com.xadazhii.server.security.jwt.AuthEntryPointJwt;
 import com.xadazhii.server.security.jwt.AuthTokenFilter;
 import com.xadazhii.server.security.services.UserDetailsServiceImpl;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.lang.NonNull;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -38,7 +39,7 @@ public class WebSecurityConfig {
   public WebMvcConfigurer corsConfigurer() {
     return new WebMvcConfigurer() {
       @Override
-      public void addCorsMappings(CorsRegistry registry) {
+      public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
             .allowedOriginPatterns("https://btsss-stu-fei.netlify.app", "http://localhost:3000",
                 "http://localhost:8081")

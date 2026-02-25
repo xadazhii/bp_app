@@ -1,9 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import authHeader from "../../services/auth-header";
-import { FriendsIcon, TrophyIcon, ChartBarIcon, StarIcon } from '../common/ProfileIcons';
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+import React from "react";
+import { FriendsIcon, ChartBarIcon, StarIcon } from '../common/ProfileIcons';
 
 const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onViewClassmates, classmatesLoading, profileImage }) => {
 

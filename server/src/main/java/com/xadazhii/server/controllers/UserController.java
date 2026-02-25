@@ -84,7 +84,7 @@ public class UserController {
     @PutMapping("/users/{userId}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> request) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
@@ -117,7 +117,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
@@ -158,7 +158,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         user.setUsername(newUsername);
@@ -179,7 +179,7 @@ public class UserController {
                     .body(new MessageResponse("Error: You are not authorized to change this user's password!"));
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         String oldPassword = request.get("oldPassword");
@@ -214,7 +214,7 @@ public class UserController {
         int totalScore = userResults.stream()
                 .collect(Collectors.groupingBy(
                         result -> result.getTest().getId(),
-                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Integer::compare))))
+                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Comparator.naturalOrder()))))
                 .values().stream()
                 .mapToInt(opt -> opt.orElse(0))
                 .sum();
@@ -230,7 +230,7 @@ public class UserController {
     public ResponseEntity<?> getUserInfo() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        User user = userRepository.findById(userDetails.getId())
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userDetails.getId()))
                 .orElseThrow(() -> new RuntimeException("Error: User not found"));
 
         Map<String, Object> responseMap = new HashMap<>();
@@ -253,7 +253,7 @@ public class UserController {
 
         UserDetailsImpl currentUser = (UserDetailsImpl) authentication.getPrincipal();
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         user.setPseudonym(pseudonym);
@@ -264,7 +264,7 @@ public class UserController {
 
     @GetMapping("/profile/scores/{studentId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<TestResult>> getStudentScores(@PathVariable Long studentId) {
+    public ResponseEntity<List<TestResult>> getStudentScores(@PathVariable @lombok.NonNull Long studentId) {
         List<TestResult> results = testResultRepository.findByStudentId(studentId);
         return ResponseEntity.ok(results);
     }

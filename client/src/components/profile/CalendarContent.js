@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import authHeader from "../../services/auth-header";
-import heic2any from "heic2any";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 

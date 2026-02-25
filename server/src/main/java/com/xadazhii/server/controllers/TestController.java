@@ -183,9 +183,9 @@ public class TestController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> deleteTest(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTest(@PathVariable @lombok.NonNull Long id) {
         try {
-            Test test = testRepository.findById(id)
+            Test test = testRepository.findById(java.util.Objects.requireNonNull(id))
                     .orElseThrow(() -> new NoSuchElementException("Test not found with id: " + id));
 
             // 1. Update student points and delete test results manually to ensure order
@@ -200,12 +200,13 @@ public class TestController {
                 }
             }
 
-            testResultRepository.deleteAll(results);
+            if (results != null)
+                testResultRepository.deleteAll(results);
             testResultRepository.flush();
 
             // 2. Now delete the test itself (which includes questions and answers via
             // cascade)
-            testRepository.delete(test);
+            testRepository.delete(java.util.Objects.requireNonNull(test));
             testRepository.flush();
 
             return ResponseEntity.ok("Test deleted successfully!");
@@ -218,9 +219,9 @@ public class TestController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody TestRequest testRequest) {
+    public ResponseEntity<?> updateTest(@PathVariable @lombok.NonNull Long id, @RequestBody TestRequest testRequest) {
         try {
-            Test test = testRepository.findById(id)
+            Test test = testRepository.findById(java.util.Objects.requireNonNull(id))
                     .orElseThrow(() -> new NoSuchElementException("Test not found with id: " + id));
 
             // When editing a test, we should probably clear old results to keep things
@@ -236,7 +237,8 @@ public class TestController {
                 }
             }
 
-            testResultRepository.deleteAll(results);
+            if (results != null)
+                testResultRepository.deleteAll(results);
             testResultRepository.flush();
 
             test.setTitle(testRequest.getTitle());
@@ -262,8 +264,8 @@ public class TestController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getTest(@PathVariable Long id) {
-        Test test = testRepository.findById(id)
+    public ResponseEntity<?> getTest(@PathVariable @lombok.NonNull Long id) {
+        Test test = testRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new NoSuchElementException("Test not found with id: " + id));
         return createTestDetailResponse(test);
     }
@@ -284,7 +286,7 @@ public class TestController {
     @PostMapping("/results")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> saveTestResult(@RequestBody TestResultRequest request) {
+    public ResponseEntity<?> saveTestResult(@RequestBody @lombok.NonNull TestResultRequest request) {
         try {
             System.out.println(
                     "Saving test result for student: " + request.getStudentId() + ", test: " + request.getTestId()
@@ -294,9 +296,9 @@ public class TestController {
                 return ResponseEntity.badRequest().body("Internal error: Chýba ID študenta alebo testu.");
             }
 
-            User student = userRepository.findById(request.getStudentId())
+            User student = userRepository.findById(java.util.Objects.requireNonNull(request.getStudentId()))
                     .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + request.getStudentId()));
-            Test test = testRepository.findById(request.getTestId())
+            Test test = testRepository.findById(java.util.Objects.requireNonNull(request.getTestId()))
                     .orElseThrow(() -> new NoSuchElementException("Test not found with ID: " + request.getTestId()));
 
             TestResult result = new TestResult();
@@ -305,7 +307,7 @@ public class TestController {
             result.setCheated(request.isCheated());
 
             // Save parent first to establish identity
-            result = testResultRepository.saveAndFlush(result);
+            result = testResultRepository.saveAndFlush(java.util.Objects.requireNonNull(result));
 
             int totalPoints = 0;
 
@@ -314,7 +316,8 @@ public class TestController {
                     if (submission.getQuestionId() == null)
                         continue;
 
-                    Question question = questionRepository.findById(submission.getQuestionId())
+                    Question question = questionRepository
+                            .findById(java.util.Objects.requireNonNull(submission.getQuestionId()))
                             .orElseThrow(() -> new NoSuchElementException(
                                     "Question not found with ID: " + submission.getQuestionId()));
 
@@ -326,7 +329,8 @@ public class TestController {
                         if (submission.getAnswerId() == null) {
                             studentAnswer.setCorrect(false);
                         } else {
-                            Answer selectedAnswer = answerRepository.findById(submission.getAnswerId())
+                            Answer selectedAnswer = answerRepository
+                                    .findById(java.util.Objects.requireNonNull(submission.getAnswerId()))
                                     .orElseThrow(() -> new NoSuchElementException(
                                             "Answer not found with ID: " + submission.getAnswerId()));
 
@@ -397,8 +401,8 @@ public class TestController {
     @GetMapping("/results/{resultId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getTestResultDetails(@PathVariable Long resultId) {
-        TestResult result = testResultRepository.findById(resultId)
+    public ResponseEntity<?> getTestResultDetails(@PathVariable @lombok.NonNull Long resultId) {
+        TestResult result = testResultRepository.findById(java.util.Objects.requireNonNull(resultId))
                 .orElseThrow(() -> new NoSuchElementException("Result not found with id: " + resultId));
 
         Map<String, Object> response = new HashMap<>();
@@ -473,12 +477,12 @@ public class TestController {
     @PostMapping("/results/evaluate-answer")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> evaluateAnswer(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> evaluateAnswer(@RequestBody @lombok.NonNull Map<String, Object> payload) {
         Long studentAnswerId = Long.valueOf(payload.get("studentAnswerId").toString());
         boolean isCorrect = (boolean) payload.get("isCorrect");
         String feedback = (String) payload.get("feedback");
 
-        StudentAnswer sa = studentAnswerRepository.findById(studentAnswerId)
+        StudentAnswer sa = studentAnswerRepository.findById(java.util.Objects.requireNonNull(studentAnswerId))
                 .orElseThrow(() -> new NoSuchElementException("StudentAnswer not found with id: " + studentAnswerId));
 
         sa.setCorrect(isCorrect);
@@ -557,8 +561,8 @@ public class TestController {
     @PostMapping("/results/{resultId}/toggle-cheat")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> toggleCheatStatus(@PathVariable Long resultId) {
-        TestResult result = testResultRepository.findById(resultId)
+    public ResponseEntity<?> toggleCheatStatus(@PathVariable @lombok.NonNull Long resultId) {
+        TestResult result = testResultRepository.findById(java.util.Objects.requireNonNull(resultId))
                 .orElseThrow(() -> new NoSuchElementException("TestResult not found with id: " + resultId));
 
         int oldScore = result.getScore();
@@ -615,8 +619,8 @@ public class TestController {
     @DeleteMapping("/results/{resultId}")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<?> deleteTestResult(@PathVariable Long resultId) {
-        TestResult result = testResultRepository.findById(resultId)
+    public ResponseEntity<?> deleteTestResult(@PathVariable @lombok.NonNull Long resultId) {
+        TestResult result = testResultRepository.findById(java.util.Objects.requireNonNull(resultId))
                 .orElseThrow(() -> new NoSuchElementException("TestResult not found with id: " + resultId));
 
         int score = result.getScore();

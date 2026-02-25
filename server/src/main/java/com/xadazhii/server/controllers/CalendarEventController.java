@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import lombok.NonNull;
 import java.util.List;
 
-@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
+@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api/calendar-events")
 public class CalendarEventController {
@@ -23,14 +24,14 @@ public class CalendarEventController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CalendarEvent> createEvent(@RequestBody CalendarEvent event) {
-        CalendarEvent savedEvent = calendarEventRepository.save(event);
+    public ResponseEntity<CalendarEvent> createEvent(@RequestBody @NonNull CalendarEvent event) {
+        CalendarEvent savedEvent = calendarEventRepository.save(java.util.Objects.requireNonNull(event));
         return ResponseEntity.ok(savedEvent);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<?> deleteEvent(@PathVariable @NonNull Long id) {
         if (!calendarEventRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

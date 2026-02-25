@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import authHeader from "../../services/auth-header";
 import { StarIcon } from '../common/ProfileIcons';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
-
-export { ProgressRing, ProgressSummaryCard, TestResultCard };
 
 const ProgressRing = ({ percentage, color, size = 80, stroke = 8 }) => {
     const radius = (size / 2) - (stroke);
@@ -229,4 +226,5 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor }) => {
     );
 };
 
+export { ProgressRing, ProgressSummaryCard, TestResultCard };
 export default AchievementsContent;

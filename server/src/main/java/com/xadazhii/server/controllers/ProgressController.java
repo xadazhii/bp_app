@@ -56,6 +56,8 @@ public class ProgressController {
         public ResponseEntity<?> markAsCompleted(@Valid @RequestBody ProgressRequest progressRequest) {
                 User currentUser = getCurrentUser();
 
+                if (progressRequest.getMaterialId() == null)
+                        return ResponseEntity.badRequest().build();
                 if (userProgressRepository.existsByUserIdAndMaterialId(currentUser.getId(),
                                 progressRequest.getMaterialId())) {
                         return ResponseEntity.badRequest()
@@ -63,7 +65,8 @@ public class ProgressController {
                                                         "Chyba: Tento materiál už bol označený ako dokončený!"));
                 }
 
-                Material material = materialRepository.findById(progressRequest.getMaterialId())
+                Material material = materialRepository
+                                .findById(java.util.Objects.requireNonNull(progressRequest.getMaterialId()))
                                 .orElseThrow(() -> new RuntimeException("Chyba: Materiál nebol nájdený."));
 
                 UserProgress progress = new UserProgress(currentUser, material);
@@ -77,7 +80,8 @@ public class ProgressController {
         public ResponseEntity<?> submitTest(@Valid @RequestBody TestSubmitRequest testRequest) {
                 User currentUser = getCurrentUser();
 
-                Material material = materialRepository.findById(testRequest.getMaterialId())
+                Material material = materialRepository
+                                .findById(java.util.Objects.requireNonNull(testRequest.getMaterialId()))
                                 .orElseThrow(() -> new RuntimeException("Chyba: Test nebol nájdený."));
 
                 UserProgress progress = new UserProgress(currentUser, material, testRequest.getScore());

@@ -107,8 +107,8 @@ public class MaterialController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @Transactional
-    public ResponseEntity<MessageResponse> deleteMaterial(@PathVariable Long id) {
-        Material material = materialRepository.findById(id)
+    public ResponseEntity<MessageResponse> deleteMaterial(@PathVariable @lombok.NonNull Long id) {
+        Material material = materialRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new NoSuchElementException("Chyba: Materiál s id " + id + " sa nenašiel."));
 
         // Delete student progress associated with this material

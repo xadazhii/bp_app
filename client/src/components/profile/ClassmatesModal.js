@@ -1,10 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import authHeader from "../../services/auth-header";
-import heic2any from "heic2any";
+import React from "react";
 import { UserIcon } from '../common/ProfileIcons';
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 const ClassmatesModal = ({ classmates, onClose, error, beigeTextColor }) => {
     return (
