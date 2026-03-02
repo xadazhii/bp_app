@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import authHeader from "../../services/auth-header";
-import { DocumentTextIcon, CheckCircleIcon, ExclamationTriangleIcon } from "../common/ProfileIcons";
+import { FileIcon, CheckCircleIcon, ExclamationTriangleIcon } from "../common/ProfileIcons";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -18,7 +18,7 @@ const fetchMaterials = async () => {
 const fetchCompletedMaterialIds = async () => {
     try {
         const res = await fetch(`${API_URL}/api/progress/completed-ids`, { headers: authHeader() });
-        if (!res.ok) throw new Error("Nepodarilo sa načíтаť dokončené materiály.");
+        if (!res.ok) throw new Error("Nepodarilo sa načítať dokončené materiály.");
         return await res.json();
     } catch (error) {
         console.error("Chyba pri načítaní dokončených materiálov:", error);
@@ -26,63 +26,73 @@ const fetchCompletedMaterialIds = async () => {
     }
 };
 
-const MaterialSection = ({ title, materials, completedMaterials, onMarkAsCompleted }) => (
-    <div className="space-y-4">
-        <h3 className="text-xl font-bold flex items-center text-blue-400">
-            <DocumentTextIcon className="mr-3 h-6 w-6" /> {title}
-        </h3>
-        <div className="space-y-3">
-            {materials.length === 0 ? (
-                <p className="text-slate-500 italic">Žiadne materiály v tejto kategórii.</p>
-            ) : (
-                materials.map(material => (
-                    <div
-                        key={material.id}
-                        className="group bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-500 transition-all duration-300 shadow-lg"
-                    >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex-1">
-                                <h4 className="font-bold text-slate-200 text-lg mb-1 group-hover:text-white transition-colors">
-                                    {material.title}
-                                </h4>
-                                <p className="text-slate-400 text-sm line-clamp-1">{material.description}</p>
+const MaterialSection = ({ title, materials, completedMaterials, onMarkAsCompleted, accentColor }) => {
+    return (
+        <div className="space-y-6 flex-1 min-w-0">
+            <h3 className="text-2xl font-bold text-slate-200 pb-3 border-b border-slate-700/50 flex items-center gap-3">
+                <span className={`w-2 h-7 rounded-full ${accentColor}`}></span>
+                {title}
+            </h3>
+            <div className="space-y-4">
+                {materials.length === 0 ? (
+                    <p className="text-slate-500 italic text-sm py-4">Žiadne materiály v tejto sekcii.</p>
+                ) : (
+                    materials.map(material => {
+                        const materialUrl = material.url || material.fileUrl;
+                        const fullUrl = materialUrl ? (materialUrl.startsWith('http') ? materialUrl : `${API_URL}/uploads/${materialUrl.startsWith('/') ? materialUrl.substring(1) : materialUrl}`) : null;
+
+                        return (
+                            <div
+                                key={material.id}
+                                className="group relative bg-[#1e293b]/40 backdrop-blur-md border border-white/5 rounded-xl py-7 px-8 transition-all duration-300 hover:bg-[#243147]/60 hover:border-white/10 shadow-xl overflow-hidden"
+                            >
+                                {/* Subtle left accent on hover */}
+                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${accentColor} transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300`} />
+
+                                <div className="flex items-center justify-between gap-6">
+                                    <div className="flex items-center gap-5 flex-1 min-w-0">
+                                        <div className="p-3 bg-slate-700/30 rounded-lg group-hover:bg-slate-700/50 transition-colors">
+                                            <FileIcon className="h-6 w-6 text-slate-400 shrink-0" />
+                                        </div>
+                                        {fullUrl ? (
+                                            <a
+                                                href={fullUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-semibold text-slate-200 text-xl hover:text-blue-400 transition-colors truncate"
+                                            >
+                                                {material.title}
+                                            </a>
+                                        ) : (
+                                            <span className="font-semibold text-slate-200 text-xl truncate">
+                                                {material.title}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="shrink-0">
+                                        {completedMaterials.has(material.id) ? (
+                                            <div className="px-5 py-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-bold rounded-xl flex items-center gap-2">
+                                                <CheckCircleIcon className="h-4 w-4" />
+                                                Prečítané
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => onMarkAsCompleted(material.id)}
+                                                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all active:scale-95 whitespace-nowrap"
+                                            >
+                                                Označiť ako prečítané
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                                {material.fileUrl && (
-                                    <a
-                                        href={material.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center gap-2 group/btn"
-                                    >
-                                        <svg className="w-3.5 h-3.5 group-hover/btn:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                        Zobraziť
-                                    </a>
-                                )}
-                                {completedMaterials.has(material.id) ? (
-                                    <button
-                                        disabled
-                                        className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold rounded-xl flex items-center gap-2"
-                                    >
-                                        <CheckCircleIcon className="h-4 w-4" />
-                                        Hotovo
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => onMarkAsCompleted(material.id)}
-                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all active:scale-95 flex items-center gap-2"
-                                    >
-                                        Hotovo?
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ))
-            )}
+                        );
+                    })
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
     const [materials, setMaterials] = useState([]);
@@ -98,7 +108,9 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
                     fetchCompletedMaterialIds()
                 ]);
 
-                setMaterials(materialsData);
+                // Sort materials descending by ID so newest (e.g. 12th) appear at the top
+                const sortedMaterials = materialsData.sort((a, b) => b.id - a.id);
+                setMaterials(sortedMaterials);
                 setCompletedMaterials(new Set(completedIdsData));
             } catch (err) {
                 setError("Nepodarilo sa načítať dáta. Skúste to prosím neskôr.");
@@ -168,22 +180,24 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
     const seminars = materials.filter(m => m.type === 'seminar');
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-10 max-w-[1600px] mx-auto">
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: beigeTextColor }}>
                 Učebné materiály
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="flex flex-col lg:flex-row gap-12">
                 <MaterialSection
                     title="Prednášky"
                     materials={lectures}
                     completedMaterials={completedMaterials}
                     onMarkAsCompleted={handleMarkAsCompleted}
+                    accentColor="bg-blue-500"
                 />
                 <MaterialSection
-                    title="Semináre"
+                    title="Cvičenia"
                     materials={seminars}
                     completedMaterials={completedMaterials}
                     onMarkAsCompleted={handleMarkAsCompleted}
+                    accentColor="bg-purple-500"
                 />
             </div>
         </div>

@@ -1,7 +1,7 @@
 import React from "react";
-import { FriendsIcon, ChartBarIcon, StarIcon } from '../common/ProfileIcons';
+import { FriendsIcon, ChartBarIcon, StarIcon, AwardIcon } from '../common/ProfileIcons';
 
-const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onViewClassmates, classmatesLoading, profileImage }) => {
+const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onViewClassmates, classmatesLoading, profileImage, setCurrentPage }) => {
 
     const calculateOverallProgress = () => {
         if (!stats || statsLoading) return 0;
@@ -42,7 +42,7 @@ const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onV
                             <p className="mt-1 text-lg text-slate-400 font-medium text-center w-full">
                                 {currentUser.email}
                             </p>
-                            <div className="mt-6">
+                            <div className="flex flex-wrap gap-2 mt-6">
                                 <button
                                     onClick={onViewClassmates}
                                     className="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-900/40 hover:bg-blue-700 hover:shadow-blue-500/30 transition-all duration-200 active:scale-95 flex items-center gap-2"
@@ -50,6 +50,13 @@ const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onV
                                 >
                                     <FriendsIcon className="w-5 h-5 text-blue-100" />
                                     {classmatesLoading ? 'Načítava sa...' : 'Moji spolužiaci'}
+                                </button>
+                                <button
+                                    onClick={() => setCurrentPage('achievements')}
+                                    className="px-6 py-2.5 bg-amber-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-amber-900/40 hover:bg-amber-700 hover:shadow-amber-500/30 transition-all duration-200 active:scale-95 flex items-center gap-2"
+                                >
+                                    <AwardIcon className="w-5 h-5 text-amber-100" />
+                                    Moje úspechy
                                 </button>
                             </div>
                         </div>

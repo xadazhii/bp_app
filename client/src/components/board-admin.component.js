@@ -108,6 +108,12 @@ const SearchIcon = (props) => (
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
 );
+const ClockIcon = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+);
 const SparklesIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.456-2.455l.259-1.036.259 1.036a3.375 3.375 0 002.455 2.455l1.036.259-1.036.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -534,7 +540,7 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
 };
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-const ProgressAnalysis = ({ summaryData }) => {
+const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     if (!summaryData) return (
         <div className="flex flex-col items-center justify-center p-12 text-slate-400">
             <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
@@ -543,7 +549,7 @@ const ProgressAnalysis = ({ summaryData }) => {
     );
 
     const entryTest = summaryData.tests.find(t => t.weekNumber === 0);
-    const exitTest = summaryData.tests.find(t => t.weekNumber === 13);
+    const exitTest = summaryData.tests.find(t => t.weekNumber === 13 && currentWeek >= 12);
 
     const studentsProgress = summaryData.studentGrades.map(student => {
         const entryScore = entryTest ? (student.scores[entryTest.id] ?? null) : null;
@@ -569,21 +575,17 @@ const ProgressAnalysis = ({ summaryData }) => {
         ? (activeProgress.reduce((acc, p) => acc + p.progress, 0) / activeProgress.length).toFixed(1)
         : '0';
 
-    if (!entryTest || !exitTest) {
+    if (!entryTest) {
         return (
             <div className="p-12 bg-[#0f172a]/50 rounded-[2rem] border border-white/5 text-center animate-fade-in">
-                <div className="w-20 h-20 bg-yellow-500/10 text-yellow-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 bg-amber-500/10 text-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <ExclamationTriangleIcon className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Chýbajúce testy pre analýzu</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Vstupný test chýba</h3>
                 <p className="text-slate-400 max-w-lg mx-auto leading-relaxed">
-                    Pre porovnanie vedomostí systém vyžaduje prítomnosť dvoch kľúčových testov:
-                    <br />
-                    1. <span className="text-blue-400 font-bold">Vstupný test</span> (Týždeň 0)
-                    <br />
-                    2. <span className="text-emerald-400 font-bold">Záverečný test</span> (Týždeň 13)
+                    Pre analýzu progresu systém vyžaduje prítomnosť <strong>Vstupného testu</strong> priradeného k týždňу 0.
                     <br /><br />
-                    Uistite sa, že tieto testy sú vytvorené v sekcii "Testy" so správnym priradením týždňa.
+                    Vytvorte prosím test v sekcii "Testy" a nastavte mu týždeň 0.
                 </p>
             </div>
         );
@@ -593,7 +595,7 @@ const ProgressAnalysis = ({ summaryData }) => {
         <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
             <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
                 <div className="max-w-xl">
-                    <h2 className="text-3xl sm:text-4xl font-extrabold text-blue-400 tracking-tight">Analýza progresu</h2>
+                    <h2 className="text-3xl font-bold text-blue-400 tracking-tight">Analýza progresu</h2>
                     <p className="text-slate-400 mt-2 text-sm sm:text-base leading-relaxed">Sledovanie rastu vedomostí medzi začiatkom a koncom semestra na základe kľúčových testov.</p>
                 </div>
                 {studentsProgress.length > 0 && (
@@ -604,13 +606,35 @@ const ProgressAnalysis = ({ summaryData }) => {
                         <div>
                             <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Globálny rast</p>
                             <p className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-1">
-                                {avgProgress >= 0 ? '+' : ''}{avgProgress}
-                                <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
+                                {exitTest ? (
+                                    <>
+                                        {avgProgress >= 0 ? '+' : ''}{avgProgress}
+                                        <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
+                                    </>
+                                ) : (
+                                    <span className="text-slate-600 italic">—</span>
+                                )}
                             </p>
                         </div>
                     </div>
                 )}
             </div>
+
+            {!exitTest && (
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-[2rem] p-6 flex items-start gap-4">
+                    <div className="p-2 bg-blue-500/10 rounded-xl mt-1">
+                        <ClockIcon className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-blue-100 font-bold mb-1">Čaká sa na Záverečný test</h4>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Aktuálne zobrazujeme výsledky zo <span className="text-blue-400 font-bold">Vstupného testu</span>.
+                            Porovnanie progresu sa automaticky dopočíta, keď systém sprístupní <span className="text-emerald-400 font-bold">Záverečný test</span> (po 12. týždni).
+                            Momentálne sme v <strong>{currentWeek}. týždni</strong>.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Mobile Cards View (Hidden on LG) */}
             <div className="lg:hidden space-y-4">
@@ -637,8 +661,14 @@ const ProgressAnalysis = ({ summaryData }) => {
                             <div className="space-y-1">
                                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Záverečný test</p>
                                 <p className="text-lg font-black text-white">
-                                    {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
-                                    {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {exitTest.maxScore}b</span>}
+                                    {exitTest ? (
+                                        <>
+                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
+                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {exitTest.maxScore}b</span>}
+                                        </>
+                                    ) : (
+                                        <span className="text-slate-700 font-bold text-sm">Zatiaľ neprístupné</span>
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -665,7 +695,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                         <tr className="bg-[#0f172a]/60 border-b border-white/5">
                             <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
                             <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test ({entryTest.maxScore}b)</th>
-                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test ({exitTest.maxScore}b)</th>
+                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test {exitTest ? `(${exitTest.maxScore}b)` : ''}</th>
                             <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Progresívny posun</th>
                         </tr>
                     </thead>
@@ -691,10 +721,14 @@ const ProgressAnalysis = ({ summaryData }) => {
                                     )}
                                 </td>
                                 <td className="px-8 py-5 text-center">
-                                    {student.exitScore !== null ? (
-                                        <span className="text-lg font-black text-white">{student.exitScore}</span>
+                                    {exitTest ? (
+                                        student.exitScore !== null ? (
+                                            <span className="text-lg font-black text-white">{student.exitScore}</span>
+                                        ) : (
+                                            <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                        )
                                     ) : (
-                                        <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                        <span className="text-slate-700 font-bold text-xs uppercase tracking-tighter">Čaká sa...</span>
                                     )}
                                 </td>
                                 <td className="px-8 py-5 text-right">
@@ -704,7 +738,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                                             <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
                                         </div>
                                     ) : (
-                                        <span className="text-slate-600 text-xs font-bold italic opacity-40">—</span>
+                                        <span className="text-slate-700 font-bold text-[10px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
                                     )}
                                 </td>
                             </tr>
@@ -778,21 +812,46 @@ export default class BoardAdmin extends Component {
         this.fetchSettings();
     }
     showMessage(text, type) {
+        // Clear any existing timeout to prevent premature removal of new message
+        if (this.messageTimeout) {
+            clearTimeout(this.messageTimeout);
+        }
+
         const id = Date.now() + Math.random();
         const newMessage = { id, text, type };
-        this.setState(prevState => ({
-            messages: [...(prevState.messages || []), newMessage]
-        }));
-        setTimeout(() => {
+
+        // Replace previous messages with the new one to avoid stacking/history
+        this.setState({
+            messages: [newMessage]
+        });
+
+        // Set a new timeout to clear the message after 4 seconds
+        this.messageTimeout = setTimeout(() => {
             this.setState(prevState => ({
                 messages: prevState.messages.filter(m => m.id !== id)
             }));
-        }, 5000);
+        }, 4000);
     }
     removeMessage = (id) => {
         this.setState(prevState => ({
             messages: prevState.messages.filter(m => m.id !== id)
         }));
+    }
+
+    getCurrentWeek() {
+        const { semesterStartDate } = this.state;
+        if (!semesterStartDate) return 0;
+
+        const start = new Date(semesterStartDate);
+        const now = new Date();
+
+        if (now < start) return 0;
+
+        // Calculate diff in minutes as 'weeks' for simulation
+        const diffInMs = now - start;
+        const diffInMins = Math.floor(diffInMs / (1000 * 60));
+
+        return diffInMins + 1;
     }
     setCurrentPage(page) {
         this.setState({ currentPage: page });
@@ -1477,7 +1536,7 @@ export default class BoardAdmin extends Component {
                                 <div className="space-y-8 animate-fade-in pb-12">
                                     <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <h2 className="text-2xl md:text-3xl font-black text-blue-400 truncate">Správa používateľov</h2>
+                                            <h2 className="text-3xl font-bold text-blue-400 truncate">Správa používateľov</h2>
                                         </div>
                                     </div>
 
@@ -1573,7 +1632,7 @@ export default class BoardAdmin extends Component {
                                 <div className="flex flex-col gap-6 mb-8">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div>
-                                            <h2 className="text-2xl md:text-3xl font-black text-blue-400">Výsledky</h2>
+                                            <h2 className="text-3xl font-bold text-blue-400">Výsledky</h2>
                                         </div>
                                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
                                             <button
@@ -1632,8 +1691,16 @@ export default class BoardAdmin extends Component {
                                                         s.email.toLowerCase().includes(this.state.studentSearchQuery.toLowerCase())
                                                     )
                                                     .map(student => {
-                                                        // Filter tests for week 1-12 and 14 (skuska)
-                                                        const filteredTests = studentGrades.tests.filter(t => (t.weekNumber >= 1 && t.weekNumber <= 12) || t.weekNumber === 14);
+                                                        const currentWeek = this.getCurrentWeek();
+                                                        // Filter tests that should be visible based on current week
+                                                        const filteredTests = studentGrades.tests.filter(t => {
+                                                            const wn = t.weekNumber || 0;
+                                                            if (wn === 0) return true;
+                                                            if (wn >= 1 && wn <= 12) return wn <= currentWeek;
+                                                            if (wn === 13) return currentWeek >= 12; // final test appears after week 12
+                                                            if (wn === 14) return currentWeek >= 13; // exam appears after final test
+                                                            return false;
+                                                        });
 
                                                         const scoresArray = filteredTests.map(t => student.scores[t.id] || 0);
                                                         const totalPoints = scoresArray.reduce((sum, score) => sum + score, 0);
@@ -1733,7 +1800,15 @@ export default class BoardAdmin extends Component {
                                                         <thead>
                                                             <tr className="bg-[#0f172a]/60">
                                                                 <th className="px-4 py-4 text-left text-slate-500 font-black uppercase tracking-widest text-[10px] md:text-[11px] sticky left-0 bg-[#0f172a] z-20 border-b border-white/5">Študent</th>
-                                                                {studentGrades.tests.filter(t => (t.weekNumber >= 1 && t.weekNumber <= 12) || t.weekNumber === 14).map(test => (
+                                                                {studentGrades.tests.filter(t => {
+                                                                    const wn = t.weekNumber || 0;
+                                                                    const currentWeek = this.getCurrentWeek();
+                                                                    if (wn === 0) return true;
+                                                                    if (wn >= 1 && wn <= 12) return wn <= currentWeek;
+                                                                    if (wn === 13) return currentWeek >= 12;
+                                                                    if (wn === 14) return currentWeek >= 13;
+                                                                    return false;
+                                                                }).map(test => (
                                                                     <th key={test.id} className="px-4 py-4 text-center text-slate-500 font-black uppercase tracking-widest text-[10px] md:text-[11px] border-b border-white/5 min-w-[80px]" title={test.title}>
                                                                         {test.title}
                                                                     </th>
@@ -1747,7 +1822,15 @@ export default class BoardAdmin extends Component {
                                                                     s.email.toLowerCase().includes(this.state.studentSearchQuery.toLowerCase())
                                                                 )
                                                                 .map(student => {
-                                                                    const filteredTestsInTable = studentGrades.tests.filter(t => (t.weekNumber >= 1 && t.weekNumber <= 12) || t.weekNumber === 14);
+                                                                    const currentWeek = this.getCurrentWeek();
+                                                                    const filteredTestsInTable = studentGrades.tests.filter(t => {
+                                                                        const wn = t.weekNumber || 0;
+                                                                        if (wn === 0) return true;
+                                                                        if (wn >= 1 && wn <= 12) return wn <= currentWeek;
+                                                                        if (wn === 13) return currentWeek >= 12;
+                                                                        if (wn === 14) return currentWeek >= 13;
+                                                                        return false;
+                                                                    });
                                                                     return (
                                                                         <tr key={student.id} className="hover:bg-[#15203d]/10 transition-colors group">
                                                                             <td className="px-4 py-3 sticky left-0 bg-[#0f172a]/90 backdrop-blur-md z-10 border-r border-white/5 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.5)]">
@@ -1821,7 +1904,7 @@ export default class BoardAdmin extends Component {
                             </div>
                         )}
                         {currentPage === "progress-analysis" && (
-                            <ProgressAnalysis summaryData={studentGrades} />
+                            <ProgressAnalysis summaryData={studentGrades} currentWeek={this.getCurrentWeek()} />
                         )}
                         {currentPage === "material-management" && (
                             <div className="space-y-8">
@@ -2062,7 +2145,7 @@ export default class BoardAdmin extends Component {
                             <div className="space-y-8 animate-fade-in pb-12">
                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <h2 className="text-2xl md:text-3xl font-black text-blue-400 truncate">Registrácia študentov</h2>
+                                        <h2 className="text-3xl font-bold text-blue-400 truncate">Registrácia študentov</h2>
                                     </div>
                                 </div>
 

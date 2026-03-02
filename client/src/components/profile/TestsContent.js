@@ -3,7 +3,7 @@ import axios from "axios";
 import emailjs from "@emailjs/browser";
 import authHeader from "../../services/auth-header";
 import AuthService from "../../services/auth.service";
-import { CheckCircleIcon, ExclamationTriangleIcon, ArrowLeftIcon, ArrowRightIcon, LockClosedIcon, CloudArrowUpIcon, CheckIcon, SparklesIcon, PhoneIcon, EnvelopeIcon, OfficeIcon, TrashIcon, ListBulletIcon, NoteIcon, PencilIcon } from "../common/ProfileIcons";
+import { CheckCircleIcon, ExclamationTriangleIcon, ArrowLeftIcon, ArrowRightIcon, LockClosedIcon, SparklesIcon, PhoneIcon, EnvelopeIcon, OfficeIcon, TrashIcon, ListBulletIcon, NoteIcon, PencilIcon, ClockIcon } from "../common/ProfileIcons";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -35,7 +35,16 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                 if (!completedRes.ok) throw new Error("Nepodarilo sa načítať dokončené testy.");
                 const testsData = await testsRes.json();
                 const completedData = await completedRes.json();
-                setTests(testsData);
+
+                // Sort tests: Vstupny test always at the bottom, others descending by ID
+                const sortedTests = testsData.sort((a, b) => {
+                    const titleA = a.title.toLowerCase();
+                    const titleB = b.title.toLowerCase();
+                    if (titleA.includes("vstupny")) return 1;
+                    if (titleB.includes("vstupny")) return -1;
+                    return b.id - a.id;
+                });
+                setTests(sortedTests);
                 setCompletedTests(new Set(completedData));
             } catch (err) {
                 setError("Nepodarilo sa načítať dáta. Skúste to prosím neskôr.");
@@ -46,6 +55,8 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
         loadInitialData();
     }, []);
 
+    // security effect
+
     useEffect(() => {
         if (activeTest) {
             const handleSecurityEvent = () => {
@@ -55,9 +66,8 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
             };
 
             const handleFullscreenChange = () => {
-                if (!document.fullscreenElement) {
+                if (!document.fullscreenElement && activeTest) {
                     setCheated(true);
-                    setShowFullscreenWarning(true);
                 }
             };
 
@@ -70,19 +80,19 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                 e.preventDefault();
             };
 
+            // Attach listeners IMMEDIATELY but with a brief window. 
+            // Visibility changing catches tab switching instantly.
             window.addEventListener('blur', handleSecurityEvent);
             window.addEventListener('visibilitychange', handleSecurityEvent);
-            window.addEventListener('beforeunload', handleBeforeUnload);
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             window.addEventListener('contextmenu', handleContextMenu);
+            window.addEventListener('beforeunload', handleBeforeUnload);
 
             if (onTestingStatusChange) onTestingStatusChange(true);
 
-            // Request fullscreen on start
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
+            // Request fullscreen ONLY ONCE when test starts
+            if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => { });
             }
 
             return () => {
@@ -91,6 +101,7 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                 window.removeEventListener('beforeunload', handleBeforeUnload);
                 document.removeEventListener('fullscreenchange', handleFullscreenChange);
                 window.removeEventListener('contextmenu', handleContextMenu);
+
                 if (document.fullscreenElement) {
                     document.exitFullscreen().catch(() => { });
                 }
@@ -103,6 +114,7 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
         if (cheated && activeTest && !submitting && !result) {
             submitTest("cheating");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cheated, activeTest, submitting, result]);
 
     useEffect(() => {
@@ -127,7 +139,8 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
         }, 1000);
 
         return () => clearInterval(timerId);
-    }, [activeTest, submitting, result, timeLeft <= 0]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTest, submitting, result, timeLeft]);
 
     const enterFullscreen = () => {
         if (document.documentElement.requestFullscreen) {
@@ -136,6 +149,8 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
             });
         }
     };
+
+
 
     const startTest = async (testId) => {
         setLoading(true);
@@ -310,63 +325,63 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
         const progressPercentage = ((currentQuestionIndex + 1) / activeTest.questions.length) * 100;
 
         return (
-            <div className="animate-fade-in w-full max-w-6xl py-2">
-                <div className="flex flex-col space-y-8">
-
-                    {/* Header: Title & Progress Bar */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-1">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-bold text-white tracking-tight leading-tight flex items-center gap-3">
-                                {activeTest.title}
-                                {timeLeft !== null && (
-                                    <div className={`text-sm px-3 py-1 rounded-full font-mono flex items-center gap-1.5 ${timeLeft < 60 ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' : 'bg-blue-500/10 text-blue-300 border border-blue-500/20'}`}>
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:
-                                        {(timeLeft % 60).toString().padStart(2, '0')}
-                                    </div>
-                                )}
-                            </h2>
-                            <p className="text-blue-500/80 text-sm font-medium">
-                                Otázka {currentQuestionIndex + 1} z {activeTest.questions.length}
-                            </p>
+            <div className="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
+                <div className="w-full max-w-[1300px] flex flex-col space-y-6">
+                    {/* Minimalist Header */}
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div className="flex items-center gap-4">
+                            <div className="space-y-0.5">
+                                <h2 className="text-xl font-bold text-white tracking-tight">
+                                    {activeTest.title}
+                                </h2>
+                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                    Otázka {currentQuestionIndex + 1} z {activeTest.questions.length}
+                                </p>
+                            </div>
                         </div>
-                        <div className="w-full md:w-64 bg-[#0f172a]/40 rounded-full h-1.5 overflow-hidden border border-white/5">
-                            <div
-                                className="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.4)]"
-                                style={{ width: `${progressPercentage}%` }}
-                            ></div>
-                        </div>
+                        {timeLeft !== null && (
+                            <div className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-mono font-bold ${timeLeft < 60 ? 'bg-red-500/10 text-red-500' : 'bg-slate-800 text-slate-400'}`}>
+                                <ClockIcon className="w-3 h-3" />
+                                {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Question Content Box */}
-                    <div className="bg-[#121826]/10 border border-white/10 rounded-[1.5rem] p-8 md:p-10 shadow-xl">
-                        <div className="mb-8 flex items-baseline gap-2">
-                            <h3 className="text-xl md:text-2xl font-bold text-white leading-relaxed">
+                    {/* Simple Progress Bar */}
+                    <div className="h-0.5 w-full bg-slate-800/50 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-blue-500 transition-all duration-500 ease-out"
+                            style={{ width: `${progressPercentage}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Compact Question Area */}
+                    <div key={currentQuestionIndex} className="bg-[#0f172a]/40 border border-white/5 rounded-2xl p-8 shadow-sm animate-fade-in">
+                        <div className="mb-8">
+                            <span className="text-[10px] font-bold text-blue-500/60 uppercase tracking-widest mb-2 block">
+                                {currentQuestion.points} {currentQuestion.points === 1 ? 'bod' : (currentQuestion.points >= 2 && currentQuestion.points <= 4 ? 'body' : 'bodov')}
+                            </span>
+                            <h3 className="text-xl md:text-2xl font-semibold text-slate-100 leading-snug">
                                 {currentQuestion.question}
                             </h3>
-                            <span className="text-slate-500 text-sm font-bold">({currentQuestion.points} {currentQuestion.points === 1 ? 'bod' : 'body'})</span>
                         </div>
 
-                        {/* Answers / Input */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {currentQuestion.type === 'OPEN' ? (
                                 <textarea
                                     value={answers[currentQuestion.questionId] || ""}
                                     onChange={(e) => handleAnswer(currentQuestion.questionId, e.target.value)}
-                                    className="w-full p-6 rounded-2xl bg-[#0a0f1a]/60 border border-white/10 text-slate-100 focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none text-base resize-none placeholder:text-slate-700 block"
-                                    placeholder="Sem napíšte svoju odpoveď..."
-                                    rows={5}
+                                    className="w-full p-6 rounded-xl bg-slate-950/30 border border-white/5 text-slate-300 focus:border-blue-500/30 transition-all outline-none text-base resize-none placeholder:text-slate-800 block min-h-[180px]"
+                                    placeholder="Vaša odpoveď..."
                                 />
                             ) : (
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-1 gap-2.5">
                                     {currentQuestion.answers.map((ans) => (
                                         <label
                                             key={ans.answerId}
-                                            className={`group/opt flex items-center p-5 rounded-2xl cursor-pointer transition-all duration-200 border ${answers[currentQuestion.questionId] === ans.answerId
-                                                ? 'bg-blue-600/10 border-blue-500/40'
-                                                : 'bg-[#0a0f1a]/40 border-white/5 hover:border-white/10 hover:bg-[#0a0f1a]/60'
+                                            className={`group/opt flex items-center p-4 rounded-xl cursor-pointer transition-all border ${answers[currentQuestion.questionId] === ans.answerId
+                                                ? 'bg-blue-600/5 border-blue-500/40'
+                                                : 'bg-transparent border-white/5 hover:border-white/10'
                                                 }`}
                                         >
                                             <input
@@ -376,15 +391,15 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                                                 onChange={() => handleAnswer(currentQuestion.questionId, ans.answerId)}
                                                 className="hidden"
                                             />
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-5 transition-all duration-200 ${answers[currentQuestion.questionId] === ans.answerId
-                                                ? 'bg-white border-white'
-                                                : 'border-white/5 group-hover/opt:border-slate-600'
+                                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-4 transition-all ${answers[currentQuestion.questionId] === ans.answerId
+                                                ? 'bg-blue-500 border-blue-500'
+                                                : 'border-slate-700'
                                                 }`}>
                                                 {answers[currentQuestion.questionId] === ans.answerId && (
-                                                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-white rounded-full"></div>
                                                 )}
                                             </div>
-                                            <span className={`text-lg font-medium transition-colors ${answers[currentQuestion.questionId] === ans.answerId ? 'text-white' : 'text-slate-400 group-hover/opt:text-slate-200'}`}>
+                                            <span className={`text-sm font-medium transition-colors ${answers[currentQuestion.questionId] === ans.answerId ? 'text-white' : 'text-slate-400'}`}>
                                                 {ans.text}
                                             </span>
                                         </label>
@@ -394,61 +409,52 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                         </div>
                     </div>
 
-                    {/* Navigation Bar */}
-                    <div className="flex justify-between items-center px-1">
+                    {/* Minimal Navigation */}
+                    <div className="flex justify-between items-center pt-2">
                         <button
                             onClick={handlePrevQuestion}
                             disabled={currentQuestionIndex === 0}
-                            className={`flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold transition-all duration-300 ${currentQuestionIndex === 0
-                                ? 'opacity-0 pointer-events-none'
-                                : 'bg-[#0f172a]/40 hover:bg-[#0f172a] border border-white/5 text-slate-400 hover:text-white'
-                                }`}
+                            className={`flex items-center gap-2 text-slate-500 font-bold uppercase text-[10px] tracking-widest hover:text-slate-300 transition-all ${currentQuestionIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
                         >
-                            <ArrowLeftIcon className="h-4 w-4" />
+                            <ArrowLeftIcon className="h-3 w-3" />
                             Späť
                         </button>
 
-                        {currentQuestionIndex < activeTest.questions.length - 1 ? (
-                            <button
-                                onClick={handleNextQuestion}
-                                className="flex items-center gap-2 px-10 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all active:scale-[0.98] group shadow-lg shadow-blue-900/20"
-                            >
-                                Ďalej
-                                <ArrowRightIcon className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => submitTest()}
-                                disabled={submitting}
-                                className="flex items-center gap-2 px-10 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-blue-900/30"
-                            >
-                                {submitting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <>
-                                        Odovzdať test
-                                        <CloudArrowUpIcon className="h-5 w-5" />
-                                    </>
-                                )}
-                            </button>
-                        )}
+                        <div className="flex gap-3">
+                            {currentQuestionIndex < activeTest.questions.length - 1 ? (
+                                <button
+                                    onClick={handleNextQuestion}
+                                    className="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-widest transition-all shadow-sm"
+                                >
+                                    Ďalej
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => submitTest()}
+                                    disabled={submitting}
+                                    className="px-8 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-widest transition-all shadow-sm"
+                                >
+                                    {submitting ? 'Odosielam...' : 'Dokončiť'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Fullscreen Warning */}
+                {/* Compact Warning Overlay */}
                 {showFullscreenWarning && !submitting && (
-                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl animate-fade-in">
-                        <div className="bg-slate-900 border border-red-500/30 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden p-10 text-center">
-                            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl mx-auto mb-6 flex items-center justify-center border border-red-500/20">
-                                <ArrowLeftIcon className="w-8 h-8" />
+                    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-sm animate-fade-in">
+                        <div className="max-w-sm w-full bg-slate-900 border border-white/5 rounded-2xl p-8 text-center space-y-6">
+                            <ExclamationTriangleIcon className="w-8 h-8 text-red-500 mx-auto" />
+                            <div className="space-y-2">
+                                <h3 className="text-lg font-bold text-white uppercase tracking-tight">Detegované porušenie</h3>
+                                <p className="text-slate-500 text-sm">Opustili ste režim testovania. Prosím, vráťte sa.</p>
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">DETEKCOVANÉ PORUŠЕННЯ!</h3>
-
                             <button
                                 onClick={enterFullscreen}
-                                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all"
+                                className="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
                             >
-                                Vrátiť sa до тесту
+                                Pokračovať
                             </button>
                         </div>
                     </div>
@@ -459,47 +465,44 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
 
     if (result) {
         return (
-            <div className="animate-fade-in w-full max-w-6xl py-2">
-                <div className="bg-[#121826]/10 border border-white/10 rounded-[1.5rem] p-6 sm:p-12 md:p-16 shadow-xl relative overflow-hidden flex flex-col items-center text-center">
-                    {/* Subtle Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-500/[0.02] pointer-events-none"></div>
-
-                    {/* Success Icon */}
-                    <div className="relative mb-6">
-                        <div className="absolute inset-0 bg-emerald-500/10 blur-xl rounded-full scale-110"></div>
-                        <div className="relative w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                            <CheckIcon className="w-12 h-12 text-white stroke-[3]" />
-                        </div>
+            <div className="animate-fade-in w-full py-12">
+                <div className="w-full bg-slate-900 border border-white/5 rounded-3xl p-10 flex flex-col items-center text-center shadow-lg">
+                    {/* Status Badge */}
+                    <div className="mb-8">
+                        {result.cheated ? (
+                            <div className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-md">
+                                <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest">Neplatný test</span>
+                            </div>
+                        ) : (
+                            <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                                <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Test vyhodnotený</span>
+                            </div>
+                        )}
                     </div>
 
-                    {result.cheated && (
-                        <div className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full flex items-center gap-2">
-                            <ExclamationTriangleIcon className="w-4 h-4 text-red-500" />
-                            <span className="text-red-500 text-xs font-bold uppercase tracking-wider">Zistené porušenie pravidiel</span>
-                        </div>
-                    )}
-                    {/* Text Content */}
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">
-                        Test dokončený!
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                        {result.cheated ? 'Test bol zrušený' : 'Test úspešne dokončený'}
                     </h2>
-                    <p className="text-slate-500 text-sm font-medium mb-8">Váš výsledok je:</p>
+                    <p className="text-slate-500 text-sm mb-10 leading-relaxed">
+                        {result.cheated ? 'Bolo detegované neoprávnené správanie (pokus o spísanie). Váš test bol zrušený.' : 'Vaše odpovede boli úspešne spracované.'}
+                    </p>
 
-                    {/* Score Display */}
-                    <div className="flex items-baseline gap-2 mb-10">
-                        <span className="text-5xl font-bold text-amber-400">
-                            {result.score}
-                        </span>
-                        <span className="text-2xl font-bold text-slate-400">
-                            / {result.total} bodov
-                        </span>
+                    {/* Simple Score */}
+                    <div className="flex flex-col items-center gap-1 mb-12">
+                        <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Váš výsledok</span>
+                        <div className="flex items-baseline gap-2">
+                            <span className={`text-6xl font-bold ${result.cheated ? 'text-red-500' : 'text-blue-500'}`}>
+                                {result.score}
+                            </span>
+                            <span className="text-2xl font-bold text-slate-800">/ {result.total}</span>
+                        </div>
                     </div>
 
-                    {/* Return Button */}
                     <button
                         onClick={handleReturnToList}
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-10 rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-900/20 relative z-10 text-sm"
+                        className="max-w-xs w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all text-xs uppercase tracking-widest"
                     >
-                        Späť na zoznam testov
+                        Vrátiť sa na zoznam
                     </button>
                 </div>
             </div>
@@ -517,7 +520,7 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
             </div>
 
             {tests.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                     {tests.map((test) => {
                         const result = userStats?.testStats?.detailedResults?.find(r => r.testId === test.id);
                         const isCompleted = !!result || completedTests.has(test.id);
@@ -591,7 +594,6 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
         </div>
     );
 };
-// <-- ЗДЕСЬ ДОБАВЛЕНА НЕДОСТАЮЩАЯ СКОБКА
 
 const ContactsContent = ({ beigeTextColor, currentUser }) => {
     const [message, setMessage] = useState({

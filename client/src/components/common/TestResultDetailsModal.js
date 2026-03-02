@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import authHeader from '../../services/auth-header';
-import { CheckCircleIcon } from '../common/Icons';
+import { CheckCircleIcon, ExclamationTriangleIcon, QuestionMarkCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 

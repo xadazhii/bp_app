@@ -69,7 +69,7 @@ const Profile = () => {
     const [testResultViewId, setTestResultViewId] = useState(null);
     const [isTesting, setIsTesting] = useState(false);
 
-    const loadStats = (userId) => {
+    const loadStats = React.useCallback((userId) => {
         setStatsLoading(true);
         UserService.getUserStats(userId)
             .then(response => {
@@ -81,7 +81,22 @@ const Profile = () => {
             .finally(() => {
                 setStatsLoading(false);
             });
-    };
+    }, []);
+
+    const handleUpdateStats = React.useCallback(() => {
+        if (currentUser?.id) {
+            loadStats(currentUser.id);
+        }
+    }, [currentUser?.id, loadStats]);
+
+    const handleTestingStatusChange = React.useCallback((status) => {
+        setIsTesting(status);
+        EventBus.dispatch("isTesting", status);
+    }, []);
+
+    const handleViewResult = React.useCallback((id) => {
+        setTestResultViewId(id);
+    }, []);
 
     useEffect(() => {
         const user = AuthService.getCurrentUser();
@@ -92,7 +107,7 @@ const Profile = () => {
             setUserReady(true);
             loadStats(user.id);
         }
-    }, []);
+    }, [loadStats]);
 
     const handleViewClassmates = async () => {
         setClassmatesLoading(true);
@@ -138,6 +153,7 @@ const Profile = () => {
                     classmatesLoading={classmatesLoading}
                     profileImage={profileImage}
                     onImageChange={handleImageChange}
+                    setCurrentPage={setCurrentPage}
                 />;
             case 'learning':
                 return <LearningContent beigeTextColor={beigeTextColor} onUpdate={() => loadStats(currentUser.id)} setModal={setModal} />;
@@ -146,16 +162,21 @@ const Profile = () => {
             case 'tests':
                 return <TestsContentPage
                     beigeTextColor={beigeTextColor}
-                    onUpdate={() => loadStats(currentUser.id)}
+                    onUpdate={handleUpdateStats}
                     setModal={setModal}
-                    onTestingStatusChange={setIsTesting}
+                    onTestingStatusChange={handleTestingStatusChange}
                     userStats={userStats}
-                    onViewResult={(id) => setTestResultViewId(id)}
+                    onViewResult={handleViewResult}
                 />;
             case 'calendar':
                 return <CalendarContent beigeTextColor={beigeTextColor} />;
             case 'achievements':
-                return <AchievementsContent stats={userStats} statsLoading={statsLoading} beigeTextColor={beigeTextColor} />;
+                return <AchievementsContent
+                    stats={userStats}
+                    statsLoading={statsLoading}
+                    beigeTextColor={beigeTextColor}
+                    onViewResult={handleViewResult}
+                />;
             case 'notes':
                 return <NotesContent beigeTextColor={beigeTextColor} setModal={setModal} />;
             case 'settings':
@@ -175,95 +196,100 @@ const Profile = () => {
                     beigeTextColor={beigeTextColor}
                     onViewClassmates={handleViewClassmates}
                     classmatesLoading={classmatesLoading}
+                    profileImage={profileImage}
+                    onImageChange={handleImageChange}
+                    setCurrentPage={setCurrentPage}
                 />;
         }
     };
 
     return (
         <div className="relative flex min-h-screen bg-slate-900 font-sans text-slate-200">
-            <aside
-                className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0f172a]/80 flex flex-col p-4 border-r border-white/5 shadow-xl
-                       transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
-                       ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${isTesting ? 'hidden md:hidden' : ''}`}
-            >
-                <div className="text-2xl font-bold mb-8 text-center" style={{ color: beigeTextColor }}>
-                    Portál študenta
-                </div>
-                <nav className="flex-grow space-y-0.5 mt-2 overflow-y-auto pr-2">
-                    <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Môj profil</div>
-                    <button
-                        onClick={() => { setCurrentPage('overview'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'overview' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <UserIcon className="mr-3 text-current w-5 h-5" /> Prehľad profilu
-                    </button>
+            {!isTesting && (
+                <aside
+                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0f172a]/80 flex flex-col p-4 border-r border-white/5 shadow-xl
+                           transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
+                           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                >
+                    <div className="text-2xl font-bold mb-8 text-center" style={{ color: beigeTextColor }}>
+                        Portál študenta
+                    </div>
+                    <nav className="flex-grow space-y-0.5 mt-2 overflow-y-auto pr-2">
+                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Môj profil</div>
+                        <button
+                            onClick={() => { setCurrentPage('overview'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'overview' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <UserIcon className="mr-3 text-current w-5 h-5" /> Prehľad profilu
+                        </button>
 
-                    <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Vzdelávanie</div>
-                    <button
-                        onClick={() => { setCurrentPage('learning'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'learning' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <BookOpenIcon className="mr-3 text-current w-5 h-5" /> Učenie
-                    </button>
-                    <button
-                        onClick={() => { setCurrentPage('simulation'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'simulation' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <TerminalIcon className="mr-3 text-current w-5 h-5" /> Simulácia
-                    </button>
-                    <button
-                        onClick={() => { setCurrentPage('tests'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'tests' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <ChartBarIcon className="mr-3 text-current w-5 h-5" /> Testy
-                    </button>
+                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Vzdelávanie</div>
+                        <button
+                            onClick={() => { setCurrentPage('learning'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'learning' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <BookOpenIcon className="mr-3 text-current w-5 h-5" /> Učenie
+                        </button>
+                        <button
+                            onClick={() => { setCurrentPage('simulation'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'simulation' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <TerminalIcon className="mr-3 text-current w-5 h-5" /> Simulácia
+                        </button>
+                        <button
+                            onClick={() => { setCurrentPage('tests'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'tests' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <ChartBarIcon className="mr-3 text-current w-5 h-5" /> Testy
+                        </button>
 
-                    <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Zoznam</div>
-                    <button
-                        onClick={() => { setCurrentPage('calendar'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'calendar' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <CalendarIcon className="mr-3 text-current w-5 h-5" /> Kalendár
-                    </button>
-                    <button
-                        onClick={() => { setCurrentPage('achievements'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'achievements' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <AwardIcon className="mr-3 text-current w-5 h-5" /> Úspechy
-                    </button>
-                    <button
-                        onClick={() => { setCurrentPage('notes'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'notes' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <NoteIcon className="mr-3 text-current w-5 h-5" /> Poznámky
-                    </button>
+                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Prehľad</div>
+                        <button
+                            onClick={() => { setCurrentPage('calendar'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'calendar' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <CalendarIcon className="mr-3 text-current w-5 h-5" /> Kalendár
+                        </button>
+                        <button
+                            onClick={() => { setCurrentPage('achievements'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'achievements' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <AwardIcon className="mr-3 text-current w-5 h-5" /> Úspechy
+                        </button>
+                        <button
+                            onClick={() => { setCurrentPage('notes'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'notes' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <NoteIcon className="mr-3 text-current w-5 h-5" /> Poznámky
+                        </button>
 
-                    <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Účet</div>
-                    <button
-                        onClick={() => { setCurrentPage('settings'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'settings' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <CogIcon className="mr-3 text-current w-5 h-5" /> Nastavenia
-                    </button>
-                    <button
-                        onClick={() => { setCurrentPage('contacts'); setSidebarOpen(false); }}
-                        className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'contacts' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
-                    >
-                        <EnvelopeIcon className="mr-3 text-current w-5 h-5" /> Kontakty
-                    </button>
+                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Účet</div>
+                        <button
+                            onClick={() => { setCurrentPage('settings'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'settings' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <CogIcon className="mr-3 text-current w-5 h-5" /> Nastavenia
+                        </button>
+                        <button
+                            onClick={() => { setCurrentPage('contacts'); setSidebarOpen(false); }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'contacts' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                        >
+                            <EnvelopeIcon className="mr-3 text-current w-5 h-5" /> Kontakty
+                        </button>
 
-                    <div className="my-2 border-t border-white/5 mx-2"></div>
-                    <button
-                        onClick={() => {
-                            EventBus.dispatch("logout");
-                            setRedirect("/home");
-                        }}
-                        className="w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-red-400 hover:bg-red-900/30 hover:text-red-300 text-[16.5px]"
-                    >
-                        <LogoutIcon className="mr-3 text-current w-5 h-5" /> Odhlásiť sa
-                    </button>
-                </nav>
-            </aside>
+                        <div className="my-2 border-t border-white/5 mx-2"></div>
+                        <button
+                            onClick={() => {
+                                EventBus.dispatch("logout");
+                                setRedirect("/home");
+                            }}
+                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-red-400 hover:bg-red-900/30 hover:text-red-300 text-[16.5px]`}
+                        >
+                            <LogoutIcon className="mr-3 text-current w-5 h-5" /> Odhlášiť sa
+                        </button>
+                    </nav>
+                </aside>
+            )}
 
             {isSidebarOpen && (
                 <div
@@ -283,19 +309,21 @@ const Profile = () => {
                 )
             }
 
-            <div className="flex flex-col flex-1">
-                <header className="sticky top-0 bg-slate-800/50 backdrop-blur-sm p-4 border-b border-slate-700 md:hidden z-10 flex items-center">
-                    <button onClick={() => setSidebarOpen(true)} className="text-slate-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    <h1 className="text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
-                        Portál študenta
-                    </h1>
-                </header>
+            <div className={`flex flex-col flex-1 ${isTesting ? 'h-screen w-full overflow-hidden' : ''}`}>
+                {!isTesting && (
+                    <header className="sticky top-0 bg-slate-800/50 backdrop-blur-sm p-4 border-b border-slate-700 md:hidden z-10 flex items-center">
+                        <button onClick={() => setSidebarOpen(true)} className="text-slate-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <h1 className="text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
+                            Portál študenta
+                        </h1>
+                    </header>
+                )}
 
-                <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+                <main className={`flex-1 overflow-y-auto ${isTesting ? 'p-0' : 'p-4 sm:p-8'}`}>
                     {renderContent()}
                 </main>
             </div>

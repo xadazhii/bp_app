@@ -10,12 +10,6 @@ import BoardAdmin from "./components/board-admin.component";
 import Simulation from "./components/simulation.component";
 import EventBus from "./common/EventBus";
 
-const HomeIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-);
-
 const UserIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -48,6 +42,7 @@ class App extends Component {
         this.state = {
             showAdminBoard: false,
             currentUser: undefined,
+            isTesting: false,
         };
     }
 
@@ -74,11 +69,16 @@ class App extends Component {
                 });
             }
         });
+
+        EventBus.on("isTesting", (status) => {
+            this.setState({ isTesting: status });
+        });
     }
 
     componentWillUnmount() {
         EventBus.remove("logout");
         EventBus.remove("login");
+        EventBus.remove("isTesting");
     }
 
     logOut() {
@@ -90,7 +90,7 @@ class App extends Component {
     }
 
     render() {
-        const { currentUser, showAdminBoard } = this.state;
+        const { currentUser, showAdminBoard, isTesting } = this.state;
 
         const navLinkStyle = {
             color: '#000000',
@@ -104,43 +104,45 @@ class App extends Component {
 
         return (
             <div>
-                <nav className="flex items-center justify-between px-3 sm:px-4 py-3" style={navbarStyle}>
-                    <div className="flex items-center gap-3 sm:gap-6">
-                        <a href="https://www.fei.stuba.sk/" className="flex-shrink-0" style={navLinkStyle} target="_blank" rel="noopener noreferrer">
-                            <img src="/images/STU-FEI-ancv.png" alt="Logo" className="w-24 sm:w-[120px] h-auto object-contain" />
-                        </a>
-                        <Link to={"/home"} className="text-black no-underline hover:text-blue-600 transition-colors" style={navLinkStyle}>
-                            <span className="font-bold text-base sm:text-xl border-l-2 border-black/20 pl-4 sm:pl-5">BTSSS</span>
-                        </Link>
-                    </div>
-
-                    <div className="flex items-center gap-4 sm:gap-5 ml-auto">
-                        {showAdminBoard && (
-                            <Link to={"/admin"} className="text-black no-underline hover:text-blue-600 transition-all flex items-center gap-1.5" style={{ ...navLinkStyle, fontSize: '1.05rem' }}>
-                                <ShieldIcon className="w-5 h-5" />
-                                <span className="hidden md:inline">Administrácia</span>
+                {!isTesting && (
+                    <nav className={`relative flex items-center justify-between px-3 sm:px-4 py-3 transition-all`} style={navbarStyle}>
+                        <div className={`flex items-center gap-3 sm:gap-6`}>
+                            <a href="https://www.fei.stuba.sk/" className="flex-shrink-0" style={navLinkStyle} target="_blank" rel="noopener noreferrer">
+                                <img src="/images/STU-FEI-ancv.png" alt="Logo" className="w-24 sm:w-[120px] h-auto object-contain" />
+                            </a>
+                            <Link to={"/home"} className="text-black no-underline hover:text-blue-600 transition-colors" style={navLinkStyle}>
+                                <span className="font-bold text-base sm:text-xl border-l-2 border-black/20 pl-4 sm:pl-5">BTSSS</span>
                             </Link>
-                        )}
+                        </div>
 
-                        {currentUser ? (
-                            <Link to={"/profile"} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-md no-underline" style={{ ...navLinkStyle, color: 'white', fontSize: '1rem' }}>
-                                <UserIcon className="w-5 h-5" />
-                                <span className="hidden sm:inline">Portál študenta</span>
-                            </Link>
-                        ) : (
-                            <div className="flex items-center gap-3 sm:gap-4">
-                                <Link to={"/login"} className="text-black no-underline hover:text-blue-600 transition-colors flex items-center gap-1.5" style={navLinkStyle}>
-                                    <LoginIcon className="w-5 h-5" />
-                                    <span className="hidden md:inline">Prihlásenie</span>
+                        <div className={`flex items-center gap-4 sm:gap-5 ml-auto`}>
+                            {showAdminBoard && (
+                                <Link to={"/admin"} className="text-black no-underline hover:text-blue-600 transition-all flex items-center gap-1.5" style={{ ...navLinkStyle, fontSize: '1.05rem' }}>
+                                    <ShieldIcon className="w-5 h-5" />
+                                    <span className="hidden md:inline">Administrácia</span>
                                 </Link>
-                                <Link to={"/register"} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all shadow-md no-underline flex items-center gap-2" style={{ ...navLinkStyle, color: 'white', fontSize: '1rem' }}>
-                                    <RegisterIcon className="w-5 h-5" />
-                                    <span className="hidden sm:inline">Registrácia</span>
+                            )}
+
+                            {currentUser ? (
+                                <Link to={"/profile"} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-md no-underline" style={{ ...navLinkStyle, color: 'white', fontSize: '1rem' }}>
+                                    <UserIcon className="w-5 h-5" />
+                                    <span className="hidden sm:inline">Portál študenta</span>
                                 </Link>
-                            </div>
-                        )}
-                    </div>
-                </nav>
+                            ) : (
+                                <div className="flex items-center gap-3 sm:gap-4">
+                                    <Link to={"/login"} className="text-black no-underline hover:text-blue-600 transition-colors flex items-center gap-1.5" style={navLinkStyle}>
+                                        <LoginIcon className="w-5 h-5" />
+                                        <span className="hidden md:inline">Prihlásenie</span>
+                                    </Link>
+                                    <Link to={"/register"} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all shadow-md no-underline flex items-center gap-2" style={{ ...navLinkStyle, color: 'white', fontSize: '1rem' }}>
+                                        <RegisterIcon className="w-5 h-5" />
+                                        <span className="hidden sm:inline">Registrácia</span>
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </nav>
+                )}
 
                 <div className="">
                     <Routes>
@@ -153,7 +155,7 @@ class App extends Component {
                         <Route path="/simulation" element={<Simulation />} />
                     </Routes>
                 </div>
-            </div>
+            </div >
         );
     }
 }
