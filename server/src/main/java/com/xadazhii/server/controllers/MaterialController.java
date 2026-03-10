@@ -42,17 +42,21 @@ public class MaterialController {
     private int getCurrentWeek() {
         GlobalSettings settings = globalSettingsRepository.findById(1L).orElse(null);
         if (settings == null || settings.getSemesterStartDate() == null) {
-            return 0; // default to 0 if no date is set
+            return 0;
         }
-        java.time.LocalDateTime start = settings.getSemesterStartDate();
 
-        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("Europe/Bratislava");
-        java.time.LocalDateTime now = java.time.LocalDateTime.now(tz.toZoneId());
+        java.time.ZoneId zone = java.time.ZoneId.of("Europe/Bratislava");
+        // Convert the stored LocalDateTime to ZonedDateTime assuming it was stored in
+        // Bratislava time
+        java.time.ZonedDateTime start = settings.getSemesterStartDate().atZone(zone);
+        java.time.ZonedDateTime now = java.time.ZonedDateTime.now(zone);
 
         if (now.isBefore(start)) {
             return -1;
         }
-        return (int) java.time.temporal.ChronoUnit.MINUTES.between(start, now) + 1;
+
+        long minutes = java.time.Duration.between(start, now).toMinutes();
+        return (int) minutes + 1;
     }
 
     @GetMapping
