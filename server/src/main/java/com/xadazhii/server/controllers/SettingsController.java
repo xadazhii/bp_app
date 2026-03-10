@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -51,8 +53,9 @@ public class SettingsController {
         if (payload.containsKey("semesterStartDate") && payload.get("semesterStartDate") != null
                 && !payload.get("semesterStartDate").isEmpty()) {
             LocalDate parsedDate = LocalDate.parse(payload.get("semesterStartDate"));
-            if (parsedDate.equals(LocalDate.now())) {
-                settings.setSemesterStartDate(java.time.LocalDateTime.now());
+            ZoneId bratislavaZone = ZoneId.of("Europe/Bratislava");
+            if (parsedDate.equals(LocalDate.now(bratislavaZone))) {
+                settings.setSemesterStartDate(ZonedDateTime.now(bratislavaZone).toLocalDateTime());
             } else {
                 settings.setSemesterStartDate(parsedDate.atStartOfDay());
             }
