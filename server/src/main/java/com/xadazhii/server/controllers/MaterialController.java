@@ -111,6 +111,34 @@ public class MaterialController {
         return ResponseEntity.ok(new MessageResponse("Materiál bol úспешне доданий!"));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @Transactional
+    public ResponseEntity<MessageResponse> updateMaterial(@PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam("type") String type,
+            @RequestParam(value = "weekNumber", required = false, defaultValue = "0") Integer weekNumber,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+
+        Material material = materialRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Chyba: Materiál s id " + id + " sa nenašiel."));
+
+        material.setTitle(title);
+        material.setType(type);
+        material.setWeekNumber(weekNumber != null ? weekNumber : 0);
+
+        if (file != null && !file.isEmpty()) {
+            if (material.getFilePath() != null) {
+                cloudinaryService.delete(material.getFilePath());
+            }
+            String newFileUrl = cloudinaryService.store(file);
+            material.setFilePath(newFileUrl);
+        }
+
+        materialRepository.save(material);
+        return ResponseEntity.ok(new MessageResponse("Materiál bol úspešne upravený!"));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @Transactional

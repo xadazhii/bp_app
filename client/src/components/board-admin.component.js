@@ -34,6 +34,11 @@ const PlusCircleIcon = (props) => (
         <line x1="8" y1="12" x2="16" y2="12"></line>
     </svg>
 );
+const PencilIcon = (props) => (
+    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
+);
 const TrashIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="3 6 5 5 21 5"></polyline>
@@ -772,6 +777,8 @@ export default class BoardAdmin extends Component {
             semesterStartDate: "",
             adminEmail: "",
             newMaterial: { title: "", type: "lecture", weekNumber: 1, file: null },
+            editingMaterialId: null,
+            editingMaterial: { title: "", type: "lecture", weekNumber: 1, file: null },
             selectedStudentFile: null,
             uploadingStudentList: false,
             allowedStudents: [],
@@ -963,6 +970,50 @@ export default class BoardAdmin extends Component {
             this.showMessage("Nepodarilo sa odstrániť materiál.", "error");
         }
     }
+
+    handleEditMaterialClick = (material) => {
+        this.setState({
+            editingMaterialId: material.id,
+            editingMaterial: {
+                title: material.title,
+                type: material.type || 'lecture',
+                weekNumber: material.weekNumber || 0,
+                file: null
+            }
+        });
+    };
+
+    handleCancelEditMaterial = () => {
+        this.setState({ editingMaterialId: null });
+    };
+
+    handleUpdateMaterial = async (e, materialId) => {
+        e.preventDefault();
+        const { editingMaterial } = this.state;
+        if (!editingMaterial.title) {
+            this.showMessage("Prosím, vyplňte názov.", "error");
+            return;
+        }
+        const formData = new FormData();
+        formData.append("title", editingMaterial.title);
+        formData.append("type", editingMaterial.type);
+        formData.append("weekNumber", editingMaterial.weekNumber);
+        if (editingMaterial.file) {
+            formData.append("file", editingMaterial.file);
+        }
+        try {
+            await fetch(`${API_URL}/api/materials/${materialId}`, {
+                method: "PUT",
+                headers: { ...authHeader() },
+                body: formData,
+            });
+            this.fetchMaterials();
+            this.setState({ editingMaterialId: null });
+            this.showMessage("Materiál úspešne upravený!", "success");
+        } catch {
+            this.showMessage("Nepodarilo sa upraviť materiál.", "error");
+        }
+    };
     handleStudentFileChange(e) {
         this.setState({ selectedStudentFile: e.target.files[0] });
     }
@@ -1992,29 +2043,37 @@ export default class BoardAdmin extends Component {
                                                 <li className="text-slate-400">Zatiaľ žiadne prednášky.</li>
                                             ) : (
                                                 filteredLectures.map((material) => (
-                                                    <li key={material.id} className="flex items-center justify-between p-3 bg-[#0f172a] rounded-lg shadow-sm border border-white/5">
-                                                        <span className="text-slate-100">
-                                                            {material.title}
-                                                            {![0, 13, 14].includes(material.weekNumber || 0) && (
-                                                                <span className="text-sm text-slate-400 ml-2">(Týždeň: {material.weekNumber || 0})</span>
-                                                            )}
-                                                        </span>
-                                                        <div className="flex items-center space-x-2">
-                                                            <a
-                                                                href={material.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                                                            >
-                                                                Stiahnuť
-                                                            </a>
-                                                            <button
-                                                                onClick={() => this.handleDeleteMaterial(material.id)}
-                                                                className="bg-red-600/90 hover:bg-red-600 text-white font-bold py-1 px-2.5 rounded-lg flex items-center text-[10px] uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md"
-                                                            >
-                                                                <TrashIcon className="w-3 h-3 mr-1" />
-                                                            </button>
-                                                        </div>
+                                                    <li key={material.id} className="flex flex-col sm:flex-row items-center justify-between p-3 bg-[#0f172a] rounded-lg shadow-sm border border-white/5 gap-2 sm:gap-0">
+                                                        {editingMaterialId === material.id ? (
+                                                            <form onSubmit={(e) => this.handleUpdateMaterial(e, material.id)} className="w-full flex items-center space-x-2">
+                                                                <input type="text" value={editingMaterial.title} onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, title: e.target.value } })} className="flex-1 px-2 py-1 bg-[#15203d] text-white border border-white/10 rounded" />
+                                                                <input type="number" min="0" max="14" value={editingMaterial.weekNumber} onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, weekNumber: parseInt(e.target.value) || 0 } })} className="w-16 px-2 py-1 bg-[#15203d] text-white border border-white/10 rounded" />
+                                                                <input type="file" onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, file: e.target.files[0] } })} className="text-white text-sm w-48" />
+                                                                <button type="submit" className="bg-emerald-600 text-white px-3 py-1 rounded text-sm hover:bg-emerald-700 whitespace-nowrap">Uložiť</button>
+                                                                <button type="button" onClick={this.handleCancelEditMaterial} className="bg-slate-600 text-white px-3 py-1 rounded text-sm hover:bg-slate-700 whitespace-nowrap">Zrušiť</button>
+                                                            </form>
+                                                        ) : (
+                                                            <>
+                                                                <span className="text-slate-100 w-full sm:w-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                    {material.title}
+                                                                    {![0, 13, 14].includes(material.weekNumber || 0) && (
+                                                                        <span className="text-sm text-slate-400 ml-2">(Týždeň: {material.weekNumber || 0})</span>
+                                                                    )}
+                                                                </span>
+                                                                <div className="flex items-center space-x-2 w-full sm:w-auto justify-end shrink-0">
+                                                                    <button onClick={() => this.handleEditMaterialClick(material)} className="bg-amber-500/90 hover:bg-amber-500 text-white font-bold p-1.5 rounded-lg flex items-center shrink-0 transition-all duration-200">
+                                                                        <PencilIcon className="w-4 h-4" />
+                                                                    </button>
+                                                                    <a href={material.url} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white font-semibold py-1.5 px-3 rounded-lg hover:bg-blue-700 shrink-0 transition-colors duration-200 text-sm">
+                                                                        Stiahnuť
+                                                                    </a>
+                                                                    <button onClick={() => this.handleDeleteMaterial(material.id)} className="bg-red-600/90 hover:bg-red-600 text-white font-bold py-1 px-2.5 rounded-lg flex items-center text-[10px] shrink-0 uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md">
+                                                                        <TrashIcon className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+                                                                        <span className="hidden sm:inline">Vymazať</span>
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </li>
                                                 ))
                                             )}
@@ -2027,29 +2086,37 @@ export default class BoardAdmin extends Component {
                                                 <li className="text-slate-400">Zatiaľ žiadne cvičenia.</li>
                                             ) : (
                                                 filteredSeminars.map((material) => (
-                                                    <li key={material.id} className="flex items-center justify-between p-3 bg-[#0f172a] rounded-lg shadow-sm border border-white/5">
-                                                        <span className="text-slate-100">
-                                                            {material.title}
-                                                            {![0, 13, 14].includes(material.weekNumber || 0) && (
-                                                                <span className="text-sm text-slate-400 ml-2">(Týždeň: {material.weekNumber || 0})</span>
-                                                            )}
-                                                        </span>
-                                                        <div className="flex items-center space-x-2">
-                                                            <a
-                                                                href={material.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                                                            >
-                                                                Stiahnuť
-                                                            </a>
-                                                            <button
-                                                                onClick={() => this.handleDeleteMaterial(material.id)}
-                                                                className="bg-red-600/90 hover:bg-red-600 text-white font-bold py-1 px-2.5 rounded-lg flex items-center text-[10px] uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md"
-                                                            >
-                                                                <TrashIcon className="w-3 h-3 mr-1" />
-                                                            </button>
-                                                        </div>
+                                                    <li key={material.id} className="flex flex-col sm:flex-row items-center justify-between p-3 bg-[#0f172a] rounded-lg shadow-sm border border-white/5 gap-2 sm:gap-0">
+                                                        {editingMaterialId === material.id ? (
+                                                            <form onSubmit={(e) => this.handleUpdateMaterial(e, material.id)} className="w-full flex items-center space-x-2">
+                                                                <input type="text" value={editingMaterial.title} onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, title: e.target.value } })} className="flex-1 px-2 py-1 bg-[#15203d] text-white border border-white/10 rounded" />
+                                                                <input type="number" min="0" max="14" value={editingMaterial.weekNumber} onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, weekNumber: parseInt(e.target.value) || 0 } })} className="w-16 px-2 py-1 bg-[#15203d] text-white border border-white/10 rounded" />
+                                                                <input type="file" onChange={(e) => this.setState({ editingMaterial: { ...editingMaterial, file: e.target.files[0] } })} className="text-white text-sm w-48" />
+                                                                <button type="submit" className="bg-emerald-600 text-white px-3 py-1 rounded text-sm hover:bg-emerald-700 whitespace-nowrap">Uložiť</button>
+                                                                <button type="button" onClick={this.handleCancelEditMaterial} className="bg-slate-600 text-white px-3 py-1 rounded text-sm hover:bg-slate-700 whitespace-nowrap">Zrušiť</button>
+                                                            </form>
+                                                        ) : (
+                                                            <>
+                                                                <span className="text-slate-100 w-full sm:w-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                    {material.title}
+                                                                    {![0, 13, 14].includes(material.weekNumber || 0) && (
+                                                                        <span className="text-sm text-slate-400 ml-2">(Týždeň: {material.weekNumber || 0})</span>
+                                                                    )}
+                                                                </span>
+                                                                <div className="flex items-center space-x-2 w-full sm:w-auto justify-end shrink-0">
+                                                                    <button onClick={() => this.handleEditMaterialClick(material)} className="bg-amber-500/90 hover:bg-amber-500 text-white font-bold p-1.5 rounded-lg flex items-center shrink-0 transition-all duration-200">
+                                                                        <PencilIcon className="w-4 h-4" />
+                                                                    </button>
+                                                                    <a href={material.url} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white font-semibold py-1.5 px-3 rounded-lg hover:bg-blue-700 shrink-0 transition-colors duration-200 text-sm">
+                                                                        Stiahnuť
+                                                                    </a>
+                                                                    <button onClick={() => this.handleDeleteMaterial(material.id)} className="bg-red-600/90 hover:bg-red-600 text-white font-bold py-1 px-2.5 rounded-lg flex items-center text-[10px] shrink-0 uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md">
+                                                                        <TrashIcon className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+                                                                        <span className="hidden sm:inline">Vymazať</span>
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </li>
                                                 ))
                                             )}
