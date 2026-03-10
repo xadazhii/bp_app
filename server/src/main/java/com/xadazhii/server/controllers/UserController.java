@@ -5,22 +5,28 @@ import com.xadazhii.server.models.Role;
 import com.xadazhii.server.models.TestResult;
 import com.xadazhii.server.models.User;
 import com.xadazhii.server.payload.response.MessageResponse;
+import com.xadazhii.server.repository.AllowedStudentRepository;
+import com.xadazhii.server.repository.MaterialRepository;
+import com.xadazhii.server.repository.NoteRepository;
 import com.xadazhii.server.repository.RoleRepository;
 import com.xadazhii.server.repository.TestResultRepository;
+import com.xadazhii.server.repository.UserProgressRepository;
 import com.xadazhii.server.repository.UserRepository;
 import com.xadazhii.server.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "https://btsss-stu-fei.netlify.app", maxAge = 3600)
+@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -36,6 +42,21 @@ public class UserController {
 
     @Autowired
     private TestResultRepository testResultRepository;
+
+    @Autowired
+    private UserProgressRepository userProgressRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private AllowedStudentRepository allowedStudentRepository;
+
+    @Value("${app.admin.email}")
+    private String adminEmail;
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -63,8 +84,13 @@ public class UserController {
     @PutMapping("/users/{userId}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> request) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
+
+        if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Cannot change role of main administrator."));
+        }
 
         String strRole = request.get("role");
         Set<Role> roles = new HashSet<>();
@@ -89,11 +115,25 @@ public class UserController {
 
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-        if (!userRepository.existsById(userId)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found."));
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
+                .orElseThrow(() -> new RuntimeException("Error: User is not found."));
+
+        if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Cannot delete main administrator."));
         }
-        userRepository.deleteById(userId);
+
+        // Delete student test results and progress first to satisfy constraints
+        testResultRepository.deleteByStudentId(userId);
+        userProgressRepository.deleteByUserId(userId);
+        noteRepository.deleteByUserId(userId);
+        materialRepository.setUploaderToNull(userId);
+
+        // Also remove from allowed list if exists
+        allowedStudentRepository.deleteByEmail(user.getEmail());
+
+        userRepository.delete(user);
         return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
     }
 
@@ -118,7 +158,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         user.setUsername(newUsername);
@@ -139,7 +179,7 @@ public class UserController {
                     .body(new MessageResponse("Error: You are not authorized to change this user's password!"));
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Error: User is not found."));
 
         String oldPassword = request.get("oldPassword");
@@ -174,7 +214,7 @@ public class UserController {
         int totalScore = userResults.stream()
                 .collect(Collectors.groupingBy(
                         result -> result.getTest().getId(),
-                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Integer::compare))))
+                        Collectors.mapping(TestResult::getScore, Collectors.maxBy(Comparator.naturalOrder()))))
                 .values().stream()
                 .mapToInt(opt -> opt.orElse(0))
                 .sum();
@@ -183,5 +223,49 @@ public class UserController {
         response.put("totalScore", totalScore);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/profile/info")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getUserInfo() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userDetails.getId()))
+                .orElseThrow(() -> new RuntimeException("Error: User not found"));
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("id", user.getId());
+        responseMap.put("username", user.getUsername());
+        responseMap.put("email", user.getEmail());
+        responseMap.put("pseudonym", user.getPseudonym());
+
+        return ResponseEntity.ok(responseMap);
+    }
+
+    @PutMapping("/profile/pseudonym")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updatePseudonym(@RequestBody Map<String, String> payload) {
+        String pseudonym = payload.get("pseudonym");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Error: Unauthorized"));
+        }
+
+        UserDetailsImpl currentUser = (UserDetailsImpl) authentication.getPrincipal();
+
+        User user = userRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
+                .orElseThrow(() -> new RuntimeException("Error: User is not found."));
+
+        user.setPseudonym(pseudonym);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Pseudonym bol aktualizovaný!"));
+    }
+
+    @GetMapping("/profile/scores/{studentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TestResult>> getStudentScores(@PathVariable @lombok.NonNull Long studentId) {
+        List<TestResult> results = testResultRepository.findByStudentId(studentId);
+        return ResponseEntity.ok(results);
     }
 }

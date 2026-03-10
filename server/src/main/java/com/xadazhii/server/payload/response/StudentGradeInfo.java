@@ -11,4 +11,6 @@ public class StudentGradeInfo {
     private String username;
     private String email;
     private Map<Long, Integer> scores;
+    private Map<Long, Boolean> cheatedMap;
+    private Map<Long, Long> resultIds;
 }

@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import { isEmail } from "validator";
 import AuthService from "../services/auth.service";
+import { withRouter } from "../common/with-router";
+import EventBus from "../common/EventBus";
 
-export default class Register extends Component {
+class Register extends Component {
     constructor(props) {
         super(props);
         this.handleRegister = this.handleRegister.bind(this);
@@ -85,10 +87,12 @@ export default class Register extends Component {
         AuthService.register(username, email, password).then(
             response => {
                 this.setState({
-                    message: response.data.message,
+                    message: response.message,
                     successful: true,
                     loading: false
                 });
+                EventBus.dispatch("login");
+                this.props.router.navigate("/profile");
             },
             error => {
                 const resMessage =
@@ -229,3 +233,5 @@ export default class Register extends Component {
         );
     }
 }
+
+export default withRouter(Register);

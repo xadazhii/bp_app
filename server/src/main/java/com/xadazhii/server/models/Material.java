@@ -43,6 +43,9 @@ public class Material {
     @CreationTimestamp
     private Instant uploadDate;
 
+    @Column(name = "week_number", nullable = false)
+    private Integer weekNumber = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploader_id")
     private User uploader;

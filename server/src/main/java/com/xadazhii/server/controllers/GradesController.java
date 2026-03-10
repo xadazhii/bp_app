@@ -44,7 +44,14 @@ public class GradesController {
                                 .getPrincipal();
                 Long currentUserId = currentUser.getId();
 
-                List<TestResult> allResults = testResultRepository.findAll();
+                List<User> nonAdminUsers = userRepository.findAll().stream()
+                                .filter(u -> u.getRoles().stream().noneMatch(r -> r.getName() == ERole.ROLE_ADMIN))
+                                .collect(Collectors.toList());
+                java.util.Set<Long> nonAdminIds = nonAdminUsers.stream().map(User::getId).collect(Collectors.toSet());
+
+                List<TestResult> allResults = testResultRepository.findAll().stream()
+                                .filter(r -> r.getStudent() != null && nonAdminIds.contains(r.getStudent().getId()))
+                                .collect(Collectors.toList());
 
                 // 1. Calculate Test Points
                 // 1. Calculate Test Points (Max score per test, sum of maxes)
@@ -56,7 +63,8 @@ public class GradesController {
                                                 Collectors.toMap(
                                                                 result -> result.getTest().getId(),
                                                                 TestResult::getScore,
-                                                                Math::max)));
+                                                                (s1, s2) -> Math.max(s1 != null ? s1 : 0,
+                                                                                s2 != null ? s2 : 0))));
 
                 // 2. Calculate Learning Points (Lectures: 2 pts, Seminars: 3 pts)
                 List<Object[]> learningCounts = userProgressRepository.countCompletedLearningMaterialsByUserAndType();
@@ -64,6 +72,8 @@ public class GradesController {
 
                 for (Object[] row : learningCounts) {
                         Long userId = (Long) row[0];
+                        if (!nonAdminIds.contains(userId))
+                                continue;
                         String type = (String) row[1];
                         long count = (Long) row[2];
 
@@ -77,13 +87,10 @@ public class GradesController {
                         learningPointsByUser.put(userId, learningPointsByUser.getOrDefault(userId, 0) + points);
                 }
 
-                // 3. Get all relevant User IDs
-                java.util.Set<Long> allUserIds = new java.util.HashSet<>();
-                allUserIds.addAll(bestTestScores.keySet());
-                allUserIds.addAll(learningPointsByUser.keySet());
-
-                List<Map<String, Object>> leaderboard = allUserIds.stream()
-                                .map(userId -> {
+                // 3. Get all relevant User IDs (All non-admin students)
+                List<Map<String, Object>> leaderboard = nonAdminUsers.stream()
+                                .map(user -> {
+                                        Long userId = user.getId();
                                         // Calculate total points
                                         Map<Long, Integer> userTestScores = bestTestScores.getOrDefault(userId,
                                                         java.util.Collections.emptyMap());
@@ -92,31 +99,37 @@ public class GradesController {
                                         int learningTotal = learningPointsByUser.getOrDefault(userId, 0);
                                         int totalPoints = testTotal + learningTotal;
 
-                                        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
-                                                        .orElse(null);
-                                        if (user == null)
-                                                return null;
-
                                         Map<String, Object> map = new java.util.HashMap<>();
                                         boolean isMe = userId.equals(currentUserId);
 
                                         if (isMe) {
-                                                map.put("username", user.getUsername() + " (Vy)");
+                                                String displayName = (user.getPseudonym() != null
+                                                                && !user.getPseudonym().isBlank())
+                                                                                ? user.getPseudonym()
+                                                                                : user.getUsername();
+                                                map.put("username", displayName + " (Vy)");
+                                                map.put("rawPseudonym", user.getPseudonym());
                                                 map.put("isCurrentUser", true);
                                         } else {
-                                                String maskedName = "Študent " + userId;
-                                                if (user.getUsername() != null && !user.getUsername().isEmpty()) {
-                                                        String[] parts = user.getUsername().split(" ");
-                                                        if (parts.length > 0) {
-                                                                maskedName = parts[0];
-                                                                if (maskedName.length() > 3) {
-                                                                        maskedName = maskedName.substring(0, 3) + "***";
-                                                                } else {
-                                                                        maskedName = maskedName + "***";
+                                                if (user.getPseudonym() != null && !user.getPseudonym().isBlank()) {
+                                                        map.put("username", user.getPseudonym());
+                                                } else {
+                                                        String maskedName = "Študent " + userId;
+                                                        if (user.getUsername() != null
+                                                                        && !user.getUsername().isEmpty()) {
+                                                                String[] parts = user.getUsername().split(" ");
+                                                                if (parts.length > 0) {
+                                                                        maskedName = parts[0];
+                                                                        if (maskedName.length() > 3) {
+                                                                                maskedName = maskedName.substring(0, 3)
+                                                                                                + "***";
+                                                                        } else {
+                                                                                maskedName = maskedName + "***";
+                                                                        }
                                                                 }
                                                         }
+                                                        map.put("username", maskedName);
                                                 }
-                                                map.put("username", maskedName);
                                                 map.put("isCurrentUser", false);
                                         }
                                         map.put("points", totalPoints);
@@ -136,8 +149,14 @@ public class GradesController {
         @Transactional(readOnly = true)
         public ResponseEntity<GradesSummaryResponse> getGradesSummary() {
                 List<Test> allTests = testRepository.findAll();
-                List<User> allStudents = userRepository.findAll();
-                List<TestResult> allResults = testResultRepository.findAll();
+                List<User> allStudents = userRepository.findAll().stream()
+                                .filter(u -> u.getRoles().stream().noneMatch(r -> r.getName() == ERole.ROLE_ADMIN))
+                                .collect(Collectors.toList());
+                java.util.Set<Long> nonAdminIds = allStudents.stream().map(User::getId).collect(Collectors.toSet());
+
+                List<TestResult> allResults = testResultRepository.findAll().stream()
+                                .filter(r -> r.getStudent() != null && nonAdminIds.contains(r.getStudent().getId()))
+                                .collect(Collectors.toList());
 
                 Map<Long, Map<Long, Integer>> scoresByStudent = allResults.stream()
                                 .collect(Collectors.groupingBy(
@@ -148,6 +167,14 @@ public class GradesController {
                                                                 (existingScore, newScore) -> Math.max(existingScore,
                                                                                 newScore))));
 
+                Map<Long, Map<Long, Boolean>> cheatedByStudent = allResults.stream()
+                                .collect(Collectors.groupingBy(
+                                                result -> result.getStudent().getId(),
+                                                Collectors.toMap(
+                                                                result -> result.getTest().getId(),
+                                                                TestResult::isCheated,
+                                                                (existing, replacement) -> existing || replacement)));
+
                 List<GradeTestInfo> testInfos = allTests.stream()
                                 .map(test -> {
                                         int maxScore = test.getQuestions().stream()
@@ -156,9 +183,34 @@ public class GradesController {
                                                                         .max()
                                                                         .orElse(0))
                                                         .sum();
-                                        return new GradeTestInfo(test.getId(), test.getTitle(), maxScore);
+                                        return new GradeTestInfo(test.getId(), test.getTitle(), maxScore,
+                                                        test.getWeekNumber());
                                 })
                                 .collect(Collectors.toList());
+
+                Map<Long, Map<Long, Long>> resultIdByStudent = allResults.stream()
+                                .collect(Collectors.groupingBy(
+                                                result -> result.getStudent().getId(),
+                                                Collectors.toMap(
+                                                                result -> result.getTest().getId(),
+                                                                TestResult::getId,
+                                                                (existingId, newId) -> {
+                                                                        if (existingId == null)
+                                                                                return newId;
+                                                                        if (newId == null)
+                                                                                return existingId;
+                                                                        TestResult existing = testResultRepository
+                                                                                        .findById(existingId)
+                                                                                        .orElse(null);
+                                                                        TestResult comparison = testResultRepository
+                                                                                        .findById(newId).orElse(null);
+                                                                        if (existing != null && comparison != null
+                                                                                        && existing.getScore() >= comparison
+                                                                                                        .getScore()) {
+                                                                                return existingId;
+                                                                        }
+                                                                        return newId;
+                                                                })));
 
                 List<StudentGradeInfo> studentGrades = allStudents.stream()
                                 .map(student -> new StudentGradeInfo(
@@ -166,6 +218,10 @@ public class GradesController {
                                                 student.getUsername(),
                                                 student.getEmail(),
                                                 scoresByStudent.getOrDefault(student.getId(),
+                                                                java.util.Collections.emptyMap()),
+                                                cheatedByStudent.getOrDefault(student.getId(),
+                                                                java.util.Collections.emptyMap()),
+                                                resultIdByStudent.getOrDefault(student.getId(),
                                                                 java.util.Collections.emptyMap())))
                                 .collect(Collectors.toList());
 
@@ -178,7 +234,18 @@ public class GradesController {
         public ResponseEntity<byte[]> exportGrades() {
                 try {
                         System.out.println("Exporting students to CSV...");
-                        List<TestResult> allResults = testResultRepository.findAll();
+
+                        List<User> nonAdminUsers = userRepository.findAll().stream()
+                                        .filter(u -> u.getRoles().stream()
+                                                        .noneMatch(r -> r.getName() == ERole.ROLE_ADMIN))
+                                        .collect(Collectors.toList());
+                        java.util.Set<Long> nonAdminIds = nonAdminUsers.stream().map(User::getId)
+                                        .collect(Collectors.toSet());
+
+                        List<TestResult> allResults = testResultRepository.findAll().stream()
+                                        .filter(r -> r.getStudent() != null
+                                                        && nonAdminIds.contains(r.getStudent().getId()))
+                                        .collect(Collectors.toList());
 
                         StringBuilder csv = new StringBuilder();
                         csv.append('\ufeff'); // BOM

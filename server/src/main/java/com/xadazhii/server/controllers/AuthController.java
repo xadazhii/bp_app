@@ -31,98 +31,124 @@ import com.xadazhii.server.repository.UserRepository;
 import com.xadazhii.server.security.jwt.JwtUtils;
 import com.xadazhii.server.security.services.UserDetailsImpl;
 
-@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
+@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+        @Autowired
+        AuthenticationManager authenticationManager;
 
-    @Autowired
-    UserRepository userRepository;
+        @Autowired
+        UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
+        @Autowired
+        RoleRepository roleRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
+        @Autowired
+        PasswordEncoder encoder;
 
-    @Autowired
-    JwtUtils jwtUtils;
+        @Autowired
+        JwtUtils jwtUtils;
 
-    @Autowired
-    AllowedStudentRepository allowedStudentRepository;
+        @Autowired
+        AllowedStudentRepository allowedStudentRepository;
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        @PostMapping("/signin")
+        public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+                try {
+                        Authentication authentication = authenticationManager.authenticate(
+                                        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                                                        loginRequest.getPassword()));
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        String jwt = jwtUtils.generateJwtToken(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+                        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                        List<String> roles = userDetails.getAuthorities().stream()
+                                        .map(GrantedAuthority::getAuthority)
+                                        .collect(Collectors.toList());
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
-    }
-
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-
-        if (!allowedStudentRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Registration is allowed only for students from the list."));
-        }
-
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
-
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                if (role.equals("admin")) {
-                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(adminRole);
-                } else {
-                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(userRole);
+                        return ResponseEntity.ok(new JwtResponse(jwt,
+                                        userDetails.getId(),
+                                        userDetails.getUsername(),
+                                        userDetails.getEmail(),
+                                        roles));
+                } catch (Exception e) {
+                        return ResponseEntity
+                                        .status(401)
+                                        .body(new MessageResponse("Nesprávne meno alebo heslo!"));
                 }
-            });
         }
 
-        user.setRoles(roles);
-        userRepository.save(user);
+        @PostMapping("/signup")
+        public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-    }
+                if (!allowedStudentRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
+                        return ResponseEntity
+                                        .badRequest()
+                                        .body(new MessageResponse(
+                                                        "Registration is allowed only for students from the list."));
+                }
+
+                if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+                        return ResponseEntity
+                                        .badRequest()
+                                        .body(new MessageResponse("Error: Username is already taken!"));
+                }
+
+                if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+                        return ResponseEntity
+                                        .badRequest()
+                                        .body(new MessageResponse("Error: Email is already in use!"));
+                }
+                User user = new User(signUpRequest.getUsername(),
+                                signUpRequest.getEmail(),
+                                encoder.encode(signUpRequest.getPassword()));
+
+                Set<String> strRoles = signUpRequest.getRole();
+                Set<Role> roles = new HashSet<>();
+
+                if (strRoles == null) {
+                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                } else {
+                        strRoles.forEach(role -> {
+                                if (role.equals("admin")) {
+                                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                                        .orElseThrow(() -> new RuntimeException(
+                                                                        "Error: Role is not found."));
+                                        roles.add(adminRole);
+                                } else {
+                                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                                        .orElseThrow(() -> new RuntimeException(
+                                                                        "Error: Role is not found."));
+                                        roles.add(userRole);
+                                }
+                        });
+                }
+
+                user.setRoles(roles);
+                userRepository.save(user);
+
+                // Auto-login after registration
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(),
+                                                signUpRequest.getPassword()));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String jwt = jwtUtils.generateJwtToken(authentication);
+
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                List<String> responseRoles = userDetails.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList());
+
+                return ResponseEntity.ok(new JwtResponse(jwt,
+                                userDetails.getId(),
+                                userDetails.getUsername(),
+                                userDetails.getEmail(),
+                                responseRoles));
+        }
 }

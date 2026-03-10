@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "test_results")
+@Table(name = "test_result")
 public class TestResult {
 
     @Id
@@ -30,6 +30,9 @@ public class TestResult {
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
+
+    @Column(name = "cheated", nullable = false)
+    private boolean cheated = false;
 
     @OneToMany(mappedBy = "testResult", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentAnswer> submittedAnswers = new ArrayList<>();

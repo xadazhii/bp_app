@@ -10,6 +10,7 @@ public class TestResultRequest {
     private Long studentId;
     private Long testId;
     private int score;
+    private boolean cheated;
     private List<AnswerSubmission> submissions;
 
     @Setter

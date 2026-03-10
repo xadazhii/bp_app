@@ -9,4 +9,5 @@ public class GradeTestInfo {
     private Long id;
     private String title;
     private int maxScore;
+    private Integer weekNumber;
 }

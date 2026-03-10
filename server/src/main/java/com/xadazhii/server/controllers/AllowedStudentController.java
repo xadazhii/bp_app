@@ -1,9 +1,9 @@
 package com.xadazhii.server.controllers;
 
-import com.xadazhii.server.models.AllowedStudent;
+import com.xadazhii.server.models.*;
 import com.xadazhii.server.payload.request.AllowedStudentRequest;
 import com.xadazhii.server.payload.response.MessageResponse;
-import com.xadazhii.server.repository.AllowedStudentRepository;
+import com.xadazhii.server.repository.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +18,28 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CrossOrigin(origins = {"https://btsss-stu-fei.netlify.app", "http://localhost:3000"}, maxAge = 3600)
+@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class AllowedStudentController {
 
     @Autowired
     private AllowedStudentRepository allowedStudentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TestResultRepository testResultRepository;
+
+    @Autowired
+    private UserProgressRepository userProgressRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
 
@@ -47,15 +62,29 @@ public class AllowedStudentController {
 
     @DeleteMapping("/allowed-students")
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional // ИСПРАВЛЕНИЕ: Добавлена транзакция для безопасного удаления
+    @Transactional
     public ResponseEntity<MessageResponse> deleteAllowedStudentByEmail(@RequestParam String email) {
         if (!allowedStudentRepository.existsByEmail(email)) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Student with email " + email + " not found on the allowed list."));
+                    .body(new MessageResponse(
+                            "Error: Student with email " + email + " not found on the allowed list."));
         }
+
+        // 1. Also delete the User account if they have registered
+        userRepository.findByEmail(email).ifPresent(user -> {
+            Long userId = user.getId();
+            testResultRepository.deleteByStudentId(userId);
+            userProgressRepository.deleteByUserId(userId);
+            noteRepository.deleteByUserId(userId);
+            materialRepository.setUploaderToNull(userId);
+            userRepository.delete(user);
+        });
+
+        // 2. Remove from allowed list
         allowedStudentRepository.deleteByEmail(email);
-        return ResponseEntity.ok(new MessageResponse("Student removed from the allowed list."));
+
+        return ResponseEntity.ok(new MessageResponse("Student and their account removed."));
     }
 
     @PostMapping("/students/upload")

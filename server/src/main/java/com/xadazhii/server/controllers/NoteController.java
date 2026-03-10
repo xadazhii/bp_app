@@ -89,7 +89,7 @@ public class NoteController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> deleteNote(@PathVariable Long id) {
+    public ResponseEntity<?> deleteNote(@PathVariable @lombok.NonNull Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Long userId = userDetails.getId();
@@ -107,7 +107,7 @@ public class NoteController {
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateNote(@PathVariable Long id,
+    public ResponseEntity<?> updateNote(@PathVariable @lombok.NonNull Long id,
             @RequestParam("content") String content,
             @RequestParam(value = "category", defaultValue = "Všeobecné") String category,
             @RequestParam(value = "files", required = false) org.springframework.web.multipart.MultipartFile[] files,
@@ -115,7 +115,7 @@ public class NoteController {
         try {
             Long userId = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                     .getId();
-            Note note = noteRepository.findById(id).orElseThrow();
+            Note note = noteRepository.findById(java.util.Objects.requireNonNull(id)).orElseThrow();
 
             if (!note.getUser().getId().equals(userId)) {
                 return ResponseEntity.status(403).body(new MessageResponse("Error: Unauthorized"));
