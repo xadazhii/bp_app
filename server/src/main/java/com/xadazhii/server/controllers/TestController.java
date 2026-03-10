@@ -65,7 +65,7 @@ public class TestController {
         java.time.LocalDateTime now = java.time.LocalDateTime.now(tz.toZoneId());
 
         if (now.isBefore(start)) {
-            return 0;
+            return -1;
         }
         return (int) java.time.temporal.ChronoUnit.MINUTES.between(start, now) + 1;
     }
@@ -125,12 +125,12 @@ public class TestController {
         List<TestSummaryResponse> response = tests.stream()
                 .filter(t -> {
                     Integer wn = t.getWeekNumber();
-                    if (wn == null)
+                    if (wn == null || currentWeek < 0)
                         return false;
                     if (wn == 0)
                         return true;
                     if (wn >= 1 && wn <= 12)
-                        return (wn <= currentWeek) && hasCompletedWeekMaterials(userId, wn);
+                        return hasCompletedWeekMaterials(userId, wn);
                     if (wn == 13)
                         return week12Completed;
                     if (wn == 14) {

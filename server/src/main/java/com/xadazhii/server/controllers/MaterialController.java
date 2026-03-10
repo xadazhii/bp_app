@@ -50,7 +50,7 @@ public class MaterialController {
         java.time.LocalDateTime now = java.time.LocalDateTime.now(tz.toZoneId());
 
         if (now.isBefore(start)) {
-            return 0;
+            return -1;
         }
         return (int) java.time.temporal.ChronoUnit.MINUTES.between(start, now) + 1;
     }
@@ -70,7 +70,7 @@ public class MaterialController {
 
         if (!(all && isAdmin)) {
             materials = materials.stream()
-                    .filter(m -> m.getWeekNumber() != null && m.getWeekNumber() <= currentWeek)
+                    .filter(m -> currentWeek >= 0 && m.getWeekNumber() != null && m.getWeekNumber() <= currentWeek)
                     .collect(Collectors.toList());
         }
 
