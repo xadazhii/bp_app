@@ -20,7 +20,11 @@ import java.util.stream.Collectors;
 import com.xadazhii.server.models.GlobalSettings;
 import com.xadazhii.server.repository.GlobalSettingsRepository;
 import com.xadazhii.server.repository.StudentAnswerRepository;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.security.core.Authentication;
+
+import javax.annotation.PostConstruct;
 
 @CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
@@ -54,6 +58,31 @@ public class TestController {
     @Autowired
     private StudentAnswerRepository studentAnswerRepository;
 
+    @PostConstruct
+    public void autoAssignWeekNumbersToMaterials() {
+        try {
+            List<Material> materials = materialRepository.findAll();
+            for (Material m : materials) {
+                if (m.getWeekNumber() == null || m.getWeekNumber() == 0) {
+                    // Try to guess week number from title (e.g., "pred1", "cvik12", "pred 2")
+                    String title = m.getTitle() != null ? m.getTitle() : "";
+                    Matcher matcher = Pattern.compile(".*?(\\d+).*").matcher(title);
+                    if (matcher.matches()) {
+                        int extractedWeek = Integer.parseInt(matcher.group(1));
+                        if (extractedWeek >= 1 && extractedWeek <= 14) {
+                            m.setWeekNumber(extractedWeek);
+                            materialRepository.save(m);
+                            System.out.println("DEBUG: Auto-fixed material '" + title + "' -> assigned weekNumber="
+                                    + extractedWeek);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error auto-assigning week numbers: " + e.getMessage());
+        }
+    }
+
     private int getCurrentWeek() {
         GlobalSettings settings = globalSettingsRepository.findById(1L).orElse(null);
         if (settings == null || settings.getSemesterStartDate() == null) {
@@ -79,7 +108,7 @@ public class TestController {
                 .collect(Collectors.toList());
 
         if (weekMaterials.isEmpty()) {
-            return true;
+            return false; // MUST have materials for that week to unlock
         }
         Set<Long> completedIds = userProgressRepository.findCompletedMaterialIdsByUserId(userId);
         return weekMaterials.stream().allMatch(m -> completedIds.contains(m.getId()));
