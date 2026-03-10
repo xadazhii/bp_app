@@ -45,7 +45,10 @@ public class MaterialController {
             return 0; // default to 0 if no date is set
         }
         java.time.LocalDateTime start = settings.getSemesterStartDate();
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("Europe/Bratislava");
+        java.time.LocalDateTime now = java.time.LocalDateTime.now(tz.toZoneId());
+
         if (now.isBefore(start)) {
             return 0;
         }
