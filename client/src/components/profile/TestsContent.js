@@ -1089,33 +1089,33 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                 </div>
             )}
 
-            <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <header className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-bold flex items-center" style={{ color: beigeTextColor }}>
+                    <h2 className="text-2xl sm:text-3xl font-bold flex items-center" style={{ color: beigeTextColor }}>
                         Moje poznámky
                     </h2>
                 </div>
 
                 {/* Tab Switcher - Segmented Control Style */}
-                <div className="bg-[#0f172a]/50 p-1 rounded-2xl border border-white/5 flex flex-col sm:flex-row w-full sm:w-fit gap-1 sm:gap-0">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start sm:self-center w-full sm:w-auto mt-2 sm:mt-0">
                     <button
                         onClick={() => setNotesActiveTab('write')}
-                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${notesActiveTab === 'write'
+                        className={`flex-1 flex justify-center sm:justify-start items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${notesActiveTab === 'write'
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
                             }`}
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         Nová poznámka
                     </button>
                     <button
                         onClick={() => setNotesActiveTab('browse')}
-                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${notesActiveTab === 'browse'
+                        className={`flex-1 flex justify-center sm:justify-start items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${notesActiveTab === 'browse'
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
                             }`}
                     >
-                        <ListBulletIcon className="w-4 h-4" />
+                        <ListBulletIcon className="w-4 h-4 shrink-0" />
                         Moje archívy
                     </button>
                 </div>

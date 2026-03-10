@@ -188,10 +188,8 @@ const CustomSelect = ({ options, value, onChange, placeholder, className = "" })
                             </div>
                         ))}
                     </div>
-                    {options.length > 3 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/80 to-transparent pointer-events-none rounded-b-lg border-b-2 border-blue-500/30 flex items-end justify-center pb-1">
-                            <span className="text-[9px] uppercase tracking-widest text-blue-400/70 font-bold mb-1">↑ Rolujte nadol ↓</span>
-                        </div>
+                    {options.length > 4 && (
+                        <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#0f172a] to-transparent pointer-events-none rounded-b-lg" />
                     )}
                 </div>
             )}
@@ -1437,78 +1435,77 @@ export default class BoardAdmin extends Component {
                     ))}
                 </div>
                 <aside
-                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0f172a]/80 flex flex-col p-4 border-r border-white/5 shadow-xl
-                       transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
-                       ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                    className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl
+                           transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
+                           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 >
-                    <div className="text-2xl font-bold mb-8 text-center" style={{ color: beigeTextColor }}>
+                    <div className="text-2xl font-bold mb-8 text-center mt-2 tracking-wide" style={{ color: beigeTextColor }}>
                         Administrácia
                     </div>
-                    <nav className="flex-grow space-y-0.5 mt-2 overflow-y-auto pr-2">
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Správa systému</div>
+                    <nav className="flex-grow space-y-1 mt-2 overflow-y-auto pr-2" style={{ scrollbarWidth: 'none' }}>
+                        <div className="pt-2 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Správa systému</div>
                         <button
                             onClick={() => { this.setCurrentPage("user-management"); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "user-management" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "user-management" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <UserIcon className="mr-3 text-current w-5 h-5" /> Používatelia
+                            <UserIcon className="mr-3 w-5 h-5 text-current" /> Používatelia
                         </button>
                         <button
                             onClick={() => { this.setCurrentPage("calendar-management"); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "calendar-management" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "calendar-management" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <CalendarIcon className="mr-3 text-current w-5 h-5" /> Udalosti
+                            <CalendarIcon className="mr-3 w-5 h-5 text-current" /> Udalosti
                         </button>
 
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Vzdelávanie</div>
+                        <div className="pt-6 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Vzdelávanie</div>
                         <button
                             onClick={() => { this.setCurrentPage("material-management"); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "material-management" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "material-management" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <BookOpenIcon className="mr-3 text-current w-5 h-5" /> Materiály
+                            <BookOpenIcon className="mr-3 w-5 h-5 text-current" /> Materiály
                         </button>
                         <button
                             onClick={() => { this.setCurrentPage("test-management"); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "test-management" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "test-management" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <TestIcon className="mr-3 text-current w-5 h-5" /> Testy
+                            <TestIcon className="mr-3 w-5 h-5 text-current" /> Testy
                         </button>
 
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Študenti</div>
+                        <div className="pt-6 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Študenti</div>
                         <button
                             onClick={() => { this.setCurrentPage("student-list-upload"); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "student-list-upload" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "student-list-upload" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <UploadIcon className="mr-3 text-current w-5 h-5" /> Registrácia
+                            <UploadIcon className="mr-3 w-5 h-5 text-current" /> Registrácia
                         </button>
                         <button
                             onClick={() => { this.setCurrentPage("student-grades"); this.fetchStudentGrades(); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "student-grades" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "student-grades" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <GraduationCap className="mr-3 text-current w-5 h-5" /> Hodnotenie
+                            <GraduationCap className="mr-3 w-5 h-5 text-current" /> Hodnotenie
                         </button>
                         <button
                             onClick={() => { this.setCurrentPage("progress-analysis"); this.fetchStudentGrades(); this.setState({ isSidebarOpen: false }); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === "progress-analysis" ? "bg-blue-600 shadow-lg text-white" : "hover:bg-[#15203d]/70 text-slate-300"}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === "progress-analysis" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:bg-[#1e293b]/70 hover:text-white"}`}
                         >
-                            <TrendingUpIcon className="mr-3 text-current w-5 h-5" /> Analýza progresu
+                            <TrendingUpIcon className="mr-3 w-5 h-5 text-current" /> Analýza progresu
                         </button>
 
-
-                        <div className="my-2 border-t border-white/5 mx-2"></div>
+                        <div className="my-6 border-t border-white/5 mx-3"></div>
                         <button
                             onClick={() => {
                                 localStorage.removeItem("user");
                                 window.location.href = "/login";
                             }}
-                            className="w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-red-400 hover:bg-red-900/30 hover:text-red-300 text-[16.5px]"
+                            className="w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] text-red-400 hover:bg-red-500/10 hover:text-red-300"
                         >
-                            <LogoutIcon className="mr-3 text-current w-5 h-5" /> Odhlásiť sa
+                            <LogoutIcon className="mr-3 w-5 h-5 text-current" /> Odhlásiť sa
                         </button>
                     </nav>
                 </aside>
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-black/60 z-20 md:hidden"
+                        className="fixed inset-0 bg-black/60 z-40 md:hidden"
                         onClick={() => this.setState({ isSidebarOpen: false })}
                     ></div>
                 )}
@@ -1519,7 +1516,7 @@ export default class BoardAdmin extends Component {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        <h1 className="text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
+                        <h1 className="text-lg sm:text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
                             Administrácia
                         </h1>
                     </header>
@@ -1536,7 +1533,7 @@ export default class BoardAdmin extends Component {
                                 <div className="space-y-8 animate-fade-in pb-12">
                                     <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <h2 className="text-3xl font-bold text-blue-400 truncate">Správa používateľov</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 truncate">Správa používateľov</h2>
                                         </div>
                                     </div>
 
@@ -1546,10 +1543,10 @@ export default class BoardAdmin extends Component {
                                         </div>
                                         <input
                                             type="text"
-                                            placeholder="Hľadať používateľa podľa mena alebo emailu..."
+                                            placeholder="Hľadať používateľa"
                                             value={this.state.userSearchQuery}
                                             onChange={(e) => this.setState({ userSearchQuery: e.target.value })}
-                                            className="block w-full pl-12 pr-4 py-3 bg-[#0f172a]/50 border border-white/5 rounded-2xl text-[11px] md:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner"
+                                            className="block w-full pl-12 pr-4 py-2.5 bg-[#0f172a]/50 border border-white/5 rounded-2xl text-xs md:text-base font-medium text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner"
                                         />
                                         {this.state.userSearchQuery && (
                                             <button
@@ -2293,11 +2290,11 @@ export default class BoardAdmin extends Component {
                                     <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: "#F5F5DC" }}>
                                         <PlusCircleIcon className="mr-2 text-blue-400" /> Pridať nový test
                                     </h3>
-                                    <div className="flex flex-wrap gap-3 mb-6">
+                                    <div className="flex justify-center mb-6">
                                         {!creatingTest && (
                                             <button
                                                 onClick={this.openTestCreation}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center shadow-lg active:scale-95 transition-all"
+                                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-10 rounded-lg flex items-center shadow-lg active:scale-95 transition-all"
                                             >
                                                 <PlusCircleIcon className="w-5 h-5 mr-2" /> Pridať nový test
                                             </button>

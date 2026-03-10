@@ -43,23 +43,23 @@ const ProgressRing = ({ percentage, color, size = 68, stroke = 6 }) => {
 };
 
 const ProgressSummaryCard = ({ title, stats, color }) => (
-    <div className="bg-slate-800/40 backdrop-blur-md p-5 rounded-2xl border border-white/5 flex items-center space-x-5
-                    transition-all duration-300 ease-out hover:border-blue-500/30 hover:bg-slate-800/60 shadow-sm">
-        <ProgressRing percentage={stats?.percent ?? 0} color={color} />
+    <div className="bg-[#0f172a]/40 backdrop-blur-md p-4 rounded-2xl border border-white/5 flex items-center space-x-4
+                    transition-all duration-300 ease-out hover:border-blue-500/30 hover:bg-[#0f172a]/60 shadow-sm">
+        <ProgressRing percentage={stats?.percent ?? 0} color={color} size={58} stroke={5} />
         <div>
-            <h3 className="font-bold text-sm text-slate-500 uppercase tracking-widest mb-1">{title}</h3>
-            <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-white leading-none">{stats?.completed ?? 0}</span>
-                <span className="text-base font-bold text-slate-500">/ {stats?.total ?? 0}</span>
+            <h3 className="font-bold text-[10px] text-slate-500 uppercase tracking-widest mb-0.5">{title}</h3>
+            <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-white leading-none">{stats?.completed ?? 0}</span>
+                <span className="text-sm font-bold text-slate-500">/ {stats?.total ?? 0}</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1 font-bold">DOKONČENÉ</p>
+            <p className="text-[10px] text-slate-500 mt-0.5 font-bold">DOKONČENÉ</p>
         </div>
     </div>
 );
 
 const TestResultCard = ({ result, color, percentage, onViewResult }) => (
-    <div className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-2xl border border-white/5 flex flex-col
-                    transition-all duration-300 ease-out hover:border-blue-500/30 hover:bg-slate-800/60 shadow-sm group">
+    <div className="bg-[#0f172a]/40 backdrop-blur-sm p-4 rounded-2xl border border-white/5 flex flex-col
+                    transition-all duration-300 ease-out hover:border-blue-500/30 hover:bg-[#0f172a]/60 shadow-sm group">
         <div className="flex justify-between items-start mb-3">
             <div className="flex flex-col min-w-0 pr-2">
                 <h4 className="font-bold text-[11px] uppercase tracking-widest mb-1">
@@ -115,22 +115,68 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
     const [leaderboard, setLeaderboard] = useState([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
     const [leaderboardError, setLeaderboardError] = useState(null);
+    const [isEditingPseudonym, setIsEditingPseudonym] = useState(false);
+    const [newPseudonym, setNewPseudonym] = useState("");
+    const [pseudonymLoading, setPseudonymLoading] = useState(false);
+    const [message, setMessage] = useState({ text: "", type: "" });
+
+    const fetchLeaderboard = () => {
+        setLeaderboardLoading(true);
+        axios.get(`${API_URL}/api/leaderboard`, { headers: authHeader() })
+            .then(res => {
+                setLeaderboard(Array.isArray(res.data) ? res.data : []);
+                setLeaderboardLoading(false);
+            })
+            .catch(err => {
+                console.error("Leaderboard error:", err);
+                setLeaderboardError("Nepodarilo sa načítať rebríček.");
+                setLeaderboardLoading(false);
+            });
+    };
 
     useEffect(() => {
         if (activeSubTab === 'leaderboard') {
-            setLeaderboardLoading(true);
-            axios.get(`${API_URL}/api/leaderboard`, { headers: authHeader() })
-                .then(res => {
-                    setLeaderboard(Array.isArray(res.data) ? res.data : []);
-                    setLeaderboardLoading(false);
-                })
-                .catch(err => {
-                    console.error("Leaderboard error:", err);
-                    setLeaderboardError("Nepodarilo sa načítať rebríček.");
-                    setLeaderboardLoading(false);
-                });
+            fetchLeaderboard();
         }
     }, [activeSubTab]);
+
+    const handlePseudonymUpdate = async (e) => {
+        e.preventDefault();
+        setPseudonymLoading(true);
+        setMessage({ text: "", type: "" });
+
+        try {
+            const response = await fetch(`${API_URL}/api/profile/pseudonym`, {
+                method: "PUT",
+                headers: {
+                    ...authHeader(),
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ pseudonym: newPseudonym.trim() }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setMessage({ text: "Pseudonym bol úspešne aktualizovaný!", type: "success" });
+                setIsEditingPseudonym(false);
+                // Update local storage so it persists across other components if needed
+                const user = JSON.parse(localStorage.getItem("user"));
+                if (user) {
+                    user.pseudonym = newPseudonym.trim();
+                    localStorage.setItem("user", JSON.stringify(user));
+                }
+                // Refresh leaderboard to show new name
+                fetchLeaderboard();
+                setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+            } else {
+                setMessage({ text: data.message || "Nepodarilo sa zmeniť pseudonym.", type: "error" });
+            }
+        } catch (error) {
+            setMessage({ text: `Chyba: ${error.message}`, type: "error" });
+        } finally {
+            setPseudonymLoading(false);
+        }
+    };
 
     if (statsLoading) {
         return <div className="text-center text-lg text-slate-400">Načítavam úspechy...</div>;
@@ -152,16 +198,16 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-2">
                 <h2 className="text-3xl font-bold" style={{ color: beigeTextColor }}>Úspechy a rebríček</h2>
 
-                <div className="flex bg-slate-800/50 p-1 rounded-xl border border-slate-700/50 self-start sm:self-center">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start sm:self-center w-full sm:w-auto">
                     <button
                         onClick={() => setActiveSubTab('stats')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'stats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        className={`flex-1 text-center sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'stats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                     >
                         Moje štatistiky
                     </button>
                     <button
                         onClick={() => setActiveSubTab('leaderboard')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'leaderboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        className={`flex-1 text-center sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'leaderboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                     >
                         Rebríček študentov
                     </button>
@@ -169,8 +215,8 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
             </div>
 
             {activeSubTab === 'stats' ? (
-                <div className="space-y-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <ProgressSummaryCard
                             title="Prednášky"
                             stats={lectureStats}
@@ -243,34 +289,154 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
 
                                         return (
                                             <div className="space-y-6">
-                                                <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
-                                                    <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-slate-700/50 border-b border-slate-700/50 bg-slate-800/60">
+                                                <div className="bg-[#0f172a]/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden shadow-xl">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/5 border-b border-white/5 bg-[#0f172a]/60">
                                                         <div className="p-4 text-center font-bold text-slate-400 text-[10px] uppercase tracking-wider">Poradie</div>
                                                         <div className="p-4 text-center font-bold text-slate-400 text-[10px] uppercase tracking-wider">Percentil</div>
                                                         <div className="p-4 text-center font-bold text-blue-400 text-[10px] uppercase tracking-wider">Celkové skóre</div>
                                                         <div className="p-4 text-center font-bold text-slate-400 text-[10px] uppercase tracking-wider">Najbližšie lepšie</div>
                                                     </div>
-                                                    <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-slate-700/50 bg-slate-800/20">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/5 bg-black/10">
                                                         <div className="p-6 text-center font-mono text-2xl text-white tracking-tight">{rank}./{totalStudents}</div>
                                                         <div className="p-6 text-center font-mono text-2xl text-white tracking-tight">{percentile} %</div>
                                                         <div className="p-6 text-center font-mono text-2xl font-bold text-blue-400 tracking-tight">{currentUser.points}</div>
                                                         <div className="p-6 text-center font-mono text-2xl text-slate-500 tracking-tight">{nearestBetterScore}</div>
                                                     </div>
                                                 </div>
-                                                <p className="text-slate-500 text-sm pl-1">
-                                                    Patríte medzi <span className="font-bold text-slate-300">{percentile} %</span> najlepších študentov podľa dosiahnutého študijného skóre.
-                                                </p>
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-1">
+                                                    <p className="text-slate-500 text-sm">
+                                                        Patríte medzi <span className="font-bold text-slate-300">{percentile} %</span> najlepších študentov podľa dosiahnutého študijného skóre.
+                                                    </p>
+
+                                                    {isEditingPseudonym ? (
+                                                        <form onSubmit={handlePseudonymUpdate} className="flex items-center gap-2 w-full sm:w-auto animate-fade-in">
+                                                            <input
+                                                                type="text"
+                                                                value={newPseudonym}
+                                                                onChange={(e) => setNewPseudonym(e.target.value)}
+                                                                placeholder="Zadajte pseudonym..."
+                                                                maxLength={20}
+                                                                className="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 transition-colors w-full sm:w-48"
+                                                                autoFocus
+                                                            />
+                                                            <button
+                                                                type="submit"
+                                                                disabled={pseudonymLoading}
+                                                                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                                                            >
+                                                                {pseudonymLoading ? "..." : "Uložiť"}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setIsEditingPseudonym(false);
+                                                                    setMessage({ text: "", type: "" });
+                                                                }}
+                                                                className="text-slate-500 hover:text-slate-300 px-2 py-1.5 text-xs font-bold transition-all"
+                                                            >
+                                                                Zrušiť
+                                                            </button>
+                                                        </form>
+                                                    ) : (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setIsEditingPseudonym(true);
+                                                                    const user = JSON.parse(localStorage.getItem("user"));
+                                                                    setNewPseudonym(user?.pseudonym || "");
+                                                                }}
+                                                                className="group flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-all bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                                                {currentUser.rawPseudonym ? "Zmeniť pseudonym" : "Nastaviť pseudonym"}
+                                                            </button>
+                                                            {message.text && (
+                                                                <span className={`text-[10px] font-bold ${message.type === 'success' ? 'text-emerald-400' : 'text-rose-400'} animate-fade-in`}>
+                                                                    {message.text}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         );
                                     })()}
+
+                                    {/* Leaderboard Table */}
+                                    <div className="bg-[#0f172a]/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden shadow-xl mt-12 animate-fade-in-up">
+                                        <div className="p-4 sm:p-6 border-b border-white/5 flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 bg-[#0f172a]/60">
+                                            <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                                                Všetci študenti
+                                            </h3>
+                                            <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-blue-500/20 whitespace-nowrap">
+                                                {leaderboard.length} Študentov
+                                            </span>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="bg-[#0f172a]/40 border-b border-white/5">
+                                                        <th className="p-2 sm:p-4 text-slate-400 text-[10px] uppercase font-black tracking-widest text-center w-12 sm:w-24">Poradie</th>
+                                                        <th className="p-2 sm:p-4 text-slate-400 text-[10px] uppercase font-black tracking-widest leading-tight">Meno / Pseudonym</th>
+                                                        <th className="p-2 sm:p-4 text-blue-400 text-[10px] uppercase font-black tracking-widest text-center leading-tight">Body</th>
+                                                        <th className="hidden sm:table-cell p-4 text-slate-400 text-[10px] uppercase font-black tracking-widest text-center">Testy</th>
+                                                        <th className="hidden sm:table-cell p-4 text-slate-400 text-[10px] uppercase font-black tracking-widest text-center">Učenie</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-700/30">
+                                                    {leaderboard.map((student, index) => (
+                                                        <tr key={index} className={`transition-all h-16 ${student.isCurrentUser ? 'bg-blue-600/10 border-l-4 border-l-blue-500' : 'hover:bg-slate-700/20'}`}>
+                                                            <td className="p-2 sm:p-4 text-center">
+                                                                <span className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-mono text-sm sm:text-base font-black ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shadow-lg shadow-yellow-500/10' :
+                                                                    index === 1 ? 'bg-slate-300/20 text-slate-300 border border-slate-300/30' :
+                                                                        index === 2 ? 'bg-orange-700/20 text-orange-400 border border-orange-700/30' :
+                                                                            'text-slate-500'
+                                                                    }`}>
+                                                                    {index + 1}.
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-2 sm:p-4">
+                                                                <div className="flex items-center gap-2 sm:gap-3">
+                                                                    <div className={`hidden sm:flex w-8 h-8 rounded-lg items-center justify-center font-bold text-xs ${student.isCurrentUser ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                                                                        {student.username.substring(0, 1).toUpperCase()}
+                                                                    </div>
+                                                                    <span className={`font-bold text-sm sm:text-base ${student.isCurrentUser ? 'text-blue-400' : 'text-slate-200'} truncate max-w-[110px] sm:max-w-none inline-block align-bottom`}>
+                                                                        {student.username}
+                                                                        {student.isCurrentUser && <span className="ml-1 sm:ml-2 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 py-0.5 bg-blue-500/20 rounded translate-y-[-1px] inline-block">Ja</span>}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-2 sm:p-4 text-center">
+                                                                <span className="font-mono font-black text-blue-400 text-lg sm:text-xl tracking-tighter">
+                                                                    {student.points}
+                                                                </span>
+                                                            </td>
+                                                            <td className="hidden sm:table-cell p-4 text-center">
+                                                                <span className="text-slate-400 font-bold text-sm">
+                                                                    {student.testPoints}b
+                                                                </span>
+                                                            </td>
+                                                            <td className="hidden sm:table-cell p-4 text-center">
+                                                                <span className="text-slate-400 font-bold text-sm">
+                                                                    {student.learningPoints}b
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
 
                                 </>
                             )}
                         </div>
                     )}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

@@ -106,6 +106,18 @@ const Profile = () => {
             setCurrentUser(user);
             setUserReady(true);
             loadStats(user.id);
+
+            // Načítanie ďalších info (pseudonym) priamo zo servera
+            fetch(`${API_URL}/api/profile/info`, {
+                headers: authHeader()
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.pseudonym) {
+                        setCurrentUser(prev => ({ ...prev, pseudonym: data.pseudonym }));
+                    }
+                })
+                .catch(err => console.error("Chyba pri načítaní pseudonymu:", err));
         }
     }, [loadStats]);
 
@@ -204,88 +216,88 @@ const Profile = () => {
     };
 
     return (
-        <div className="relative flex min-h-screen bg-slate-900 font-sans text-slate-200">
+        <div className="relative flex min-h-screen bg-[#0f172a] font-sans text-slate-200">
             {!isTesting && (
                 <aside
-                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0f172a]/80 flex flex-col p-4 border-r border-white/5 shadow-xl
+                    className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl
                            transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 >
-                    <div className="text-2xl font-bold mb-8 text-center" style={{ color: beigeTextColor }}>
+                    <div className="text-2xl font-bold mb-8 text-center mt-2 tracking-wide" style={{ color: beigeTextColor }}>
                         Portál študenta
                     </div>
-                    <nav className="flex-grow space-y-0.5 mt-2 overflow-y-auto pr-2">
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Môj profil</div>
+                    <nav className="flex-grow space-y-1 mt-2 overflow-y-auto pr-2" style={{ scrollbarWidth: 'none' }}>
+                        <div className="pt-2 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Môj profil</div>
                         <button
                             onClick={() => { setCurrentPage('overview'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'overview' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <UserIcon className="mr-3 text-current w-5 h-5" /> Prehľad profilu
+                            <UserIcon className="mr-3 w-5 h-5 text-current" /> Prehľad profilu
                         </button>
 
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Vzdelávanie</div>
+                        <div className="pt-6 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Vzdelávanie</div>
                         <button
                             onClick={() => { setCurrentPage('learning'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'learning' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'learning' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <BookOpenIcon className="mr-3 text-current w-5 h-5" /> Učenie
+                            <BookOpenIcon className="mr-3 w-5 h-5 text-current" /> Učenie
                         </button>
                         <button
                             onClick={() => { setCurrentPage('simulation'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'simulation' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'simulation' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <TerminalIcon className="mr-3 text-current w-5 h-5" /> Simulácia
+                            <TerminalIcon className="mr-3 w-5 h-5 text-current" /> Simulácia
                         </button>
                         <button
                             onClick={() => { setCurrentPage('tests'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'tests' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'tests' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <ChartBarIcon className="mr-3 text-current w-5 h-5" /> Testy
+                            <ChartBarIcon className="mr-3 w-5 h-5 text-current" /> Testy
                         </button>
 
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Prehľad</div>
+                        <div className="pt-6 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Prehľad</div>
                         <button
                             onClick={() => { setCurrentPage('calendar'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'calendar' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'calendar' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <CalendarIcon className="mr-3 text-current w-5 h-5" /> Kalendár
+                            <CalendarIcon className="mr-3 w-5 h-5 text-current" /> Kalendár
                         </button>
                         <button
                             onClick={() => { setCurrentPage('achievements'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'achievements' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'achievements' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <AwardIcon className="mr-3 text-current w-5 h-5" /> Úspechy
+                            <AwardIcon className="mr-3 w-5 h-5 text-current" /> Úspechy
                         </button>
                         <button
                             onClick={() => { setCurrentPage('notes'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'notes' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'notes' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <NoteIcon className="mr-3 text-current w-5 h-5" /> Poznámky
+                            <NoteIcon className="mr-3 w-5 h-5 text-current" /> Poznámky
                         </button>
 
-                        <div className="pt-3 pb-1 px-3 text-[12px] font-bold uppercase tracking-widest text-slate-500/70">Účet</div>
+                        <div className="pt-6 pb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Účet</div>
                         <button
                             onClick={() => { setCurrentPage('settings'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'settings' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'settings' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <CogIcon className="mr-3 text-current w-5 h-5" /> Nastavenia
+                            <CogIcon className="mr-3 w-5 h-5 text-current" /> Nastavenia
                         </button>
                         <button
                             onClick={() => { setCurrentPage('contacts'); setSidebarOpen(false); }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-[16.5px] ${currentPage === 'contacts' ? 'bg-blue-600 shadow-lg text-white' : 'hover:bg-[#15203d]/70 text-slate-300'}`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] ${currentPage === 'contacts' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-[#1e293b]/70 hover:text-white'}`}
                         >
-                            <EnvelopeIcon className="mr-3 text-current w-5 h-5" /> Kontakty
+                            <EnvelopeIcon className="mr-3 w-5 h-5 text-current" /> Kontakty
                         </button>
 
-                        <div className="my-2 border-t border-white/5 mx-2"></div>
+                        <div className="my-6 border-t border-white/5 mx-3"></div>
                         <button
                             onClick={() => {
                                 EventBus.dispatch("logout");
                                 setRedirect("/home");
                             }}
-                            className={`w-full text-left flex items-center py-2 px-3 rounded-lg transition-all duration-200 font-medium text-red-400 hover:bg-red-900/30 hover:text-red-300 text-[16.5px]`}
+                            className={`w-full text-left flex items-center py-2.5 px-3 rounded-lg transition-colors border-none duration-200 font-medium text-[15.5px] text-red-400 hover:bg-red-500/10 hover:text-red-300`}
                         >
-                            <LogoutIcon className="mr-3 text-current w-5 h-5" /> Odhlášiť sa
+                            <LogoutIcon className="mr-3 w-5 h-5 text-current" /> Odhlásiť sa
                         </button>
                     </nav>
                 </aside>
@@ -293,7 +305,7 @@ const Profile = () => {
 
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 z-20 md:hidden"
+                    className="fixed inset-0 bg-black/60 z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 ></div>
             )}
@@ -309,21 +321,23 @@ const Profile = () => {
                 )
             }
 
-            <div className={`flex flex-col flex-1 ${isTesting ? 'h-screen w-full overflow-hidden' : ''}`}>
+            <div className={`flex flex-col flex-1 min-w-0 ${isTesting ? 'h-screen w-full overflow-hidden' : ''}`}>
                 {!isTesting && (
-                    <header className="sticky top-0 bg-slate-800/50 backdrop-blur-sm p-4 border-b border-slate-700 md:hidden z-10 flex items-center">
-                        <button onClick={() => setSidebarOpen(true)} className="text-slate-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                        <h1 className="text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
-                            Portál študenta
-                        </h1>
+                    <header className="sticky top-0 bg-[#0f172a]/50 backdrop-blur-sm p-4 border-b border-white/5 md:hidden z-10 flex items-center justify-between">
+                        <div className="flex items-center">
+                            <button onClick={() => setSidebarOpen(true)} className="text-slate-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <h1 className="text-xl font-bold ml-4" style={{ color: beigeTextColor }}>
+                                Portál študenta
+                            </h1>
+                        </div>
                     </header>
                 )}
 
-                <main className={`flex-1 overflow-y-auto ${isTesting ? 'p-0' : 'p-4 sm:p-8'}`}>
+                <main className={`flex-1 overflow-y-auto overflow-x-hidden ${isTesting ? 'p-0' : 'p-4 sm:p-8'}`}>
                     {renderContent()}
                 </main>
             </div>
