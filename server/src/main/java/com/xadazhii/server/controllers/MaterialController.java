@@ -108,7 +108,7 @@ public class MaterialController {
 
         materialRepository.save(material);
 
-        return ResponseEntity.ok(new MessageResponse("Materiál bol úспешне доданий!"));
+        return ResponseEntity.ok(new MessageResponse("Materiál bol úspešne pridaný!"));
     }
 
     @PutMapping("/{id}")
@@ -155,6 +155,6 @@ public class MaterialController {
 
         materialRepository.deleteById(id);
 
-        return ResponseEntity.ok(new MessageResponse("Materiál bol úспешне видалений!"));
+        return ResponseEntity.ok(new MessageResponse("Materiál bol úspešne odstránený!"));
     }
 }
