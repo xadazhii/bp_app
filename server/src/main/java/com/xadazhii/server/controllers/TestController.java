@@ -133,7 +133,7 @@ public class TestController {
                     if (wn == 0)
                         return true;
                     if (wn >= 1 && wn <= 12)
-                        return hasCompletedWeekMaterials(userId, wn);
+                        return (wn <= currentWeek) && hasCompletedWeekMaterials(userId, wn);
                     if (wn == 13)
                         return week12Completed;
                     if (wn == 14) {

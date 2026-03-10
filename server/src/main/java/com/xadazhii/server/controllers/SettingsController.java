@@ -51,14 +51,16 @@ public class SettingsController {
                 && !payload.get("semesterStartDate").isEmpty()) {
 
             java.time.ZoneId bratislavaZone = java.time.ZoneId.of("Europe/Bratislava");
-            java.time.LocalDate parsedDate = java.time.LocalDate.parse(payload.get("semesterStartDate"));
+            // Parsing only the date part from the potential ISO string
+            String datePart = payload.get("semesterStartDate").split("T")[0];
+            java.time.LocalDate parsedDate = java.time.LocalDate.parse(datePart);
             java.time.ZonedDateTime nowInBratislava = java.time.ZonedDateTime.now(bratislavaZone);
 
             if (parsedDate.equals(nowInBratislava.toLocalDate())) {
-                // If today, set exactly to current minute, ignoring seconds/nanos for stability
+                // FORCE current exact time if the day is TODAY
                 settings.setSemesterStartDate(nowInBratislava.toLocalDateTime().withSecond(0).withNano(0));
             } else {
-                // If other day, set to 00:00:00
+                // Set to 00:00:00 for any other day
                 settings.setSemesterStartDate(parsedDate.atStartOfDay());
             }
         } else {
