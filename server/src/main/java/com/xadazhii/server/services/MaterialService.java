@@ -108,6 +108,6 @@ public class MaterialService {
             material.setFilePath(fileStorage.store(file));
         }
 
-        return materialRepository.save(material);
+        return materialRepository.save(java.util.Objects.requireNonNull(material));
     }
 }
