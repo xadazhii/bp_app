@@ -429,7 +429,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                 id: Date.now() + Math.random(),
                 type: b.type,
                 value: b.value,
-                preview: b.type === 'image' ? (b.value.startsWith('http') ? b.value : `${API_URL}/uploads/${b.value}`) : null,
+                preview: b.type === 'image' ? getFileUrl(b.value) : null,
                 file: null
             })));
             setSelectedCategory(note.category || "Všeobecné");
@@ -544,10 +544,9 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                         });
                         contentHtml += `</tbody></table></div>`;
                     } else if (b.type === 'drawing') {
-                        contentHtml += `<div class="drawing-container"><img src="${b.value}" /></div>`;
+                        contentHtml += `<div class="drawing-container"><img src="${getFileUrl(b.value)}" /></div>`;
                     } else if (b.type === 'image') {
-                        const imgUrl = b.value.startsWith('http') ? b.value : `${API_URL}/uploads/${b.value}`;
-                        contentHtml += `<div class="image-container"><img src="${imgUrl}" /></div>`;
+                        contentHtml += `<div class="image-container"><img src="${getFileUrl(b.value)}" /></div>`;
                     }
                 });
             } else {
