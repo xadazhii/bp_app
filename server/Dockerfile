@@ -13,7 +13,13 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
+# Install python and necessary libraries for Excel parsing
+RUN apt-get update && apt-get install -y python3 python3-pip && \
+    pip3 install pandas openpyxl --break-system-packages && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/target/*.jar app.jar
+COPY excel_parser.py .
 
 EXPOSE 8080
 

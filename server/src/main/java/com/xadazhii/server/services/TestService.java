@@ -494,7 +494,8 @@ public class TestService {
         Files.copy(file.getInputStream(), temp, StandardCopyOption.REPLACE_EXISTING);
         try {
             ProcessBuilder pb = new ProcessBuilder("python3", "excel_parser.py", temp.toString());
-            pb.directory(new File("/Users/m/Desktop/btsss-backup/app/server"));
+            // Use current working directory as the script is located in the same directory as the JAR
+            pb.directory(new File("."));
             Process p = pb.start();
             String output;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
