@@ -26,7 +26,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
 
-      BTSSS_APP_STORAGE: cloudinary
+      BTSSS_APP_STORAGE: ${BTSSS_APP_STORAGE:-local}
       BTSSS_APP_JWTSECRET: ${JWT_SECRET}
       BTSSS_APP_JWTEXPIRATIONMS: 86400000
 
