@@ -596,6 +596,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
     };
 
     const handleDeleteNote = (id) => {
+        setSelectedNote(null);
         setModal({
             show: true,
             title: 'Odstrániť poznámku?',
