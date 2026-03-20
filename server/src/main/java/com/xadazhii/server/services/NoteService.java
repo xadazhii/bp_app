@@ -150,6 +150,18 @@ public class NoteService {
             throw new RuntimeException("Chyba: Neautorizovaný prístup");
         }
 
+        if (note.getContent() != null && note.getContent().contains("\"value\":\"")) {
+            String content = note.getContent();
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"value\":\"([^\"]+)\"");
+            java.util.regex.Matcher matcher = pattern.matcher(content);
+            while (matcher.find()) {
+                String val = matcher.group(1);
+                if (!val.startsWith("data:") && (val.endsWith(".png") || val.endsWith(".jpg") || val.endsWith(".jpeg") || val.endsWith(".gif") || val.contains("cloudinary.com"))) {
+                    fileStorage.delete(val);
+                }
+            }
+        }
+
         if (note.getImagePath() != null) {
             fileStorage.delete(note.getImagePath());
         }

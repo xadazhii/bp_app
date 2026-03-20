@@ -461,6 +461,12 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
         return { text: content, image: null };
     };
 
+    const getFileUrl = (value) => {
+        if (!value) return "";
+        if (value.startsWith('data:image') || value.startsWith('http')) return value;
+        return `${API_URL}/uploads/${value}`;
+    };
+
     const renderFullContent = (content) => {
         try {
             const blocksArr = JSON.parse(content);
@@ -470,7 +476,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                         {blocksArr.map((b, i) => (
                             <div key={i}>
                                 {b.type === 'text' && (
-                                    <div className="whitespace-pre-wrap leading-relaxed">{b.value}</div>
+                                    <div className="whitespace-pre-wrap leading-relaxed text-slate-300">{b.value}</div>
                                 )}
                                 {b.type === 'table' && b.value && b.value.rows && (
                                     <div className="my-4 overflow-x-auto rounded-xl border border-white/10 bg-black/20">
@@ -491,13 +497,18 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                                 )}
                                 {b.type === 'drawing' && (
                                     <div className="my-4 rounded-2xl overflow-hidden border border-white/5 bg-black/5 shadow-inner">
-                                        <img src={b.value} alt="Kresba" className="max-w-full h-auto mx-auto" />
+                                        <img
+                                            src={getFileUrl(b.value)}
+                                            alt="Kresba"
+                                            className="max-w-full h-auto mx-auto"
+                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
                                     </div>
                                 )}
                                 {b.type === 'image' && (
                                     <div className="my-4 rounded-2xl overflow-hidden border border-white/5 bg-black/20 text-center relative group/img">
                                         <img
-                                            src={b.value.startsWith('http') ? b.value : `${API_URL}/uploads/${b.value}`}
+                                            src={getFileUrl(b.value)}
                                             alt=""
                                             className="max-w-full h-auto inline-block"
                                             onError={(e) => { e.target.style.display = 'none'; }}
@@ -510,7 +521,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                 );
             }
         } catch (e) { }
-        return <div className="whitespace-pre-wrap">{content}</div>;
+        return <div className="whitespace-pre-wrap text-slate-300">{content}</div>;
     };
 
     const handleDownloadPDF = (note) => {
@@ -1023,7 +1034,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                                         {preview.image && (
                                             <div className="mb-4 rounded-2xl overflow-hidden shadow-md h-32 w-full relative group/cardimg">
                                                 <img
-                                                    src={preview.image.startsWith('data:image') || preview.image.startsWith('http') ? preview.image : `${API_URL}/uploads/${preview.image}`}
+                                                    src={getFileUrl(preview.image)}
                                                     alt=""
                                                     className="w-full h-full object-cover opacity-80 transition-transform group-hover/cardimg:scale-110"
                                                     onError={(e) => { e.target.style.display = 'none'; }}
