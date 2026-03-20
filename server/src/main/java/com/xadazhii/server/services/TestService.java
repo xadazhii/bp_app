@@ -25,7 +25,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,10 +74,11 @@ public class TestService {
             GlobalSettings settings = globalSettingsRepository.findAll().stream().findFirst().orElse(null);
             int currentWeekValue = 0;
             if (settings != null && settings.getSemesterStartDate() != null) {
-                long startMs = settings.getSemesterStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
+                long startMs = settings.getSemesterStartDate().atZone(ZoneId.of("Europe/Bratislava")).toInstant().toEpochMilli();
                 long diffInMs = Instant.now().toEpochMilli() - startMs;
-                int week = (int) (diffInMs / 60000L) + 1;
-                currentWeekValue = Math.min(week, 14);
+                // 1 week = 7 days = 7 * 24 * 60 * 60 * 1000 ms
+                int week = (int) (diffInMs / (1000L * 60 * 60 * 24 * 7)) + 1;
+                currentWeekValue = Math.max(0, week);
             }
             final int finalWeek = currentWeekValue;
 
@@ -511,9 +511,19 @@ public class TestService {
             for (JsonNode weekNode : root.get("weeks")) {
                 Test t = new Test();
                 t.setType(type);
-                int assignedWeek = weekNode.get("weekNumber").asInt() != 0 ? weekNode.get("weekNumber").asInt() : weekNumber;
-                t.setWeekNumber(assignedWeek == -1 ? 1 : assignedWeek);
-                t.setTitle(getAutoTitle(t.getWeekNumber(), type, generalTopic));
+                
+                // If weekNumber is -1, it means "All weekly tests", use file's weekNumber.
+                // Otherwise, it's a specific selection (Entry=0, Weekly=1-12, Final=13, Exam=14), so override.
+                int assignedWeek;
+                if (weekNumber == -1) {
+                    assignedWeek = weekNode.get("weekNumber").asInt();
+                    if (assignedWeek <= 0) assignedWeek = 1; // Default to week 1 if not specified in file
+                } else {
+                    assignedWeek = weekNumber;
+                }
+                
+                t.setWeekNumber(assignedWeek);
+                t.setTitle(getAutoTitle(assignedWeek, type, generalTopic));
 
                 List<Question> qs = new ArrayList<>();
                 for (JsonNode qn : weekNode.get("questions")) {
@@ -557,10 +567,21 @@ public class TestService {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
              CSVParser p = new CSVParser(r, format)) {
             List<CSVRecord> recs = p.getRecords();
-            int startW = weekNumber == -1 ? 1 : weekNumber;
-            Test cur = new Test(); cur.setType(type); cur.setWeekNumber(startW); cur.setTitle(getAutoTitle(startW, type, "CSV Import"));
+            
+            // If weekNumber is not -1, force that week for everything
+            int startW;
+            if (weekNumber == -1) {
+                startW = 1; // Default starting for sequence
+            } else {
+                startW = weekNumber;
+            }
 
-            List<Test> all = new ArrayList<>();
+            Test cur = new Test(); 
+            cur.setType(type); 
+            cur.setWeekNumber(startW); 
+            cur.setTitle(getAutoTitle(startW, type, "CSV Import"));
+
+            List<Test> allTests = new ArrayList<>();
             List<Question> qs = new ArrayList<>();
             Pattern ptn = Pattern.compile("^(\\d+)\\.\\s*(.*)");
 
@@ -572,10 +593,23 @@ public class TestService {
 
                 Matcher m = ptn.matcher(txt);
                 if (m.matches()) {
-                    if (!qs.isEmpty()) { cur.setQuestions(qs); all.add(cur); }
-                    cur = new Test(); cur.setType(type);
-                    int w = Integer.parseInt(m.group(1));
-                    cur.setWeekNumber(w); cur.setTitle(getAutoTitle(w, type, "CSV Import"));
+                    // New week separator found
+                    if (!qs.isEmpty()) { 
+                        cur.setQuestions(qs); 
+                        allTests.add(cur); 
+                    }
+                    
+                    int w;
+                    if (weekNumber == -1) {
+                        w = Integer.parseInt(m.group(1));
+                    } else {
+                        w = weekNumber; // Override even if file says different
+                    }
+                    
+                    cur = new Test(); 
+                    cur.setType(type);
+                    cur.setWeekNumber(w); 
+                    cur.setTitle(getAutoTitle(w, type, "CSV Import"));
                     qs = new ArrayList<>();
                     continue;
                 }
@@ -599,11 +633,14 @@ public class TestService {
                 }
                 q.setPoints(Math.max(1, cCount)); q.setAnswers(ans); qs.add(q);
             }
-            if (!qs.isEmpty()) { cur.setQuestions(qs); all.add(cur); }
-            if (!all.isEmpty()) {
-                testRepository.saveAll(all);
+            if (!qs.isEmpty()) { 
+                cur.setQuestions(qs); 
+                allTests.add(cur); 
             }
-            return all.size();
+            if (!allTests.isEmpty()) {
+                testRepository.saveAll(allTests);
+            }
+            return allTests.size();
         }
     }
 
