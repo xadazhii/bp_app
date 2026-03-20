@@ -6,36 +6,40 @@ import re
 def parse_excel(file_path):
     try:
         # Read the Excel file, skipping any potential initial header junk
-        # Typical structure: Week number/Topic in column 0, Question in 1, Answers in 2-6, Correct in 7
         df = pd.read_excel(file_path, header=None)
         
-        # Start looking for data from row 0
-        general_topic = "Importovaný test"
+        general_topic = "Excel Import"
         weeks_dict = {}
         
-        # Pattern for week: "1. Topic" or just "1"
+        # Pattern for week: "1. Topic" (looking for number followed by dot)
         week_pattern = re.compile(r'^(\d+)\.\s*(.*)')
         
+        # Default starting week
         current_week = 1
         
         for index, row in df.iterrows():
-            if pd.isna(row[1]) or str(row[1]).strip() == "":
-                # Check if column 0 has a week marker
-                if not pd.isna(row[0]):
-                    val = str(row[0]).strip()
-                    match = week_pattern.match(val)
-                    if match:
-                        current_week = int(match.group(1))
-                        general_topic = match.group(2) if match.group(2) else general_topic
-                continue
-                
-            # Skip header row if it contains "otázka"
-            if "otázka" in str(row[1]).lower():
-                continue
-                
-            question_text = str(row[1]).strip()
+            # Most data is in Column 1 (index 1)
+            val_col1 = str(row[1]).strip() if not pd.isna(row[1]) else ""
             
-            # Answers are in columns 2 to 6 (A, B, C, D, NEVIEM)
+            if not val_col1:
+                continue
+                
+            # Check if this row is a Week marker like "1. Introductory Topic"
+            match = week_pattern.match(val_col1)
+            if match:
+                current_week = int(match.group(1))
+                # Maybe the topic name is in the marker too
+                if match.group(2).strip():
+                    general_topic = match.group(2).strip()
+                continue
+                
+            # Skip header rows
+            if val_col1.lower() == "otázka" or val_col1.lower() == "nan":
+                continue
+                
+            question_text = val_col1
+            
+            # Answers are in columns 2 to 6 (A-D, NEVIEM)
             answers = []
             letters = ["A", "B", "C", "D", "NEVIEM"]
             for i in range(2, 7):
@@ -47,7 +51,7 @@ def parse_excel(file_path):
                             "letter": letters[i-2]
                         })
             
-            # Correct answer letters are in column 7
+            # Correct answer letters are in column 7 (A, B, C, AB etc.)
             correct_answers = ""
             if 7 < len(row) and not pd.isna(row[7]):
                 correct_answers = str(row[7]).strip().upper()
