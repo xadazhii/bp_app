@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.Map;
 
 @Component
-@org.springframework.context.annotation.Primary
 public class CloudinaryStorageStrategy implements FileStorageStrategy {
 
     @Autowired

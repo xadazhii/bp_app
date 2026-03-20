@@ -1,17 +1,13 @@
 package com.xadazhii.server.storage;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-@Component
-@ConditionalOnProperty(name = "btsss.app.storage", havingValue = "local", matchIfMissing = true)
+// Deactivated: use CloudinaryStorageStrategy instead
 public class LocalFileStorageStrategy implements FileStorageStrategy {
 
     private final Path root = Paths.get("uploads");
