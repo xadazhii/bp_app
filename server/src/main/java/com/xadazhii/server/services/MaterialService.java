@@ -58,7 +58,17 @@ public class MaterialService {
         List<Material> materials = materialRepository.findAll();
 
         if (!(all && isAdmin)) {
-            final int effectiveWeek = Math.max(1, currentWeek);
+            final int effectiveWeek;
+            if (currentWeek == 0) {
+                // Semester date not set at all
+                effectiveWeek = 0;
+            } else if (currentWeek < 0) {
+                // Semester set to future, show week 1 by default
+                effectiveWeek = 1;
+            } else {
+                effectiveWeek = currentWeek;
+            }
+
             materials = materials.stream()
                     .filter(m -> m.getWeekNumber() != null && m.getWeekNumber() <= effectiveWeek)
                     .collect(Collectors.toList());
