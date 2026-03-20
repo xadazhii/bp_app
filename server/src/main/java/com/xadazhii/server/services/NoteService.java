@@ -71,7 +71,7 @@ public class NoteService {
         }
 
         if (updatedContent.contains("data:image")) {
-            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"type\":\"drawing\",\"value\":\"(data:image/[^;]+;base64,[^\"]+)\"");
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"type\"\\s*:\\s*\"drawing\"\\s*,\\s*\"value\"\\s*:\\s*\"(data:image/[^;]+;base64,[^\"]+)\"");
             java.util.regex.Matcher matcher = pattern.matcher(updatedContent);
             StringBuilder sb = new StringBuilder();
             int lastEnd = 0;

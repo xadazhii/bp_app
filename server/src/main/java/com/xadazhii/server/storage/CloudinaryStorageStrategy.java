@@ -21,7 +21,8 @@ public class CloudinaryStorageStrategy implements FileStorageStrategy {
     public String store(MultipartFile file) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            return result.get("url").toString();
+            Object secureUrl = result.get("secure_url");
+            return secureUrl != null ? secureUrl.toString() : result.get("url").toString();
         } catch (IOException e) {
             throw new RuntimeException("Chyba pri nahrávaní na Cloudinary: " + e.getMessage());
         }
