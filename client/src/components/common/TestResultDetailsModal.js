@@ -52,7 +52,7 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
             for (const [studentAnswerId, evalData] of Object.entries(evaluations)) {
                 const original = resultData.details.find(q => q.studentAnswerId === Number(studentAnswerId));
                 if (original && original.isCorrect === evalData.isCorrect && (original.feedback || "") === evalData.feedback) {
-                    continue; // Skip if no changes
+                    continue;
                 }
                 await axios.post(`${API_URL}/api/tests/results/evaluate-answer`, {
                     studentAnswerId,
@@ -62,7 +62,7 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
             }
             await fetchDetails();
             if (onUpdate) onUpdate();
-            onClose(); // Close the modal after update
+            onClose();
         } catch (err) {
             alert("Chyba pri ukladaní hodnotenia: " + err.message);
         } finally {
@@ -151,20 +151,31 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
                                         </h3>
                                     </div>
                                     <div className="flex items-center self-start sm:self-auto shrink-0">
-                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${q.isCorrect ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/40' : 'bg-red-500 text-white shadow-lg shadow-red-900/40'}`}>
-                                            {q.isCorrect ? `Správne (${q.earnedPoints ?? q.points ?? 0} b.)` : `Nesprávne (0 b.)`}
-                                        </span>
+                                        {(() => {
+                                            const points = q.earnedPoints ?? 0;
+                                            const isNeviem = q.allAnswers?.some(ans => {
+                                                const isSelected = (q.selectedAnswerIds || []).includes(ans.id) || (q.selectedAnswerId === ans.id);
+                                                return isSelected && ans.text?.toLowerCase().includes("neviem");
+                                            }) && (q.selectedAnswerIds?.length === 1 || (q.selectedAnswerId && !q.selectedAnswerIds));
+
+                                            let colorClass = points > 0 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/40' : (points < 0 ? 'bg-red-500 text-white shadow-lg shadow-red-900/40' : (isNeviem ? 'bg-slate-600 text-white shadow-lg shadow-slate-900/40' : 'bg-red-500 text-white shadow-lg shadow-red-900/40'));
+                                            let label = points > 0 ? `Správne (${points} b.)` : (points < 0 ? `Nesprávne (${points} b.)` : (isNeviem ? `Neviem (0 b.)` : `Nesprávne (0 b.)`));
+
+                                            return <span className={`px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${colorClass}`}>{label}</span>;
+                                        })()}
                                     </div>
                                 </div>
 
-                                {q.type === 'CLOSED' ? (
+                                { (q.type === 'CLOSED' || q.type === 'MULTIPLE' || (q.allAnswers && q.allAnswers.length > 0 && q.type !== 'OPEN')) ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-12">
                                         {q.allAnswers.map(ans => {
-                                            const isSelected = q.selectedAnswerId === ans.id;
+                                            const isSelected = (q.selectedAnswerIds || []).includes(ans.id) || (q.selectedAnswerId === ans.id);
                                             const isCorrectAns = ans.pointsWeight > 0;
+
                                             let borderClass = "border-white/5";
                                             let bgClass = "bg-white/5";
                                             let icon = null;
+
                                             if (isSelected) {
                                                 if (isCorrectAns) {
                                                     borderClass = "border-emerald-500/50";
@@ -177,11 +188,13 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
                                                 }
                                             } else if (isCorrectAns) {
                                                 borderClass = "border-emerald-500/30";
-                                                bgClass = "bg-emerald-500/5";
+                                                bgClass = "bg-emerald-500/[0.02]";
+                                                icon = <CheckCircleIcon className="w-4 h-4 text-emerald-500/20" />;
                                             }
+
                                             return (
-                                                <div key={ans.id} className={`p-3 rounded-2xl border ${borderClass} ${bgClass} flex items-center justify-between gap-3 transition-all`}>
-                                                    <span className={`text-sm ${isSelected ? 'text-white' : 'text-slate-400'}`}>{ans.text}</span>
+                                                <div key={ans.id} className={`p-3 rounded-2xl border ${borderClass} ${bgClass} flex items-center justify-between gap-3 transition-all relative overflow-hidden group`}>
+                                                    <span className={`text-sm ${isSelected ? 'text-white' : (isCorrectAns ? 'text-emerald-400/70' : 'text-slate-400')}`}>{ans.text}</span>
                                                     {icon}
                                                 </div>
                                             );
@@ -208,7 +221,7 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
                                     </div>
                                 )}
 
-                                {/* Evaluation Section for Admin */}
+                                {}
                                 {!resultData.cheated && (
                                     <div className="pl-12 pt-4 mt-4 border-t border-white/5">
                                         <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-3">
@@ -301,7 +314,7 @@ const TestResultDetailsModal = ({ resultId, onClose, onUpdate, beigeTextColor })
                     )}
                 </div>
 
-                {/* Restart Confirmation Modal Overlaid inside the details modal view context */}
+                {}
                 {showRestartModal && (
                     <div className="absolute inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-3xl p-4">
                         <div className="bg-[#121826] border border-orange-500/20 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(249,115,22,0.1)] text-center animate-scale-up">

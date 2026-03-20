@@ -265,10 +265,10 @@ const PacketFlow = ({ active, direction = "right", label, color = "cyan", speed 
             </div>
             { }
             <div className={`
-                absolute bg-[#0f172a] px-3 py-1 rounded border border-slate-600 
-                text-[10px] font-bold uppercase tracking-wider 
+                absolute bg-[#0f172a] px-3 py-1 rounded border border-slate-600
+                text-[10px] font-bold uppercase tracking-wider
                 transition-all duration-500 z-50 shadow-lg
-                ${active ? 'opacity-100 scale-100' : 'opacity-0 scale-90'} 
+                ${active ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
                 ${textColors[color]}
             `}>
                 {label}
@@ -294,24 +294,24 @@ const SimDNS = () => {
         setTimeout(() => setIsRunning(true), 100);
     };
     return (
-        <SimWrapper title="DNS Lookup" onStart={handleStart} isRunning={isRunning && step < 9} info="Celý cyklus: Dopyt -> Rekurzia -> Odpoveď">
+        <SimWrapper title="DNS Vyhľadávanie" onStart={handleStart} isRunning={isRunning && step < 9} info="Celý cyklus: Dopyt -> Rekurzia -> Odpoveď">
             <div className="w-full h-[520px] max-w-6xl grid grid-cols-[1fr_2.5fr_1fr] gap-4 items-center relative p-8">
-                <DeviceNode IconComponent={RetroClientIcon} label="Client" active={step === 1 || step >= 8} color={step >= 8 ? "green" : "cyan"} subLabel={step >= 8 ? "IP: 142.250.1.1" : "google.com?"} />
+                <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step === 1 || step >= 8} color={step >= 8 ? "green" : "cyan"} subLabel={step >= 8 ? "IP: 142.250.1.1" : "google.com?"} />
                 <div className="relative h-[450px] w-full">
                     <div className="absolute left-[-2%] top-1/2 -translate-y-1/2 w-[35%] h-12 flex items-center z-0">
-                        <BiDirectionalConnection activeRequest={step === 1} keepRequest={step >= 1} activeResponse={step === 8} keepResponse={step >= 8} labelRequest="DNS Query" labelResponse="IP Address" />
+                        <BiDirectionalConnection activeRequest={step === 1} keepRequest={step >= 1} activeResponse={step === 8} keepResponse={step >= 8} labelRequest="DNS Dopyt" labelResponse="IP Adresa" />
                     </div>
                     <div className="absolute left-[48%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 p-2">
                         <DeviceNode IconComponent={RetroResolverIcon} label="Resolver" active={step >= 2 && step <= 7} color="indigo" subLabel="ISP / Recursive" />
                     </div>
-                    <div className="absolute top-[25%] left-[60%] w-[40%] origin-left -rotate-[15deg]"><BiDirectionalConnection activeRequest={step === 2} keepRequest={step >= 2} activeResponse={step === 3} keepResponse={step >= 3} labelRequest="Where is .com?" labelResponse="Ask TLD" /></div>
-                    <div className="absolute top-[50%] left-[65%] w-[35%] -translate-y-1/2"><BiDirectionalConnection activeRequest={step === 4} keepRequest={step >= 4} activeResponse={step === 5} keepResponse={step >= 5} labelRequest="Where is google?" labelResponse="Ask Auth" /></div>
-                    <div className="absolute top-[75%] left-[60%] w-[40%] origin-left rotate-[15deg]"><BiDirectionalConnection activeRequest={step === 6} keepRequest={step >= 6} activeResponse={step === 7} keepResponse={step >= 7} labelRequest="IP for google?" labelResponse="142.250.1.1" /></div>
+                    <div className="absolute top-[25%] left-[60%] w-[40%] origin-left -rotate-[15deg]"><BiDirectionalConnection activeRequest={step === 2} keepRequest={step >= 2} activeResponse={step === 3} keepResponse={step >= 3} labelRequest="Kde je .com?" labelResponse="Spýtaj sa TLD" /></div>
+                    <div className="absolute top-[50%] left-[65%] w-[35%] -translate-y-1/2"><BiDirectionalConnection activeRequest={step === 4} keepRequest={step >= 4} activeResponse={step === 5} keepResponse={step >= 5} labelRequest="Kde je google?" labelResponse="Spýtaj sa Auth" /></div>
+                    <div className="absolute top-[75%] left-[60%] w-[40%] origin-left rotate-[15deg]"><BiDirectionalConnection activeRequest={step === 6} keepRequest={step >= 6} activeResponse={step === 7} keepResponse={step >= 7} labelRequest="IP pre google?" labelResponse="142.250.1.1" /></div>
                 </div>
                 <div className="flex flex-col gap-16 justify-center py-4 pl-2">
-                    <DeviceNode IconComponent={RetroCloudIcon} label="Root Server" active={step === 2 || step === 3} color="purple" />
+                    <DeviceNode IconComponent={RetroCloudIcon} label="Koreňový Server" active={step === 2 || step === 3} color="purple" />
                     <DeviceNode IconComponent={RetroCloudIcon} label="TLD Server" active={step === 4 || step === 5} color="orange" />
-                    <DeviceNode IconComponent={RetroServerIcon} label="Auth Server" active={step === 6 || step === 7} color="green" />
+                    <DeviceNode IconComponent={RetroServerIcon} label="Autoritatívny Server" active={step === 6 || step === 7} color="green" />
                 </div>
             </div>
         </SimWrapper>
@@ -392,7 +392,7 @@ const SimDHCP = () => {
                     />
                 </svg>
                 <div
-                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none transition-all duration-700 
+                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none transition-all duration-700
                     ${(active || visited) ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
                     style={{ left: `calc(${start.x} + (${end.x} - ${start.x}) / 2)`, top: `calc(${start.y} + (${end.y} - ${start.y}) / 2)` }}
                 >
@@ -408,14 +408,14 @@ const SimDHCP = () => {
         <SimWrapper title="DHCP (DORA)" onStart={handleStart} isRunning={isRunning && step < 5} info={`1. Discover\n2. Offer\n3. Request\n4. Ack`}>
             <div className="w-full h-[520px] relative p-8">
                 <div className="absolute left-[10%] top-[5%] w-24 flex flex-col items-center z-10">
-                    <DeviceNode IconComponent={RetroClientIcon} label="Client" active={step === 1} color="cyan" />
+                    <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step === 1} color="cyan" />
                     <div className="text-[9px] text-slate-500 mt-1 font-mono">00:1A:2B:3C</div>
                 </div>
                 <div className="absolute right-[10%] top-[25%] w-24 flex flex-col items-center z-10">
                     <DeviceNode IconComponent={RetroServerIcon} label="Server" active={step === 1 || step === 2} color="purple" />
                 </div>
                 <div className="absolute left-[10%] top-[45%] w-24 flex flex-col items-center z-10">
-                    <DeviceNode IconComponent={RetroClientIcon} label="Client" active={step === 2 || step === 3} color="cyan" />
+                    <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step === 2 || step === 3} color="cyan" />
                 </div>
                 <div className="absolute right-[10%] top-[65%] w-24 flex flex-col items-center z-10">
                     <DeviceNode IconComponent={RetroServerIcon} label="Server" active={step === 3 || step === 4} color="purple" />
@@ -428,7 +428,7 @@ const SimDHCP = () => {
                             : 'bg-[#0B1120] border-slate-700 shadow-none'
                         }
                      `}>
-                        <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors duration-1000 ${step >= 4 ? 'text-green-500' : 'text-slate-500'}`}>Configured</div>
+                        <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors duration-1000 ${step >= 4 ? 'text-green-500' : 'text-slate-500'}`}>Konfigurované</div>
                         <div className={`text-sm font-mono font-bold transition-colors duration-1000 ${step >= 4 ? 'text-white' : 'text-slate-600'}`}>
                             {step >= 4 ? simData.ip : "0.0.0.0"}
                         </div>
@@ -436,8 +436,8 @@ const SimDHCP = () => {
                 </div>
                 <DhcpLink id="d1" active={step === 1} visited={step >= 1} color="yellow" dashed={true} label="DISCOVER" subLabel="Broadcast" start={{ x: "25%", y: "15%" }} end={{ x: "75%", y: "30%" }} />
                 <DhcpLink id="d2" active={step === 2} visited={step >= 2} color="green" label="OFFER" subLabel={`IP: ${simData.ip}`} start={{ x: "75%", y: "35%" }} end={{ x: "25%", y: "50%" }} />
-                <DhcpLink id="d3" active={step === 3} visited={step >= 3} color="blue" label="REQUEST" subLabel="I'll take it" start={{ x: "25%", y: "55%" }} end={{ x: "75%", y: "70%" }} />
-                <DhcpLink id="d4" active={step === 4} visited={step >= 4} color="purple" label="ACK" subLabel="Confirmed" start={{ x: "75%", y: "75%" }} end={{ x: "25%", y: "90%" }} />
+                <DhcpLink id="d3" active={step === 3} visited={step >= 3} color="blue" label="REQUEST" subLabel="Beriem to" start={{ x: "25%", y: "55%" }} end={{ x: "75%", y: "70%" }} />
+                <DhcpLink id="d4" active={step === 4} visited={step >= 4} color="purple" label="ACK" subLabel="Potvrdené" start={{ x: "75%", y: "75%" }} end={{ x: "25%", y: "90%" }} />
             </div>
         </SimWrapper>
     );
@@ -451,14 +451,14 @@ const SimTcpUdp = () => {
         setStep(1);
         setUdpStep(1);
         const tcpTimers = [
-            setTimeout(() => setStep(2), 2000), // SYN-ACK
-            setTimeout(() => setStep(3), 4000), // ACK
-            setTimeout(() => setStep(4), 6000), // Data
+            setTimeout(() => setStep(2), 2000),
+            setTimeout(() => setStep(3), 4000),
+            setTimeout(() => setStep(4), 6000),
         ];
         const udpTimers = [
-            setTimeout(() => setUdpStep(2), 1500), // Response 1
-            setTimeout(() => setUdpStep(3), 3000), // Request 2
-            setTimeout(() => setUdpStep(4), 4500), // Response 2
+            setTimeout(() => setUdpStep(2), 1500),
+            setTimeout(() => setUdpStep(3), 3000),
+            setTimeout(() => setUdpStep(4), 4500),
         ];
         const stopTimer = setTimeout(() => setIsRunning(false), 7000);
         return () => {
@@ -472,10 +472,10 @@ const SimTcpUdp = () => {
                 <div className="border-r border-slate-700/50 relative p-6 flex flex-col items-center">
                     <div className="mb-4 text-center">
                         <h3 className="text-xl font-bold text-blue-400">TCP</h3>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">Connection Oriented</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">Orientované na spojenie</p>
                     </div>
                     <div className="flex justify-between items-center w-full mt-4 gap-4">
-                        <DeviceNode IconComponent={RetroClientIcon} label="Client" active={step > 0} color="blue" scale={0.8} />
+                        <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step > 0} color="blue" scale={0.8} />
                         <div className="flex-1 relative h-64 flex flex-col justify-evenly">
                             { }
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[20%]"></div>
@@ -499,7 +499,7 @@ const SimTcpUdp = () => {
                                         animate={{ opacity: 1, scale: 1 }}
                                         className="w-full text-center text-[10px] font-bold text-green-400 tracking-widest border border-green-500/30 rounded bg-green-900/20 py-1 shadow-[0_0_10px_rgba(74,222,128,0.2)]"
                                     >
-                                        CONNECTED: DATA STREAM
+                                        PRIPOJENÉ: DÁTOVÝ TOK
                                     </motion.div>
                                 )}
                             </div>
@@ -511,10 +511,10 @@ const SimTcpUdp = () => {
                 <div className="relative p-6 flex flex-col items-center">
                     <div className="mb-4 text-center">
                         <h3 className="text-xl font-bold text-orange-400">UDP</h3>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">Connectionless</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">Nespojovaná služba</p>
                     </div>
                     <div className="flex justify-between items-center w-full mt-4 gap-4">
-                        <DeviceNode IconComponent={RetroClientIcon} label="Client" active={udpStep > 0} color="orange" scale={0.8} />
+                        <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={udpStep > 0} color="orange" scale={0.8} />
                         <div className="flex-1 relative h-64 flex flex-col justify-evenly">
                             { }
                             <div className="w-full h-[1px] bg-slate-800/50 absolute top-[20%]"></div>
@@ -602,13 +602,13 @@ const FirewallGame = () => {
         <div className="w-full h-full flex flex-col p-2 overflow-x-hidden">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-700 pb-4">
                 <div>
-                    <h3 className="text-xl font-bold text-white">Firewall Traffic Control</h3>
+                    <h3 className="text-xl font-bold text-white">Firewall - Riadenie prevádzky</h3>
                     <p className="text-sm text-slate-400">Nastavte pravidlá na ochranu servera pred útokmi.</p>
                 </div>
                 <div className="text-left sm:text-right flex gap-4 sm:gap-6 items-center w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-2xl font-bold text-blue-400 tracking-widest">{score} <span className="text-xs text-slate-500">XP</span></div>
                     <div className={`text-sm font-bold px-3 py-1 rounded border ${serverHealth > 50 ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-red-500/30 bg-red-500/10 text-red-400'}`}>
-                        SYSTEM: {serverHealth > 0 ? 'ONLINE' : 'CRITICAL'}
+                        SYSTÉM: {serverHealth > 0 ? 'AKTÍVNY' : 'KRITICKÝ'}
                     </div>
                 </div>
             </div>
@@ -678,7 +678,7 @@ const FirewallGame = () => {
                     </div>
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center z-10">
                         <ServerGameIcon health={serverHealth} />
-                        <span className="mt-2 text-xs font-bold text-slate-400">Internal Server</span>
+                        <span className="mt-2 text-xs font-bold text-slate-400">Interný Server</span>
                     </div>
                     <AnimatePresence>
                         {packets.map(p => (
@@ -1024,7 +1024,7 @@ const CyberLab = () => {
                 { }
                 <div
                     ref={containerRef}
-                    className={`flex-1 bg-[#0f172a] rounded-xl border border-slate-700 relative overflow-hidden shadow-inner 
+                    className={`flex-1 bg-[#0f172a] rounded-xl border border-slate-700 relative overflow-hidden shadow-inner
                 ${tool === 'cable' ? 'cursor-crosshair' : (tool === 'eraser' ? 'cursor-not-allowed' : 'cursor-default')}`}
                     onMouseMove={handleContainerMouseMove}
                     onMouseUp={handleContainerMouseUp}
@@ -1107,7 +1107,7 @@ const CyberLab = () => {
                             onMouseDown={(e) => handleMouseDown(e, node.id)}
                             onMouseUp={(e) => handleMouseUpNode(e, node.id)}
                             onClick={(e) => e.stopPropagation()}
-                            className={`absolute w-10 h-10 flex items-center justify-center transition-transform active:scale-95 
+                            className={`absolute w-10 h-10 flex items-center justify-center transition-transform active:scale-95
                         ${tool === 'cursor' ? 'cursor-grab active:cursor-grabbing' : (tool === 'eraser' ? 'cursor-pointer hover:scale-110 hover:bg-red-500/20 rounded-full' : 'cursor-crosshair')}`}
                             style={{ left: node.x, top: node.y, zIndex: 10 }}
                         >

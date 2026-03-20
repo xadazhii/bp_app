@@ -1,4 +1,4 @@
-package com.xadazhii.server.security.services;
+package com.xadazhii.server.security.details;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +21,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
-    return com.xadazhii.server.security.services.UserDetailsImpl.build(user);
+    return UserDetailsImpl.build(user);
   }
 }

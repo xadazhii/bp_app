@@ -18,7 +18,7 @@ const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onV
                     Môj profil
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-6 sm:gap-10">
-                    {/* Photo Container */}
+                    {}
                     <div className="relative shrink-0 transition-transform duration-300 hover:scale-105">
                         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-blue-600/30 shadow-2xl">
                             {profileImage ? (
@@ -34,7 +34,7 @@ const ProfileOverview = ({ currentUser, stats, statsLoading, beigeTextColor, onV
                         </div>
                     </div>
 
-                    {/* Content Container: Name -> Email -> Blue Button -> Yellow Button */}
+                    {}
                     <div className="flex-1 w-full flex flex-col items-center sm:items-start text-center sm:text-left">
                         <div className="inline-flex flex-col items-center sm:items-center">
                             <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-1" style={{ color: beigeTextColor }}>

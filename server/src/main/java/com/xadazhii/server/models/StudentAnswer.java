@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,6 +28,14 @@ public class StudentAnswer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selected_answer_id", nullable = true)
     private Answer selectedAnswer;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "student_answer_selected_answers",
+        joinColumns = @JoinColumn(name = "student_answer_id"),
+        inverseJoinColumns = @JoinColumn(name = "answer_id")
+    )
+    private List<Answer> selectedAnswers = new java.util.ArrayList<>();
 
     @Column(name = "text_response", columnDefinition = "TEXT")
     private String textResponse;

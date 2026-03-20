@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface MaterialRepository extends JpaRepository<Material, Long> {
     long countByMaterialType(String materialType);
 
+    java.util.List<Material> findByWeekNumber(Integer weekNumber);
+
     @Modifying
     @Query("UPDATE Material m SET m.uploader = null WHERE m.uploader.id = :userId")
     void setUploaderToNull(Long userId);

@@ -6,7 +6,7 @@ const api = axios.create({
 
 export const fetchSomeData = async () => {
     try {
-        const response = await api.get('/api/data'); 
+        const response = await api.get('/api/data');
         return response.data;
     } catch (error) {
         console.error("Error fetching data:", error);

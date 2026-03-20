@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "user_progress")
 @Getter
 @Setter
-@NoArgsConstructor 
+@NoArgsConstructor
 public class UserProgress {
 
     @Id

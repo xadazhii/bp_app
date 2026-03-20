@@ -16,7 +16,7 @@ public class Answer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "answer_text", nullable = false)
+    @Column(name = "answer_text", nullable = false, columnDefinition = "TEXT")
     private String answerText;
 
     @Column(name = "points_weight", nullable = false)

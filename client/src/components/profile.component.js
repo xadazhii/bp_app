@@ -10,7 +10,8 @@ import LearningContent from "./profile/LearningContent";
 import AchievementsContent from "./profile/AchievementsContent";
 import SettingsContent from "./profile/SettingsContent";
 import CalendarContent from "./profile/CalendarContent";
-import { TestsContentPage, TestResultDetailsModal, ContactsContent, NotesContent } from "./profile/TestsContent";
+import NotesContent from "./profile/NotesContent";
+import { TestsContentPage, TestResultDetailsModal, ContactsContent } from "./profile/TestsContent";
 
 import {
     UserIcon, ChartBarIcon, BookOpenIcon, CalendarIcon, AwardIcon,
@@ -107,7 +108,6 @@ const Profile = () => {
             setUserReady(true);
             loadStats(user.id);
 
-            // Načítanie ďalších info (pseudonym) priamo zo servera
             fetch(`${API_URL}/api/profile/info`, {
                 headers: authHeader()
             })
@@ -220,7 +220,7 @@ const Profile = () => {
             {!isTesting && (
                 <aside
                     className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl
-                           transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 
+                           transform transition-transform duration-300 ease-in-out md:static md:translate-x-0
                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 >
                     <div className="text-2xl font-bold mb-8 text-center mt-2 tracking-wide" style={{ color: beigeTextColor }}>
@@ -310,7 +310,7 @@ const Profile = () => {
                 ></div>
             )}
 
-            {/* Test Result Modal */}
+            {}
             {
                 testResultViewId && (
                     <TestResultDetailsModal
@@ -344,7 +344,7 @@ const Profile = () => {
 
             {showClassmatesModal && <ClassmatesModal classmates={classmates} onClose={() => setShowClassmatesModal(false)} error={classmatesError} beigeTextColor={beigeTextColor} />}
 
-            {/* Confirmation Modal */}
+            {}
             {
                 modal.show && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
@@ -383,7 +383,6 @@ const Profile = () => {
     );
 };
 
-
 const ClassmatesModal = ({ classmates, onClose, error, beigeTextColor }) => {
     return (
         <div className="fixed inset-0 bg-slate-900 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -415,7 +414,5 @@ const ClassmatesModal = ({ classmates, onClose, error, beigeTextColor }) => {
         </div>
     );
 };
-
-
 
 export default Profile;

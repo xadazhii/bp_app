@@ -1,0 +1,211 @@
+import React from "react";
+import { UserIcon, ExclamationTriangleIcon, ClockIcon, TrendingUpIcon } from './AdminIcons';
+
+export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
+    if (!summaryData) return (
+        <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <p className="font-medium">Pripravujem analýzu...</p>
+        </div>
+    );
+
+    const entryTest = summaryData.tests.find(t => t.weekNumber === 0);
+    const exitTest = summaryData.tests.find(t => t.weekNumber === 13 && currentWeek >= 12);
+
+    const studentsProgress = summaryData.studentGrades.map(student => {
+        const entryScore = entryTest ? (student.scores[entryTest.id] ?? null) : null;
+        const exitScore = exitTest ? (student.scores[exitTest.id] ?? null) : null;
+
+        let progress = null;
+        if (entryScore !== null && exitScore !== null && entryTest.maxScore > 0 && exitTest.maxScore > 0) {
+            const entryPercent = (entryScore / entryTest.maxScore) * 100;
+            const exitPercent = (exitScore / exitTest.maxScore) * 100;
+            progress = exitPercent - entryPercent;
+        }
+
+        return {
+            ...student,
+            entryScore,
+            exitScore,
+            progress
+        };
+    });
+
+    const activeProgress = studentsProgress.filter(p => p.progress !== null);
+    const avgProgress = activeProgress.length > 0
+        ? (activeProgress.reduce((acc, p) => acc + p.progress, 0) / activeProgress.length).toFixed(1)
+        : '0';
+
+    if (!entryTest) {
+        return (
+            <div className="p-12 bg-[#0f172a]/50 rounded-[2rem] border border-white/5 text-center animate-fade-in">
+                <div className="w-20 h-20 bg-amber-500/10 text-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <ExclamationTriangleIcon className="w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">Vstupný test chýba</h3>
+                <p className="text-slate-400 max-w-lg mx-auto leading-relaxed">
+                    Pre analýzu progresu systém vyžaduje prítomnosť <strong>Vstupného testu</strong> priradeného k týždňu 0.
+                    <br /><br />
+                    Vytvorte prosím test v sekcii "Testy" a nastavte mu týždeň 0.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
+            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+                <div className="max-w-xl">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight">Analýza progresu</h2>
+                    <p className="text-slate-400 mt-2 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-3">
+                        Sledovanie rastu vedomostí medzi začiatkom a koncom semestra.
+                        {!exitTest && (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/5 border border-blue-500/10 rounded-full text-[10px] font-bold text-blue-400/80 uppercase tracking-wider">
+                                <ClockIcon className="w-3.5 h-3.5" />
+                                Zber dát: Porovnanie po 12. týždni (teraz {currentWeek}.)
+                            </span>
+                        )}
+                    </p>
+                </div>
+                {studentsProgress.length > 0 && (
+                    <div className="bg-[#0f172a]/60 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group self-start lg:self-auto w-full sm:w-auto">
+                        <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                            <TrendingUpIcon className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Globálny rast</p>
+                            <p className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-1">
+                                {exitTest ? (
+                                    <>
+                                        {avgProgress >= 0 ? '+' : ''}{avgProgress}
+                                        <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
+                                    </>
+                                ) : (
+                                    <span className="text-slate-600 italic">—</span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="lg:hidden space-y-4">
+                {studentsProgress.map(student => (
+                    <div key={student.id} className="bg-[#0f172a]/50 border border-white/5 rounded-2xl p-5 shadow-lg group">
+                        <div className="flex items-center gap-4 mb-5 pb-4 border-b border-white/5">
+                            <div className="w-10 h-10 rounded-2xl bg-[#15203d] flex items-center justify-center text-slate-300 font-black text-xs uppercase shadow-inner">
+                                {student.username.substring(0, 2)}
+                            </div>
+                            <div className="min-w-0">
+                                <div className="font-bold text-white text-base truncate">{student.username}</div>
+                                <div className="text-xs text-slate-500 truncate">{student.email}</div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Vstupný test</p>
+                                <p className="text-lg font-black text-white">
+                                    {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
+                                    {student.entryScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {entryTest.maxScore}b</span>}
+                                </p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Záverečný test</p>
+                                <p className="text-lg font-black text-white">
+                                    {exitTest ? (
+                                        <>
+                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
+                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {exitTest.maxScore}b</span>}
+                                        </>
+                                    ) : (
+                                        <span className="text-slate-700 font-bold text-sm">Zatiaľ neprístupné</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
+                            <p className="text-xs font-bold text-slate-400">Progresívny posun:</p>
+                            {student.progress !== null ? (
+                                <span className={`flex items-center gap-1.5 font-black text-lg ${student.progress >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                    <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180 text-rose-400' : 'text-emerald-400'}`} />
+                                </span>
+                            ) : (
+                                <span className="text-slate-600 text-[10px] uppercase font-bold italic">Nedostupné</span>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="hidden lg:block overflow-x-auto rounded-[2rem] border border-white/5 shadow-2xl">
+                <table className="min-w-full bg-[#0f172a]/40 backdrop-blur-sm overflow-hidden">
+                    <thead>
+                        <tr className="bg-[#0f172a]/60 border-b border-white/5">
+                            <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
+                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test ({entryTest.maxScore}b)</th>
+                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test {exitTest ? `(${exitTest.maxScore}b)` : ''}</th>
+                            <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Progresívny posun</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                        {studentsProgress.map(student => (
+                            <tr key={student.id} className="hover:bg-[#15203d]/30 transition-all group">
+                                <td className="px-8 py-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#15203d]/50 flex items-center justify-center text-slate-300 font-black text-xs shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                            {student.username.substring(0, 2).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="font-bold text-white text-sm group-hover:text-blue-400 transition-colors">{student.username}</div>
+                                            <div className="text-[11px] text-slate-500 font-medium truncate">{student.email}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-8 py-5 text-center">
+                                    {student.entryScore !== null ? (
+                                        <span className="text-lg font-black text-white">{student.entryScore}</span>
+                                    ) : (
+                                        <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                    )}
+                                </td>
+                                <td className="px-8 py-5 text-center">
+                                    {exitTest ? (
+                                        student.exitScore !== null ? (
+                                            <span className="text-lg font-black text-white">{student.exitScore}</span>
+                                        ) : (
+                                            <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                        )
+                                    ) : (
+                                        <span className="text-slate-700 font-bold text-xs uppercase tracking-tighter">Čaká sa...</span>
+                                    )}
+                                </td>
+                                <td className="px-8 py-5 text-right">
+                                    {student.progress !== null ? (
+                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${student.progress >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                            <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
+                                        </div>
+                                    ) : (
+                                        <span className="text-slate-700 font-bold text-[10px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {studentsProgress.length === 0 && (
+                <div className="p-12 text-center bg-[#0f172a]/40 backdrop-blur-sm rounded-[2rem] border border-dashed border-white/5 shadow-inner">
+                    <div className="w-16 h-16 bg-[#15203d]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <UserIcon className="w-8 h-8 text-slate-600" />
+                    </div>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Zatiaľ žiadni študenti na analýzu</p>
+                </div>
+            )}
+        </div>
+    );
+};

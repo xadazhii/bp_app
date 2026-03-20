@@ -79,7 +79,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                 )}
             </div>
 
-            {/* Mobile Cards View (Hidden on LG) */}
+            {}
             <div className="lg:hidden space-y-4">
                 {studentsProgress.map(student => (
                     <div key={student.id} className="bg-[#0f172a]/50 border border-white/5 rounded-2xl p-5 shadow-lg group">
@@ -125,7 +125,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                 ))}
             </div>
 
-            {/* Desktop Table View (Hidden on smaller than LG) */}
+            {}
             <div className="hidden lg:block overflow-x-auto rounded-[2rem] border border-white/5 shadow-2xl">
                 <table className="min-w-full bg-[#0f172a]/40 backdrop-blur-sm overflow-hidden">
                     <thead>

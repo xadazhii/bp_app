@@ -6,17 +6,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import com.xadazhii.server.security.services.UserDetailsImpl;
+import com.xadazhii.server.security.details.UserDetailsImpl;
 import io.jsonwebtoken.*;
 
 @Component
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-  @Value("${hasbi.app.jwtSecret}")
+  @Value("${btsss.app.jwtSecret}")
   private String jwtSecret;
 
-  @Value("${hasbi.app.jwtExpirationMs}")
+  @Value("${btsss.app.jwtExpirationMs}")
   private int jwtExpirationMs;
 
   public String generateJwtToken(Authentication authentication) {

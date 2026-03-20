@@ -20,6 +20,8 @@ public class TestResultRequest {
 
         private Long answerId;
 
+        private List<Long> answerIds;
+
         private String textResponse;
     }
 }

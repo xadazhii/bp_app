@@ -1,4 +1,4 @@
-package com.xadazhii.server.security.services;
+package com.xadazhii.server.security.details;
 
 import java.util.Collection;
 import java.util.List;

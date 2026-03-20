@@ -100,7 +100,7 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
     const [completedMaterials, setCompletedMaterials] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('lecture'); // 'lecture' or 'seminar'
+    const [activeTab, setActiveTab] = useState('lecture');
 
     useEffect(() => {
         const loadData = async () => {
@@ -110,7 +110,6 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
                     fetchCompletedMaterialIds()
                 ]);
 
-                // Sort materials descending by ID so newest (e.g. 12th) appear at the top
                 const sortedMaterials = materialsData.sort((a, b) => b.id - a.id);
                 setMaterials(sortedMaterials);
                 setCompletedMaterials(new Set(completedIdsData));
@@ -188,7 +187,7 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
                     Učebné materiály
                 </h2>
 
-                {/* Mobile Tab Switcher */}
+                {}
                 <div className="flex sm:hidden bg-slate-900/50 p-1 rounded-xl border border-white/5 shadow-inner">
                     <button
                         onClick={() => setActiveTab('lecture')}
@@ -205,7 +204,7 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
                 </div>
             </div>
 
-            {/* Desktop View (Side by Side) */}
+            {}
             <div className="hidden sm:flex flex-row gap-8 lg:gap-12">
                 <MaterialSection
                     title="Prednášky"
@@ -223,7 +222,7 @@ const LearningContent = ({ beigeTextColor, onUpdate, setModal }) => {
                 />
             </div>
 
-            {/* Mobile View (Filtered by Active Tab) */}
+            {}
             <div className="block sm:hidden animate-fade-in">
                 {activeTab === 'lecture' ? (
                     <MaterialSection

@@ -45,9 +45,8 @@ public class AdminInitializer implements CommandLineRunner {
         }
 
         if (!userRepository.existsByUsername(adminUsername)) {
-
             Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: ROLE_ADMIN not found."));
+                    .orElseThrow(() -> new RuntimeException("Chyba: ROLE_ADMIN nebola nájdená."));
 
             User admin = new User();
             admin.setUsername(adminUsername);
@@ -56,10 +55,14 @@ public class AdminInitializer implements CommandLineRunner {
             admin.setRoles(Collections.singleton(adminRole));
 
             userRepository.save(admin);
-
-            System.out.println("AdminInitializer: Admin user created.");
+            System.out.println("AdminInitializer: Administrátor bol úspešne vytvorený.");
         } else {
-            System.out.println("AdminInitializer: Admin already exists.");
+            userRepository.findByUsername(adminUsername).ifPresent(adminUser -> {
+                adminUser.setEmail(adminEmail);
+                adminUser.setPassword(passwordEncoder.encode(adminPassword));
+                userRepository.save(adminUser);
+                System.out.println("AdminInitializer: Údaje administrátora boli aktualizované.");
+            });
         }
     }
 }

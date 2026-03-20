@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.xadazhii.server.security.services.UserDetailsServiceImpl;
+import com.xadazhii.server.security.details.UserDetailsServiceImpl;
 import org.springframework.lang.NonNull;
 
 public class AuthTokenFilter extends OncePerRequestFilter {

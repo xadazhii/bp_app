@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import authHeader from "../../services/auth-header";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-
 const CalendarContent = ({ beigeTextColor }) => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);

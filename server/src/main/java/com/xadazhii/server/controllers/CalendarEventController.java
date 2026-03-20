@@ -1,41 +1,39 @@
 package com.xadazhii.server.controllers;
 
 import com.xadazhii.server.models.CalendarEvent;
-import com.xadazhii.server.repository.CalendarEventRepository;
+import com.xadazhii.server.services.CalendarEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import lombok.NonNull;
 import java.util.List;
 
-@CrossOrigin(origins = { "https://btsss-stu-fei.netlify.app", "http://localhost:3000" }, maxAge = 3600)
 @RestController
 @RequestMapping("/api/calendar-events")
 public class CalendarEventController {
 
     @Autowired
-    private CalendarEventRepository calendarEventRepository;
+    private CalendarEventService calendarEventService;
 
     @GetMapping
     public List<CalendarEvent> getAllEvents() {
-        return calendarEventRepository.findAllByOrderByEventDateAsc();
+        return calendarEventService.getAllEvents();
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CalendarEvent> createEvent(@RequestBody @NonNull CalendarEvent event) {
-        CalendarEvent savedEvent = calendarEventRepository.save(java.util.Objects.requireNonNull(event));
-        return ResponseEntity.ok(savedEvent);
+    public ResponseEntity<CalendarEvent> createEvent(@RequestBody @lombok.NonNull CalendarEvent event) {
+        return ResponseEntity.ok(calendarEventService.createEvent(event));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteEvent(@PathVariable @NonNull Long id) {
-        if (!calendarEventRepository.existsById(id)) {
+    public ResponseEntity<?> deleteEvent(@PathVariable @lombok.NonNull Long id) {
+        try {
+            calendarEventService.deleteEvent(id);
+            return ResponseEntity.ok("Udalosť bola úspešne vymazaná!");
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-        calendarEventRepository.deleteById(id);
-        return ResponseEntity.ok("Event deleted successfully!");
     }
 }

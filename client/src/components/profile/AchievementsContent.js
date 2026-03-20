@@ -111,7 +111,7 @@ const TestResultCard = ({ result, color, percentage, onViewResult }) => (
 );
 
 const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult }) => {
-    const [activeSubTab, setActiveSubTab] = useState('stats'); // 'stats' or 'leaderboard'
+    const [activeSubTab, setActiveSubTab] = useState('stats');
     const [leaderboard, setLeaderboard] = useState([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
     const [leaderboardError, setLeaderboardError] = useState(null);
@@ -159,13 +159,13 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
             if (response.ok) {
                 setMessage({ text: "Pseudonym bol úspešne aktualizovaný!", type: "success" });
                 setIsEditingPseudonym(false);
-                // Update local storage so it persists across other components if needed
+
                 const user = JSON.parse(localStorage.getItem("user"));
                 if (user) {
                     user.pseudonym = newPseudonym.trim();
                     localStorage.setItem("user", JSON.stringify(user));
                 }
-                // Refresh leaderboard to show new name
+
                 fetchLeaderboard();
                 setTimeout(() => setMessage({ text: "", type: "" }), 3000);
             } else {
@@ -198,16 +198,16 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-2">
                 <h2 className="text-3xl font-bold" style={{ color: beigeTextColor }}>Úspechy a rebríček</h2>
 
-                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start sm:self-center w-full sm:w-auto">
+                <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start sm:self-center w-full sm:w-auto mt-2 sm:mt-0">
                     <button
                         onClick={() => setActiveSubTab('stats')}
-                        className={`flex-1 text-center sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'stats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        className={`flex-1 text-center sm:flex-none sm:min-w-[180px] px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'stats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                     >
                         Moje štatistiky
                     </button>
                     <button
                         onClick={() => setActiveSubTab('leaderboard')}
-                        className={`flex-1 text-center sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'leaderboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        className={`flex-1 text-center sm:flex-none sm:min-w-[180px] px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeSubTab === 'leaderboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                     >
                         Rebríček študentov
                     </button>
@@ -362,7 +362,7 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
                                         );
                                     })()}
 
-                                    {/* Leaderboard Table */}
+                                    {}
                                     <div className="bg-[#0f172a]/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden shadow-xl mt-12 animate-fade-in-up">
                                         <div className="p-4 sm:p-6 border-b border-white/5 flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 bg-[#0f172a]/60">
                                             <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">

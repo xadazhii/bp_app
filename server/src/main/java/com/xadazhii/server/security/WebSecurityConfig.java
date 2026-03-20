@@ -3,6 +3,7 @@ package com.xadazhii.server.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -17,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.xadazhii.server.security.jwt.AuthEntryPointJwt;
 import com.xadazhii.server.security.jwt.AuthTokenFilter;
-import com.xadazhii.server.security.services.UserDetailsServiceImpl;
+import com.xadazhii.server.security.details.UserDetailsServiceImpl;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.lang.NonNull;
 
@@ -30,6 +31,9 @@ public class WebSecurityConfig {
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
 
+  @Value("${btsss.app.cors.allowed-origins}")
+  private String[] allowedOrigins;
+
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
@@ -41,8 +45,7 @@ public class WebSecurityConfig {
       @Override
       public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
-            .allowedOriginPatterns("https://btsss-stu-fei.netlify.app", "http://localhost:3000",
-                "http://localhost:8081")
+            .allowedOriginPatterns(java.util.Objects.requireNonNull(allowedOrigins))
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .exposedHeaders("Content-Disposition")
@@ -77,7 +80,7 @@ public class WebSecurityConfig {
         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .antMatchers("/api/export/**").permitAll()
+            .antMatchers("/api/export/**").hasRole("ADMIN")
             .antMatchers("/api/auth/**").permitAll()
             .antMatchers("/api/test/**").permitAll()
             .antMatchers("/files/**").permitAll()

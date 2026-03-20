@@ -30,7 +30,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
         if (!file) return;
 
         try {
-            // Check if it's HEIC format and convert
+
             if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
                 try {
                     const convertedBlob = await heic2any({
@@ -45,7 +45,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                 }
             }
 
-            // Downscale image to prevent LocalStorage QuotaExceededError
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -85,7 +84,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
             console.error("Vyskytla sa chyba pri spracovaní obrázka:", error);
             alert("Chyba spracovania: " + (error.message || error.toString()));
         } finally {
-            event.target.value = ''; // Reset input so the same file can be selected again
+            event.target.value = '';
         }
     };
 
@@ -115,11 +114,11 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
             const data = await response.json();
             if (response.ok) {
                 setMessage(data.message || "Meno bolo úspešne zmenené!");
-                // Update localStorage
+
                 const user = JSON.parse(localStorage.getItem("user"));
                 user.username = newUsername;
                 localStorage.setItem("user", JSON.stringify(user));
-                // We reload to sync all components
+
                 setTimeout(() => window.location.reload(), 1500);
             } else {
                 setMessage(data.message || "Nepodarilo sa zmeniť meno.");
@@ -202,11 +201,11 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                 <h2 className="text-3xl font-bold tracking-tight" style={{ color: beigeTextColor }}>Nastavenia a profil</h2>
             </header>
 
-            {/* Main Settings Grid */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Column 1: Photo & Username */}
+                {}
                 <div className="space-y-6">
-                    {/* Compact Profile Photo */}
+                    {}
                     <div className="bg-[#0f172a]/40 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                         <div className="flex items-center gap-6">
                             <div className="relative group shrink-0">
@@ -255,8 +254,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                         </div>
                     </div>
 
-
-                    {/* Compact Username Change */}
+                    {}
                     <div className="bg-[#0f172a]/40 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                         <h3 className="text-lg font-bold mb-4 flex items-center text-blue-400">
                             <UserCircleIcon className="w-5 h-5 mr-2" />
@@ -285,7 +283,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                     </div>
                 </div>
 
-                {/* Column 2: Password Change */}
+                {}
                 <div className="bg-[#0f172a]/40 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm flex flex-col">
                     <h3 className="text-lg font-bold mb-4 flex items-center text-blue-400">
                         <KeyIcon className="w-5 h-5 mr-3" />
@@ -305,7 +303,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    placeholder="Současné heslo"
+                                    placeholder="Aktuálne heslo"
                                     value={oldPassword}
                                     onChange={(e) => setOldPassword(e.target.value)}
                                     className="w-full pl-4 pr-10 py-2.5 rounded-xl border bg-slate-900/50 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm transition-all"
@@ -333,7 +331,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                             <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Potvrdenie</label>
                             <input
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Zopakujte hesло"
+                                placeholder="Zopakujte heslo"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="w-full px-4 py-2.5 rounded-xl border bg-slate-900/50 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm transition-all"

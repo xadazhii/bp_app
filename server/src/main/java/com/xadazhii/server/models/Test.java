@@ -18,8 +18,11 @@ public class Test {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
+
+    @Column(name = "type")
+    private String type = "WEEKLY";
 
     @Column(name = "week_number", nullable = false)
     private Integer weekNumber = 0;
@@ -31,6 +34,7 @@ public class Test {
     private Integer timeLimit;
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("id ASC")
     private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

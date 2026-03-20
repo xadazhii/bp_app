@@ -1,4 +1,4 @@
-package com.xadazhii.server.security.services;
+package com.xadazhii.server.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
