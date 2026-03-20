@@ -5,61 +5,75 @@ import re
 
 def parse_excel(file_path):
     try:
-        # Read the Excel file, skipping any potential initial header junk
+        # Read the Excel file
         df = pd.read_excel(file_path, header=None)
         
-        general_topic = "Excel Import"
         weeks_dict = {}
-        
-        # Pattern for week: "1. Topic" (looking for number followed by dot)
         week_pattern = re.compile(r'^(\d+)\.\s*(.*)')
-        
-        # Default starting week
         current_week = 1
+        general_topic = "Excel Import"
+        
+        # Columns mapping to hold indices
+        idx = {
+            "q": -1, "a": -1, "b": -1, "c": -1, "d": -1, "n": -1, "corr": -1
+        }
+        
+        header_found = False
         
         for index, row in df.iterrows():
-            # Most data is in Column 1 (index 1)
-            val_col1 = str(row[1]).strip() if not pd.isna(row[1]) else ""
+            row_list = [str(x).strip().lower() if not pd.isna(x) else "" for x in row]
             
-            if not val_col1:
-                continue
-                
-            # Check if this row is a Week marker like "1. Introductory Topic"
-            match = week_pattern.match(val_col1)
-            if match:
-                current_week = int(match.group(1))
-                # Maybe the topic name is in the marker too
-                if match.group(2).strip():
-                    general_topic = match.group(2).strip()
-                continue
-                
-            # Skip header rows
-            if val_col1.lower() == "otázka" or val_col1.lower() == "nan":
-                continue
-                
-            question_text = val_col1
+            # Match week marker even before header is found (often above the questions table)
+            # Check most likely column for marker (often 0 or 1)
+            for col_val in row_list[:3]:
+                match = week_pattern.match(col_val)
+                if match:
+                    current_week = int(match.group(1))
+                    if match.group(2): 
+                        general_topic = match.group(2).strip()
+                    break
+
+            # 1. Search for Header Row
+            if not header_found:
+                # Check if this row contains "otázka" or "otazka"
+                if any("otázka" in x or "otazka" in x for x in row_list):
+                    for i, col_name in enumerate(row_list):
+                        if "otázka" in col_name or "otazka" in col_name: idx["q"] = i
+                        elif col_name == "a": idx["a"] = i
+                        elif col_name == "b": idx["b"] = i
+                        elif col_name == "c": idx["c"] = i
+                        elif col_name == "d": idx["d"] = i
+                        elif "neviem" in col_name: idx["n"] = i
+                        elif "správna" in col_name or "spravna" in col_name: idx["corr"] = i
+                    
+                    # Verify we found the critical columns
+                    if idx["q"] != -1 and idx["corr"] != -1:
+                        header_found = True
+                    continue # Skip the header row itself from processing as a question
+                continue # Keep skipping until header is found
             
-            # Answers are in columns 2 to 6 (A-D, NEVIEM)
+            # 2. Process Data Rows (if header found)
+            q_text = str(row[idx["q"]]).strip() if not pd.isna(row[idx["q"]]) else ""
+            if not q_text or q_text.lower() == "nan":
+                continue
+            
+            # Map answers based on identified columns
             answers = []
-            letters = ["A", "B", "C", "D", "NEVIEM"]
-            for i in range(2, 7):
-                if i < len(row) and not pd.isna(row[i]):
-                    ans_text = str(row[i]).strip()
-                    if ans_text:
-                        answers.append({
-                            "text": ans_text,
-                            "letter": letters[i-2]
-                        })
+            ltr_map = {idx["a"]: "A", idx["b"]: "B", idx["c"]: "C", idx["d"]: "D", idx["n"]: "NEVIEM"}
             
-            # Correct answer letters are in column 7 (A, B, C, AB etc.)
-            correct_answers = ""
-            if 7 < len(row) and not pd.isna(row[7]):
-                correct_answers = str(row[7]).strip().upper()
-                
+            for col_idx, letter in ltr_map.items():
+                if col_idx != -1 and col_idx < len(row) and not pd.isna(row[col_idx]):
+                    ans_val = str(row[col_idx]).strip()
+                    if ans_val:
+                        answers.append({"text": ans_val, "letter": letter})
+            
+            # Correct answer letters from its specific column
+            correct_raw = str(row[idx["corr"]]).strip().upper() if idx["corr"] != -1 else ""
+            
             question_data = {
-                "questionText": question_text,
+                "questionText": q_text,
                 "answers": answers,
-                "correctAnswers": correct_answers
+                "correctAnswers": correct_raw
             }
             
             if current_week not in weeks_dict:
@@ -67,14 +81,12 @@ def parse_excel(file_path):
                     "weekNumber": current_week,
                     "questions": []
                 }
-            
             weeks_dict[current_week]["questions"].append(question_data)
             
         result = {
             "topic": general_topic,
             "weeks": list(weeks_dict.values())
         }
-        
         print(json.dumps(result, ensure_ascii=False))
         
     except Exception as e:
@@ -85,5 +97,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.stderr.write("Usage: python3 excel_parser.py <file_path>\n")
         sys.exit(1)
-        
     parse_excel(sys.argv[1])
