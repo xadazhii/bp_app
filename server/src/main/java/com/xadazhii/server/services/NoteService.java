@@ -30,31 +30,43 @@ public class NoteService {
     }
 
     public Note createNote(Long userId, String content, String category, MultipartFile[] files) {
-        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
-                .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený"));
+        try {
+            User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
+                    .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený"));
 
-        String updatedContent = processContent(content, files);
-        String firstImagePath = extractFirstImagePath(updatedContent);
+            String updatedContent = processContent(content, files);
+            String firstImagePath = extractFirstImagePath(updatedContent);
 
-        Note note = new Note(updatedContent, category, firstImagePath, user);
-        return noteRepository.save(note);
+            Note note = new Note(updatedContent, category, firstImagePath, user);
+            return noteRepository.save(note);
+        } catch (Exception e) {
+            System.err.println("NoteService ERROR (createNote): " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Chyba pri vytváraní нотатки: " + e.getMessage());
+        }
     }
 
     public Note updateNote(Long userId, Long id, String content, String category, MultipartFile[] files) {
-        Note note = noteRepository.findById(java.util.Objects.requireNonNull(id))
-                .orElseThrow(() -> new NoSuchElementException("Poznámka nebola nájdená"));
+        try {
+            Note note = noteRepository.findById(java.util.Objects.requireNonNull(id))
+                    .orElseThrow(() -> new NoSuchElementException("Poznámka nebola nájdená"));
 
-        if (!note.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Chyba: Neautorizovaný prístup");
+            if (!note.getUser().getId().equals(userId)) {
+                throw new RuntimeException("Chyba: Neautorizovaný prístup");
+            }
+
+            String updatedContent = processContent(content, files);
+            String firstImagePath = extractFirstImagePath(updatedContent);
+
+            note.setContent(updatedContent);
+            note.setCategory(category);
+            note.setImagePath(firstImagePath);
+            return noteRepository.save(note);
+        } catch (Exception e) {
+            System.err.println("NoteService ERROR (updateNote): " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Chyba pri aktualizácii нотатки: " + e.getMessage());
         }
-
-        String updatedContent = processContent(content, files);
-        String firstImagePath = extractFirstImagePath(updatedContent);
-
-        note.setContent(updatedContent);
-        note.setCategory(category);
-        note.setImagePath(firstImagePath);
-        return noteRepository.save(note);
     }
 
     private String processContent(String content, MultipartFile[] files) {
