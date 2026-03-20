@@ -76,8 +76,8 @@ public class TestService {
             if (settings != null && settings.getSemesterStartDate() != null) {
                 long startMs = settings.getSemesterStartDate().atZone(ZoneId.of("Europe/Bratislava")).toInstant().toEpochMilli();
                 long diffInMs = Instant.now().toEpochMilli() - startMs;
-                // 1 week = 7 days = 7 * 24 * 60 * 60 * 1000 ms
-                int week = (int) (diffInMs / (1000L * 60 * 60 * 24 * 7)) + 1;
+                // 1 minute = 1 week (for testing purposes)
+                int week = (int) (diffInMs / 60000L) + 1;
                 currentWeekValue = Math.max(0, week);
             }
             final int finalWeek = currentWeekValue;
