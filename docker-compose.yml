@@ -47,6 +47,8 @@ services:
       MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
       MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-false}
 
+    volumes:
+      - ./uploads:/app/uploads
     depends_on:
       - db
 
