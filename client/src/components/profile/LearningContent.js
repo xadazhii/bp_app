@@ -39,7 +39,8 @@ const MaterialSection = ({ title, materials, completedMaterials, onMarkAsComplet
                 ) : (
                     materials.map(material => {
                         const materialUrl = material.url || material.fileUrl;
-                        const fullUrl = materialUrl ? (materialUrl.startsWith('http') ? materialUrl : `${API_URL}/uploads/${materialUrl.startsWith('/') ? materialUrl.substring(1) : materialUrl}`) : null;
+                        const isString = typeof materialUrl === 'string';
+                        const fullUrl = (isString && materialUrl) ? (materialUrl.startsWith('http') ? materialUrl : `${API_URL}/uploads/${materialUrl.startsWith('/') ? materialUrl.substring(1) : materialUrl}`) : null;
                         const isCompleted = completedMaterials.has(material.id);
 
                         return (

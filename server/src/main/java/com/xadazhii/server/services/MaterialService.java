@@ -58,8 +58,9 @@ public class MaterialService {
         List<Material> materials = materialRepository.findAll();
 
         if (!(all && isAdmin)) {
+            final int effectiveWeek = Math.max(1, currentWeek);
             materials = materials.stream()
-                    .filter(m -> currentWeek >= 0 && m.getWeekNumber() != null && m.getWeekNumber() <= currentWeek)
+                    .filter(m -> m.getWeekNumber() != null && m.getWeekNumber() <= effectiveWeek)
                     .collect(Collectors.toList());
         }
 
