@@ -20,7 +20,7 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const rectRef = useRef(null); 
     const previewRef = useRef(null); 
     const [paths, setPaths] = useState([]); // List of all completed paths
-    const [currentPath, setCurrentPath] = useState(null); // The path currently being drawn
+    const currentStrokeRef = useRef(null); // Ref for active stroke to avoid React lag
 
     useEffect(() => {
         if (isFullscreen) {
@@ -69,13 +69,13 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         if (tool === "pencil" || isEraser) {
             ctxRef.current.beginPath();
             ctxRef.current.moveTo(x, y);
-            setCurrentPath({ 
+            currentStrokeRef.current = { 
                 type: "path", 
                 points: [{x, y}], 
                 color: isEraser ? "#0f172a" : color, 
                 size: brushSize,
                 isEraser
-            });
+            };
         } else {
             setCurrentShape({ type: tool, startX: x, startY: y, x, y, color, size: brushSize });
         }
@@ -87,17 +87,15 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         if (!isDrawing) return;
         const { x, y } = getPos(e);
 
-        if ((tool === "pencil" || isEraser) && currentPath) {
-            // Draw smooth line using quadratic curves
-            const pts = currentPath.points;
+        if ((tool === "pencil" || isEraser) && currentStrokeRef.current) {
+            // Draw immediate line for feedback
+            const pts = currentStrokeRef.current.points;
             pts.push({x, y});
             
-            ctxRef.current.strokeStyle = currentPath.color;
-            ctxRef.current.lineWidth = currentPath.size;
-            ctxRef.current.globalCompositeOperation = currentPath.isEraser ? "destination-out" : "source-over";
+            ctxRef.current.strokeStyle = currentStrokeRef.current.isEraser ? "#0b1224" : color;
+            ctxRef.current.lineWidth = brushSize;
+            ctxRef.current.globalCompositeOperation = currentStrokeRef.current.isEraser ? "destination-out" : "source-over";
             
-            ctxRef.current.beginPath();
-            ctxRef.current.moveTo(pts[pts.length - 2].x, pts[pts.length - 2].y);
             ctxRef.current.lineTo(x, y);
             ctxRef.current.stroke();
         } else if (currentShape && previewRef.current) {
@@ -188,10 +186,9 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     };
 
     const stopDrawing = () => {
-        if (currentPath) {
-            setPaths([...paths, { ...currentPath, timestamp: Date.now() }]);
-            setCurrentPath(null);
-            // Redraw everything once to get the smooth quadratic curves
+        if (currentStrokeRef.current) {
+            setPaths(prev => [...prev, { ...currentStrokeRef.current, timestamp: Date.now() }]);
+            currentStrokeRef.current = null;
             setTimeout(redrawAll, 0); 
         } else if (currentShape) {
             const finalShape = {
