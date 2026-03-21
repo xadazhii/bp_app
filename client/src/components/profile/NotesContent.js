@@ -17,6 +17,8 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const [currentShape, setCurrentShape] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const rectRef = useRef(null); 
+    const previewRef = useRef(null); // Ref for direct DOM update to avoid re-render lag
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -39,7 +41,7 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     }, [initialValue]);
 
     const getPos = (e) => {
-        const rect = canvasRef.current.getBoundingClientRect();
+        const rect = rectRef.current || canvasRef.current.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         return {
@@ -49,12 +51,14 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     };
 
     const startDrawing = (e) => {
+        rectRef.current = canvasRef.current.getBoundingClientRect();
         const { x, y } = getPos(e);
         if (tool === "pencil" || isEraser) {
             ctxRef.current.beginPath();
             ctxRef.current.moveTo(x, y);
         } else {
             setCurrentShape({ type: tool, startX: x, startY: y, x, y, color, size: brushSize });
+            // The previewRef will be available after React renders the initial currentShape div
         }
         setIsDrawing(true);
         e.preventDefault();
@@ -70,8 +74,25 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
             ctxRef.current.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
             ctxRef.current.lineTo(x, y);
             ctxRef.current.stroke();
-        } else if (currentShape) {
-            setCurrentShape(prev => ({ ...prev, x, y }));
+        } else if (currentShape && previewRef.current) {
+            // Update preview directly via DOM for 60fps performance
+            const startX = currentShape.startX;
+            const startY = currentShape.startY;
+            const l = Math.min(startX, x);
+            const t = Math.min(startY, y);
+            const w = Math.abs(x - startX);
+            const h = Math.abs(y - startY);
+            
+            previewRef.current.style.left = `${l}px`;
+            previewRef.current.style.top = `${t}px`;
+            previewRef.current.style.width = `${w}px`;
+            previewRef.current.style.height = `${h}px`;
+            
+            // Still need to track final coords for when user releases mouse
+            // but we can debounce or just update on mouseUp.
+            // For now, let's keep it simple and update on mouseUp.
+            currentShape.finalX = x;
+            currentShape.finalY = y;
         }
         e.preventDefault();
     };
@@ -118,7 +139,12 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
 
     const stopDrawing = () => {
         if (currentShape) {
-            setShapes([...shapes, currentShape]);
+            const finalShape = {
+                ...currentShape,
+                x: currentShape.finalX || currentShape.x,
+                y: currentShape.finalY || currentShape.y
+            };
+            setShapes([...shapes, finalShape]);
             setCurrentShape(null);
         }
         ctxRef.current.closePath();
@@ -221,12 +247,12 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
                 />
 
                 {currentShape && (
-                    <div className="absolute pointer-events-none border-2 border-blue-500 border-dashed"
+                    <div ref={previewRef} className="absolute pointer-events-none border-2 border-blue-500 border-dashed"
                          style={{
-                             left: Math.min(currentShape.startX, currentShape.x),
-                             top: Math.min(currentShape.startY, currentShape.y),
-                             width: Math.abs(currentShape.x - currentShape.startX),
-                             height: Math.abs(currentShape.y - currentShape.startY),
+                             left: currentShape.startX,
+                             top: currentShape.startY,
+                             width: 0,
+                             height: 0,
                              borderRadius: currentShape.type === 'circle' ? '50%' : '0'
                          }}
                     />
