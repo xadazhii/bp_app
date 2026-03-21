@@ -517,7 +517,7 @@ public class TestService {
                 int assignedWeek;
                 if (weekNumber == -1) {
                     assignedWeek = weekNode.get("weekNumber").asInt();
-                    if (assignedWeek <= 0) assignedWeek = 1; // Default to week 1 if not specified in file
+                    if (assignedWeek < 0) assignedWeek = 1; // Default to week 1 only if negative
                 } else {
                     assignedWeek = weekNumber;
                 }

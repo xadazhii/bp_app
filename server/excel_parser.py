@@ -23,15 +23,34 @@ def parse_excel(file_path):
         for index, row in df.iterrows():
             row_list = [str(x).strip().lower() if not pd.isna(x) else "" for x in row]
             
-            # Match week marker even before header is found (often above the questions table)
-            # Check most likely column for marker (often 0 or 1)
+            # Match week marker or special test type even before header is found
+            special_found = False
             for col_val in row_list[:3]:
+                if "vstupný" in col_val or "vstupny" in col_val:
+                    current_week = 0
+                    general_topic = "Vstupný test"
+                    special_found = True
+                    break
+                elif "záverečný" in col_val or "zaverecny" in col_val:
+                    current_week = 13
+                    general_topic = "Záverečný test"
+                    special_found = True
+                    break
+                elif "skúška" in col_val or "skuska" in col_val:
+                    current_week = 14
+                    general_topic = "Skúška"
+                    special_found = True
+                    break
+                
                 match = week_pattern.match(col_val)
                 if match:
                     current_week = int(match.group(1))
                     if match.group(2): 
                         general_topic = match.group(2).strip()
                     break
+            if special_found:
+                # Continue row processing if you want, but we found our marker
+                pass
 
             # 1. Search for Header Row
             if not header_found:
