@@ -106,29 +106,41 @@ public class GradesService {
                 .collect(Collectors.toList());
         Set<Long> studentIds = students.stream().map(User::getId).collect(Collectors.toSet());
 
-        List<TestResult> results = testResultRepository.findAll().stream()
+        // Fetch results and associate with student
+        List<TestResult> allResults = testResultRepository.findAll().stream()
                 .filter(r -> r.getStudent() != null && studentIds.contains(r.getStudent().getId()))
                 .collect(Collectors.toList());
 
-        Map<Long, Map<Long, Integer>> scores = results.stream()
-                .collect(Collectors.groupingBy(r -> r.getStudent().getId(),
-                        Collectors.toMap(r -> r.getTest().getId(), TestResult::getScore, (a, b) -> Math.max(a, b))));
+        Map<Long, Map<Long, Integer>> scores = new HashMap<>();
+        Map<Long, Map<Long, Boolean>> cheated = new HashMap<>();
+        Map<Long, Map<Long, Long>> resultIdsMap = new HashMap<>();
 
-        Map<Long, Map<Long, Boolean>> cheated = results.stream()
-                .collect(Collectors.groupingBy(r -> r.getStudent().getId(),
-                        Collectors.toMap(r -> r.getTest().getId(), TestResult::isCheated, (e, n) -> e || n)));
+        for (TestResult r : allResults) {
+            Long sId = r.getStudent().getId();
+            Long tId = r.getTest().getId();
+            
+            scores.computeIfAbsent(sId, k -> new HashMap<>());
+            cheated.computeIfAbsent(sId, k -> new HashMap<>());
+            resultIdsMap.computeIfAbsent(sId, k -> new HashMap<>());
 
-        Map<Long, Map<Long, Long>> resultIds = results.stream()
-                .collect(Collectors.groupingBy(r -> r.getStudent().getId(),
-                        Collectors.toMap(r -> r.getTest().getId(), TestResult::getId, (id1, id2) -> {
-                            TestResult r1 = testResultRepository.findById(java.util.Objects.requireNonNull(id1)).orElse(null);
-                            TestResult r2 = testResultRepository.findById(java.util.Objects.requireNonNull(id2)).orElse(null);
-                            if (r1 != null && r2 != null && r1.getScore() >= r2.getScore()) return id1;
-                            return id2;
-                        })));
+            Integer oldScore = scores.get(sId).get(tId);
+            if (oldScore == null || r.getScore() > oldScore) {
+                scores.get(sId).put(tId, r.getScore());
+                resultIdsMap.get(sId).put(tId, r.getId());
+                cheated.get(sId).put(tId, r.isCheated());
+            } else if (r.getScore() == oldScore) {
+                // If scores are equal, keep existing if not cheated, or update if this one is less "problematic"
+                // Actually usually we just keep the first one found or highest ID.
+            }
+        }
 
         List<GradeTestInfo> testInfos = tests.stream().map(t -> {
-            int max = t.getQuestions().stream().mapToInt(q -> q.getAnswers().stream().mapToInt(Answer::getPointsWeight).max().orElse(0)).sum();
+            // Efficient max score calculation - should be pre-calculated in DB ideally but this is in-memory now
+            int max = t.getQuestions().stream()
+                    .mapToInt(q -> q.getAnswers().stream()
+                            .filter(a -> a.getPointsWeight() > 0)
+                            .mapToInt(Answer::getPointsWeight).sum())
+                    .sum();
             return new GradeTestInfo(t.getId(), t.getTitle(), max, t.getWeekNumber());
         }).collect(Collectors.toList());
 
@@ -136,7 +148,7 @@ public class GradesService {
                 s.getId(), s.getUsername(), s.getEmail(),
                 scores.getOrDefault(s.getId(), Collections.emptyMap()),
                 cheated.getOrDefault(s.getId(), Collections.emptyMap()),
-                resultIds.getOrDefault(s.getId(), Collections.emptyMap())
+                resultIdsMap.getOrDefault(s.getId(), Collections.emptyMap())
         )).collect(Collectors.toList());
 
         return new GradesSummaryResponse(testInfos, studentGrades);

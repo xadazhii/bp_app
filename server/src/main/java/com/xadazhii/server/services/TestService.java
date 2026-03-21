@@ -68,6 +68,12 @@ public class TestService {
                 : null;
 
         List<Test> testList;
+        // Pre-fetch all materials once per request to avoid N+1
+        List<Material> allMaterials = materialRepository.findAll();
+        Map<Integer, List<Material>> materialsByWeek = allMaterials.stream()
+                .filter(m -> m.getWeekNumber() != null)
+                .collect(Collectors.groupingBy(Material::getWeekNumber));
+
         if (all) {
             testList = testRepository.findAllWithQuestions();
         } else {
@@ -76,7 +82,6 @@ public class TestService {
             if (settings != null && settings.getSemesterStartDate() != null) {
                 long startMs = settings.getSemesterStartDate().atZone(ZoneId.of("Europe/Bratislava")).toInstant().toEpochMilli();
                 long diffInMs = Instant.now().toEpochMilli() - startMs;
-                // 1 minute = 1 week (for testing purposes)
                 int week = (int) (diffInMs / 60000L) + 1;
                 currentWeekValue = Math.max(0, week);
             }
@@ -89,7 +94,7 @@ public class TestService {
                         if (w == null || w <= 0) return true;
                         if (w <= 13) {
                             if (w > finalWeek) return false;
-                            List<Material> weekMaterials = materialRepository.findByWeekNumber(w);
+                            List<Material> weekMaterials = materialsByWeek.getOrDefault(w, Collections.emptyList());
                             if (weekMaterials.isEmpty()) return false;
                             return (completedMaterialIds != null && weekMaterials.stream().allMatch(m -> completedMaterialIds.contains(m.getId())));
                         }
@@ -112,7 +117,7 @@ public class TestService {
                     LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Bratislava"));
                     available = now.isAfter(test.getExamDateTime());
                 } else if (test.getWeekNumber() != null && test.getWeekNumber() > 0 && test.getWeekNumber() <= 12) {
-                    List<Material> weekMaterials = materialRepository.findByWeekNumber(test.getWeekNumber());
+                    List<Material> weekMaterials = materialsByWeek.getOrDefault(test.getWeekNumber(), Collections.emptyList());
                     if (weekMaterials.isEmpty()) {
                         available = false;
                     } else {
