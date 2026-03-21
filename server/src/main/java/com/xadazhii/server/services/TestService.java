@@ -142,8 +142,10 @@ public class TestService {
 
     private int getQuestionLimit(Integer week) {
         if (week == null) return 0;
-        if (week >= 1 && week <= 12) return 8;
-        if (week == 14) return 25;
+        if (week == 0) return 25;   // Entry test limit
+        if (week >= 1 && week <= 12) return 8; // Weekly test limit
+        if (week == 13) return 25;  // Final test limit
+        if (week == 14) return 25;  // Exam limit
         return 0;
     }
 
