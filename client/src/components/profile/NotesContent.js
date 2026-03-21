@@ -21,6 +21,17 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const previewRef = useRef(null); // Ref for direct DOM update to avoid re-render lag
 
     useEffect(() => {
+        if (isFullscreen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isFullscreen]);
+
+    useEffect(() => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width * 2;
@@ -317,6 +328,17 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
             })
             .catch(() => setLoading(false));
     };
+
+    useEffect(() => {
+        if (selectedNote) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [selectedNote]);
 
     useEffect(() => {
         fetchNotes();
