@@ -18,7 +18,9 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const rectRef = useRef(null); 
-    const previewRef = useRef(null); // Ref for direct DOM update to avoid re-render lag
+    const previewRef = useRef(null); 
+    const [paths, setPaths] = useState([]); // List of all completed paths
+    const [currentPath, setCurrentPath] = useState(null); // The path currently being drawn
 
     useEffect(() => {
         if (isFullscreen) {
@@ -67,9 +69,15 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         if (tool === "pencil" || isEraser) {
             ctxRef.current.beginPath();
             ctxRef.current.moveTo(x, y);
+            setCurrentPath({ 
+                type: "path", 
+                points: [{x, y}], 
+                color: isEraser ? "#0f172a" : color, 
+                size: brushSize,
+                isEraser
+            });
         } else {
             setCurrentShape({ type: tool, startX: x, startY: y, x, y, color, size: brushSize });
-            // The previewRef will be available after React renders the initial currentShape div
         }
         setIsDrawing(true);
         e.preventDefault();
@@ -79,10 +87,17 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         if (!isDrawing) return;
         const { x, y } = getPos(e);
 
-        if (tool === "pencil" || isEraser) {
-            ctxRef.current.strokeStyle = isEraser ? "#0f172a" : color;
-            ctxRef.current.lineWidth = brushSize;
-            ctxRef.current.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
+        if ((tool === "pencil" || isEraser) && currentPath) {
+            // Draw smooth line using quadratic curves
+            const pts = currentPath.points;
+            pts.push({x, y});
+            
+            ctxRef.current.strokeStyle = currentPath.color;
+            ctxRef.current.lineWidth = currentPath.size;
+            ctxRef.current.globalCompositeOperation = currentPath.isEraser ? "destination-out" : "source-over";
+            
+            ctxRef.current.beginPath();
+            ctxRef.current.moveTo(pts[pts.length - 2].x, pts[pts.length - 2].y);
             ctxRef.current.lineTo(x, y);
             ctxRef.current.stroke();
         } else if (currentShape && previewRef.current) {
@@ -99,9 +114,6 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
             previewRef.current.style.width = `${w}px`;
             previewRef.current.style.height = `${h}px`;
             
-            // Still need to track final coords for when user releases mouse
-            // but we can debounce or just update on mouseUp.
-            // For now, let's keep it simple and update on mouseUp.
             currentShape.finalX = x;
             currentShape.finalY = y;
         }
@@ -111,60 +123,124 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const redrawAll = () => {
         const canvas = canvasRef.current;
         const ctx = ctxRef.current;
+        const rect = canvas.getBoundingClientRect();
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.setTransform(2, 0, 0, 2, 0, 0); // Scale(2) for retina
 
-        shapes.forEach(shape => {
+        [...paths, ...shapes].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).forEach(item => {
             ctx.beginPath();
-            ctx.strokeStyle = shape.color;
-            ctx.lineWidth = shape.size;
+            ctx.strokeStyle = item.color;
+            ctx.lineWidth = item.size;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
+            ctx.globalCompositeOperation = item.isEraser ? "destination-out" : "source-over";
 
-            const sx = shape.startX + offset.x;
-            const sy = shape.startY + offset.y;
-            const ex = shape.x + offset.x;
-            const ey = shape.y + offset.y;
+            if (item.type === "path") {
+                const pts = item.points;
+                if (pts.length < 2) return;
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i = 1; i < pts.length - 2; i++) {
+                    const xc = (pts[i].x + pts[i + 1].x) / 2;
+                    const yc = (pts[i].y + pts[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+                }
+                // For the last 2 points
+                if (pts.length > 2) {
+                    ctx.quadraticCurveTo(
+                        pts[pts.length - 2].x, 
+                        pts[pts.length - 2].y, 
+                        pts[pts.length - 1].x, 
+                        pts[pts.length - 1].y
+                    );
+                }
+                ctx.stroke();
+            } else {
+                const sx = item.startX + offset.x;
+                const sy = item.startY + offset.y;
+                const ex = item.x + offset.x;
+                const ey = item.y + offset.y;
 
-            if (shape.type === "rectangle") {
-                ctx.strokeRect(sx, sy, ex - sx, ey - sy);
-            } else if (shape.type === "circle") {
-                const radius = Math.sqrt(Math.pow(ex - sx, 2) + Math.pow(ey - sy, 2));
-                ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
-                ctx.stroke();
-            } else if (shape.type === "line") {
-                ctx.moveTo(sx, sy);
-                ctx.lineTo(ex, ey);
-                ctx.stroke();
-            } else if (shape.type === "arrow") {
-                ctx.moveTo(sx, sy);
-                ctx.lineTo(ex, ey);
-                const headlen = 15;
-                const angle = Math.atan2(ey - sy, ex - sx);
-                ctx.lineTo(ex - headlen * Math.cos(angle - Math.PI / 6), ey - headlen * Math.sin(angle - Math.PI / 6));
-                ctx.moveTo(ex, ey);
-                ctx.lineTo(ex - headlen * Math.cos(angle + Math.PI / 6), ey - headlen * Math.sin(angle + Math.PI / 6));
-                ctx.stroke();
+                if (item.type === "rectangle") {
+                    ctx.strokeRect(sx, sy, ex - sx, ey - sy);
+                } else if (item.type === "circle") {
+                    const radius = Math.sqrt(Math.pow(ex - sx, 2) + Math.pow(ey - sy, 2));
+                    ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                } else if (item.type === "line") {
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                    ctx.stroke();
+                } else if (item.type === "arrow") {
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                    const headlen = 15;
+                    const angle = Math.atan2(ey - sy, ex - sx);
+                    ctx.lineTo(ex - headlen * Math.cos(angle - Math.PI / 6), ey - headlen * Math.sin(angle - Math.PI / 6));
+                    ctx.moveTo(ex, ey);
+                    ctx.lineTo(ex - headlen * Math.cos(angle + Math.PI / 6), ey - headlen * Math.sin(angle + Math.PI / 6));
+                    ctx.stroke();
+                }
             }
         });
+        ctx.restore();
     };
 
     const stopDrawing = () => {
-        if (currentShape) {
+        if (currentPath) {
+            setPaths([...paths, { ...currentPath, timestamp: Date.now() }]);
+            setCurrentPath(null);
+            // Redraw everything once to get the smooth quadratic curves
+            setTimeout(redrawAll, 0); 
+        } else if (currentShape) {
             const finalShape = {
                 ...currentShape,
                 x: currentShape.finalX || currentShape.x,
-                y: currentShape.finalY || currentShape.y
+                y: currentShape.finalY || currentShape.y,
+                timestamp: Date.now()
             };
             setShapes([...shapes, finalShape]);
             setCurrentShape(null);
+            setTimeout(redrawAll, 0);
         }
         ctxRef.current.closePath();
         setIsDrawing(false);
     };
 
+    const undo = useCallback((e) => {
+        if (e) e.stopPropagation();
+        
+        // Find if the most recent item is a path or a shape
+        const combined = [...paths, ...shapes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        if (combined.length === 0) return;
+        
+        const last = combined[0];
+        if (last.type === "path") {
+            setPaths(prev => prev.filter(p => p !== last));
+        } else {
+            setShapes(prev => prev.filter(s => s !== last));
+        }
+        setTimeout(redrawAll, 0);
+    }, [paths, shapes]);
+
+    useEffect(() => {
+        const handleKeys = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                e.stopPropagation();
+                undo();
+            }
+        };
+        window.addEventListener('keydown', handleKeys, true); // true for capture to beat global NotesContent handler
+        return () => window.removeEventListener('keydown', handleKeys, true);
+    }, [undo]);
+
     const clearCanvas = () => {
         const canvas = canvasRef.current;
         ctxRef.current.clearRect(0, 0, canvas.width, canvas.height);
+        setPaths([]);
+        setShapes([]);
     };
 
     const handleConfirm = () => {
@@ -227,6 +303,9 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
                 </div>
 
                 <div className="flex gap-2">
+                    <button type="button" onClick={undo} className="p-2 text-slate-400 hover:text-white transition-all bg-black/20 rounded-xl" title="Späť (Cmd+Z)">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                    </button>
                     <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} className="p-2 text-slate-400 hover:text-white transition-all bg-black/20 rounded-xl" title="Celá obrazovka">
                         {isFullscreen ? (
                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5" /></svg>
