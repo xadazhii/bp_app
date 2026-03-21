@@ -33,25 +33,88 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         };
     }, [isFullscreen]);
 
+    const redrawAll = useCallback(() => {
+        const canvas = canvasRef.current;
+        const ctx = ctxRef.current;
+        if (!canvas || !ctx) return;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.setTransform(2, 0, 0, 2, 0, 0); // Scale(2) for retina
+
+        const combined = [...paths, ...shapes].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        
+        combined.forEach(item => {
+            ctx.beginPath();
+            ctx.strokeStyle = item.color;
+            ctx.lineWidth = item.size;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.globalCompositeOperation = item.isEraser ? "destination-out" : "source-over";
+
+            if (item.type === "path") {
+                const pts = item.points;
+                if (pts.length < 2) return;
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i = 1; i < pts.length - 2; i++) {
+                    const xc = (pts[i].x + pts[i + 1].x) / 2;
+                    const yc = (pts[i].y + pts[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+                }
+                if (pts.length > 2) {
+                    ctx.quadraticCurveTo(
+                        pts[pts.length - 2].x, 
+                        pts[pts.length - 2].y, 
+                        pts[pts.length - 1].x, 
+                        pts[pts.length - 1].y
+                    );
+                }
+                ctx.stroke();
+            } else {
+                const sx = item.startX + offset.x;
+                const sy = item.startY + offset.y;
+                const ex = item.x + offset.x;
+                const ey = item.y + offset.y;
+
+                if (item.type === "rectangle") {
+                    ctx.strokeRect(sx, sy, ex - sx, ey - sy);
+                } else if (item.type === "circle") {
+                    const radius = Math.sqrt(Math.pow(ex - sx, 2) + Math.pow(ey - sy, 2));
+                    ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                } else if (item.type === "line") {
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                    ctx.stroke();
+                } else if (item.type === "arrow") {
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                    const headlen = 15;
+                    const angle = Math.atan2(ey - sy, ex - sx);
+                    ctx.lineTo(ex - headlen * Math.cos(angle - Math.PI / 6), ey - headlen * Math.sin(angle - Math.PI / 6));
+                    ctx.moveTo(ex, ey);
+                    ctx.lineTo(ex - headlen * Math.cos(angle + Math.PI / 6), ey - headlen * Math.sin(angle + Math.PI / 6));
+                    ctx.stroke();
+                }
+            }
+        });
+        ctx.restore();
+    }, [paths, shapes, offset]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width * 2;
         canvas.height = rect.height * 2;
         const ctx = canvas.getContext("2d");
-        ctx.scale(2, 2);
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
         ctxRef.current = ctx;
+        
+        redrawAll();
+    }, [initialValue, redrawAll]);
 
-        if (initialValue && initialValue.startsWith("data:image")) {
-            const img = new Image();
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0, rect.width, rect.height);
-            };
-            img.src = initialValue;
-        }
-    }, [initialValue]);
+    useEffect(() => {
+        redrawAll();
+    }, [paths, shapes, offset, redrawAll]);
 
     const getPos = (e) => {
         const rect = rectRef.current || canvasRef.current.getBoundingClientRect();
@@ -118,78 +181,10 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         e.preventDefault();
     };
 
-    const redrawAll = () => {
-        const canvas = canvasRef.current;
-        const ctx = ctxRef.current;
-        const rect = canvas.getBoundingClientRect();
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.save();
-        ctx.setTransform(2, 0, 0, 2, 0, 0); // Scale(2) for retina
-
-        [...paths, ...shapes].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).forEach(item => {
-            ctx.beginPath();
-            ctx.strokeStyle = item.color;
-            ctx.lineWidth = item.size;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.globalCompositeOperation = item.isEraser ? "destination-out" : "source-over";
-
-            if (item.type === "path") {
-                const pts = item.points;
-                if (pts.length < 2) return;
-                ctx.moveTo(pts[0].x, pts[0].y);
-                for (let i = 1; i < pts.length - 2; i++) {
-                    const xc = (pts[i].x + pts[i + 1].x) / 2;
-                    const yc = (pts[i].y + pts[i + 1].y) / 2;
-                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
-                }
-                // For the last 2 points
-                if (pts.length > 2) {
-                    ctx.quadraticCurveTo(
-                        pts[pts.length - 2].x, 
-                        pts[pts.length - 2].y, 
-                        pts[pts.length - 1].x, 
-                        pts[pts.length - 1].y
-                    );
-                }
-                ctx.stroke();
-            } else {
-                const sx = item.startX + offset.x;
-                const sy = item.startY + offset.y;
-                const ex = item.x + offset.x;
-                const ey = item.y + offset.y;
-
-                if (item.type === "rectangle") {
-                    ctx.strokeRect(sx, sy, ex - sx, ey - sy);
-                } else if (item.type === "circle") {
-                    const radius = Math.sqrt(Math.pow(ex - sx, 2) + Math.pow(ey - sy, 2));
-                    ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
-                    ctx.stroke();
-                } else if (item.type === "line") {
-                    ctx.moveTo(sx, sy);
-                    ctx.lineTo(ex, ey);
-                    ctx.stroke();
-                } else if (item.type === "arrow") {
-                    ctx.moveTo(sx, sy);
-                    ctx.lineTo(ex, ey);
-                    const headlen = 15;
-                    const angle = Math.atan2(ey - sy, ex - sx);
-                    ctx.lineTo(ex - headlen * Math.cos(angle - Math.PI / 6), ey - headlen * Math.sin(angle - Math.PI / 6));
-                    ctx.moveTo(ex, ey);
-                    ctx.lineTo(ex - headlen * Math.cos(angle + Math.PI / 6), ey - headlen * Math.sin(angle + Math.PI / 6));
-                    ctx.stroke();
-                }
-            }
-        });
-        ctx.restore();
-    };
-
     const stopDrawing = () => {
         if (currentStrokeRef.current) {
             setPaths(prev => [...prev, { ...currentStrokeRef.current, timestamp: Date.now() }]);
             currentStrokeRef.current = null;
-            setTimeout(redrawAll, 0); 
         } else if (currentShape) {
             const finalShape = {
                 ...currentShape,
@@ -197,9 +192,8 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
                 y: currentShape.finalY || currentShape.y,
                 timestamp: Date.now()
             };
-            setShapes([...shapes, finalShape]);
+            setShapes(prev => [...prev, finalShape]);
             setCurrentShape(null);
-            setTimeout(redrawAll, 0);
         }
         ctxRef.current.closePath();
         setIsDrawing(false);
@@ -208,7 +202,6 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const undo = useCallback((e) => {
         if (e) e.stopPropagation();
         
-        // Find if the most recent item is a path or a shape
         const combined = [...paths, ...shapes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         if (combined.length === 0) return;
         
@@ -218,7 +211,6 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         } else {
             setShapes(prev => prev.filter(s => s !== last));
         }
-        setTimeout(redrawAll, 0);
     }, [paths, shapes]);
 
     useEffect(() => {
