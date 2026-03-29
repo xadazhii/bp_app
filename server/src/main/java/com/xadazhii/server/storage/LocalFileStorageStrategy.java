@@ -6,7 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnProperty(name = "btsss.app.storage", havingValue = "local", matchIfMissing = true)
 public class LocalFileStorageStrategy implements FileStorageStrategy {
 
     private final Path root = Paths.get("uploads");

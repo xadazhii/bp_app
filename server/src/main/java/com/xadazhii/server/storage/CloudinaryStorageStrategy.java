@@ -3,13 +3,16 @@ package com.xadazhii.server.storage;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
 
+ 
 @Component
+@ConditionalOnProperty(name = "btsss.app.storage", havingValue = "cloudinary")
 public class CloudinaryStorageStrategy implements FileStorageStrategy {
 
     @Autowired
