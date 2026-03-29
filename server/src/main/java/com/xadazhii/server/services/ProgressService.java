@@ -77,13 +77,11 @@ public class ProgressService {
             List<Question> questions = (r.getTest().getQuestions() != null) ? r.getTest().getQuestions() : Collections.emptyList();
             int limit = getQuestionLimit(r.getTest().getWeekNumber());
 
+            int ppq = getPointsPerQuestion(r.getTest().getWeekNumber());
             if (limit > 0 && questions.size() > limit) {
-                List<Question> shuffled = new ArrayList<>(questions);
-                shuffled.sort(Comparator.comparing(Question::getId));
-                Collections.shuffle(shuffled, new Random(Objects.hash(userId, r.getTest().getId())));
-                maxScore = shuffled.subList(0, limit).stream().mapToInt(Question::getPoints).sum();
+                maxScore = limit * ppq;
             } else {
-                maxScore = questions.stream().mapToInt(Question::getPoints).sum();
+                maxScore = questions.size() * ppq;
             }
 
             return new UserStatsResponse.UserTestResultDto(
@@ -102,9 +100,17 @@ public class ProgressService {
         return new UserStatsResponse(lectureStats, seminarStats, testStats);
     }
 
+    private int getPointsPerQuestion(Integer week) {
+        if (week == null) return 1;
+        if (week == 0 || week == 13 || week == 14) return 2;
+        return 1;
+    }
+
     private int getQuestionLimit(Integer week) {
         if (week == null) return 0;
+        if (week == 0) return 25;
         if (week >= 1 && week <= 12) return 8;
+        if (week == 13) return 25;
         if (week == 14) return 25;
         return 0;
     }

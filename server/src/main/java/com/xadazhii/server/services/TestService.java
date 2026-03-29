@@ -130,19 +130,27 @@ public class TestService {
             List<Question> questions = test.getQuestions();
             int totalQ = (questions != null) ? questions.size() : 0;
             int limit = getQuestionLimit(test.getWeekNumber());
+            int ppq = getPointsPerQuestion(test.getWeekNumber());
 
             if (isStudentView && userId != null && limit > 0 && totalQ > limit) {
                 response.setQuestionCount(limit);
                 List<Question> shuffled = new ArrayList<>(questions);
                 shuffled.sort(Comparator.comparing(Question::getId));
                 Collections.shuffle(shuffled, new Random(Objects.hash(userId, test.getId())));
-                response.setTotalPoints(shuffled.subList(0, limit).stream().mapToInt(Question::getPoints).sum());
+                response.setTotalPoints(limit * ppq);
             } else {
                 response.setQuestionCount(totalQ);
-                response.setTotalPoints((questions != null) ? questions.stream().mapToInt(Question::getPoints).sum() : 0);
+                response.setTotalPoints(totalQ * ppq);
             }
             return response;
         }).collect(Collectors.toList());
+    }
+
+    private int getPointsPerQuestion(Integer week) {
+        if (week == null) return 1;
+        // Entry (0), Final (13) and Exam (14) are 2 points per question
+        if (week == 0 || week == 13 || week == 14) return 2;
+        return 1;
     }
 
     private int getQuestionLimit(Integer week) {
@@ -245,8 +253,9 @@ public class TestService {
         Test test = testRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new NoSuchElementException("Test s id " + id + " nebol nájdený"));
 
+        int ppq = getPointsPerQuestion(test.getWeekNumber());
         List<Map<String, Object>> questionsDto = test.getQuestions().stream()
-                .map(this::mapQuestionToDto)
+                .map(q -> mapQuestionToDto(q, ppq))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         if (!full && userId != null) {
@@ -267,17 +276,18 @@ public class TestService {
         return result;
     }
 
-    private Map<String, Object> mapQuestionToDto(Question q) {
+    private Map<String, Object> mapQuestionToDto(Question q, int pointsPerQuestion) {
         Map<String, Object> qDto = new HashMap<>();
         qDto.put("questionId", q.getId());
         qDto.put("question", q.getQuestionText());
         qDto.put("type", q.getType());
-        qDto.put("points", q.getPoints());
+        qDto.put("points", pointsPerQuestion);
 
         List<Map<String, Object>> answersDto = q.getAnswers().stream().map(a -> {
             Map<String, Object> ansDto = new HashMap<>();
             ansDto.put("answerId", a.getId());
             ansDto.put("text", a.getAnswerText());
+            // Scale pointWeight if necessary, but UI usually just shows text
             ansDto.put("pointsWeight", a.getPointsWeight());
             return ansDto;
         }).collect(Collectors.toList());
@@ -385,7 +395,8 @@ public class TestService {
             qMap.put("questionId", q.getId());
             qMap.put("questionText", q.getQuestionText());
             qMap.put("type", q.getType());
-            qMap.put("points", q.getPoints());
+            int ppq = getPointsPerQuestion(result.getTest().getWeekNumber());
+            qMap.put("points", ppq);
             qMap.put("allAnswers", q.getAnswers().stream().map(a -> {
                 Map<String, Object> am = new HashMap<>();
                 am.put("id", a.getId());
@@ -531,6 +542,7 @@ public class TestService {
                 
                 t.setWeekNumber(assignedWeek);
                 t.setTitle(getAutoTitle(assignedWeek, type, generalTopic));
+                int ppq = getPointsPerQuestion(assignedWeek);
 
                 List<Question> qs = new ArrayList<>();
                 for (JsonNode qn : weekNode.get("questions")) {
@@ -550,11 +562,22 @@ public class TestService {
                         a.setQuestion(q);
                         String letter = an.get("letter").asText();
                         if (letter.equals("NEVIEM")) a.setPointsWeight(0);
-                        else if (correct.contains(letter)) { a.setPointsWeight(1); cCount++; }
+                        else if (correct.contains(letter)) { cCount++; }
                         else a.setPointsWeight(-1);
                         ans.add(a);
                     }
-                    q.setPoints(Math.max(1, cCount));
+                    
+                    // Distribute question points among correct answers
+                    for (Answer a : ans) {
+                        if (a.getPointsWeight() == 0) continue;
+                        if (a.getPointsWeight() == -1) continue; 
+                        // If it's a correct answer, assign its weight
+                        // If ppq=2 and cCount=1, weight=2. If cCount=2, weight=1.
+                        // If cCount > ppq, we'll just give 1 per correct answer.
+                        a.setPointsWeight(Math.max(1, ppq / Math.max(1, cCount)));
+                    }
+                    
+                    q.setPoints(ppq);
                     q.setAnswers(ans);
                     qs.add(q);
                 }
@@ -632,13 +655,20 @@ public class TestService {
                 int cCount = 0;
                 for (int j = 0; j < opts.length; j++) {
                     if (opts[j].trim().isEmpty()) continue;
+                    if (ltrs[j].equals("NEVIEM")) continue;
+                    if (correct.contains(ltrs[j])) cCount++;
+                }
+
+                int ppq = getPointsPerQuestion(cur.getWeekNumber());
+                for (int j = 0; j < opts.length; j++) {
+                    if (opts[j].trim().isEmpty()) continue;
                     Answer a = new Answer(); a.setAnswerText(opts[j]); a.setQuestion(q);
                     if (ltrs[j].equals("NEVIEM")) a.setPointsWeight(0);
-                    else if (correct.contains(ltrs[j])) { a.setPointsWeight(1); cCount++; }
+                    else if (correct.contains(ltrs[j])) { a.setPointsWeight(Math.max(1, ppq / Math.max(1, cCount))); }
                     else a.setPointsWeight(-1);
                     ans.add(a);
                 }
-                q.setPoints(Math.max(1, cCount)); q.setAnswers(ans); qs.add(q);
+                q.setPoints(ppq); q.setAnswers(ans); qs.add(q);
             }
             if (!qs.isEmpty()) { 
                 cur.setQuestions(qs); 

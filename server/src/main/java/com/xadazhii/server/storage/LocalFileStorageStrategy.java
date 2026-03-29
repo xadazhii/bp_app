@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-// Deactivated: use CloudinaryStorageStrategy instead
 public class LocalFileStorageStrategy implements FileStorageStrategy {
 
     private final Path root = Paths.get("uploads");
