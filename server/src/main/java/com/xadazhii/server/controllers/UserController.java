@@ -17,6 +17,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.xadazhii.server.security.jwt.JwtUtils jwtUtils;
+
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
+
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
@@ -61,9 +66,17 @@ public class UserController {
     @PreAuthorize("isAuthenticated() && (#userId == principal.id)")
     public ResponseEntity<?> updateUsername(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         try {
-            userService.updateUsername(userId, request.get("username"));
-            return ResponseEntity.ok(new MessageResponse("Používateľské meno bolo úspešne zmenené."));
+            String newUsername = request.get("username");
+            logger.info("Zmena mena pre používateľa ID {}: na {}", userId, newUsername);
+            userService.updateUsername(userId, newUsername);
+            String newToken = jwtUtils.generateTokenFromUsername(newUsername);
+            return ResponseEntity.ok(Map.of(
+                "message", "Používateľské meno bolo úspešne zmenené.",
+                "accessToken", newToken,
+                "username", newUsername
+            ));
         } catch (Exception e) {
+            logger.error("Chyba pri zmene mena ID {}: {}", userId, e.getMessage());
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }

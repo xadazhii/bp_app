@@ -118,8 +118,12 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
                 const user = JSON.parse(localStorage.getItem("user"));
                 user.username = newUsername;
+                if (data.accessToken) {
+                    user.accessToken = data.accessToken;
+                }
                 localStorage.setItem("user", JSON.stringify(user));
 
+                // Notify other components if they're listening
                 setTimeout(() => window.location.reload(), 1500);
             } else {
                 setMessage(data.message || "Nepodarilo sa zmeniť meno.");
@@ -245,6 +249,12 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                 <div className="space-y-6">
                     {}
                     <div className="bg-[#0f172a]/40 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                        {message && !isError && (
+                            <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-green-900/20 text-green-300 border border-green-500/30 flex items-center gap-2">
+                                <CheckCircleIcon className="w-4 h-4" />
+                                {message}
+                            </div>
+                        )}
                         <div className="flex items-center gap-6">
                             <div className="relative group shrink-0">
                                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-blue-600/30 shadow-2xl relative transition-transform duration-300 group-hover:scale-105">
@@ -298,6 +308,12 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                             <UserCircleIcon className="w-5 h-5 mr-2" />
                             Meno používateľa
                         </h3>
+                        {message && isError && (
+                            <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-red-900/20 text-red-300 border border-red-500/30 flex items-center gap-2">
+                                <ExclamationTriangleIcon className="w-4 h-4" />
+                                {message}
+                            </div>
+                        )}
                         <form onSubmit={handleUsernameUpdate} className="space-y-4">
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Nové meno</label>
