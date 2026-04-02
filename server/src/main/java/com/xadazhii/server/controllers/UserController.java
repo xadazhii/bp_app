@@ -46,6 +46,39 @@ public class UserController {
         }
     }
 
+    @PutMapping("/users/{userId}/password")
+    @PreAuthorize("isAuthenticated() && (#userId == principal.id)")
+    public ResponseEntity<?> updateUserPassword(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        try {
+            userService.updatePassword(userId, request.get("oldPassword"), request.get("newPassword"));
+            return ResponseEntity.ok(new MessageResponse("Heslo bolo úspešne zmenené."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/users/{userId}/username")
+    @PreAuthorize("isAuthenticated() && (#userId == principal.id)")
+    public ResponseEntity<?> updateUsername(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        try {
+            userService.updateUsername(userId, request.get("username"));
+            return ResponseEntity.ok(new MessageResponse("Používateľské meno bolo úspešne zmenené."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/users/{userId}/pseudonym")
+    @PreAuthorize("isAuthenticated() && (#userId == principal.id)")
+    public ResponseEntity<?> updatePseudonym(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        try {
+            userService.updatePseudonym(userId, request.get("pseudonym"));
+            return ResponseEntity.ok(new MessageResponse("Pseudonym bol úspešne zmenený."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {

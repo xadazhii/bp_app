@@ -108,16 +108,16 @@ const Profile = () => {
             setUserReady(true);
             loadStats(user.id);
 
-            fetch(`${API_URL}/api/profile/info`, {
+            fetch(`${API_URL}/api/profile`, {
                 headers: authHeader()
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (data && data.pseudonym) {
-                        setCurrentUser(prev => ({ ...prev, pseudonym: data.pseudonym }));
+                    if (data && data.username) {
+                        setCurrentUser(prev => ({ ...prev, ...data }));
                     }
                 })
-                .catch(err => console.error("Chyba pri načítaní pseudonymu:", err));
+                .catch(err => console.error("Chyba pri načítaní profilu:", err));
         }
     }, [loadStats]);
 

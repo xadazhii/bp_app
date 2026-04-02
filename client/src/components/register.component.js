@@ -87,7 +87,7 @@ class Register extends Component {
         AuthService.register(username, email, password).then(
             response => {
                 this.setState({
-                    message: response.message,
+                    message: "Registrácia úspešná! Prihlasujem...",
                     successful: true,
                     loading: false
                 });

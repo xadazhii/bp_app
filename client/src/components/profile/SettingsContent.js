@@ -8,6 +8,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageChange }) => {
     const fileInputRef = useRef(null);
     const [newUsername, setNewUsername] = useState(currentUser?.username || "");
+    const [pseudonym, setPseudonym] = useState(currentUser?.pseudonym || "");
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -122,6 +123,43 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                 setTimeout(() => window.location.reload(), 1500);
             } else {
                 setMessage(data.message || "Nepodarilo sa zmeniť meno.");
+                setIsError(true);
+            }
+        } catch (error) {
+            setMessage(`Chyba: ${error.message}`);
+            setIsError(true);
+        } finally {
+            setUserLoading(false);
+        }
+    };
+
+    const handlePseudonymUpdate = async (e) => {
+        e.preventDefault();
+        setMessage("");
+        setIsError(false);
+        setUserLoading(true);
+
+        try {
+            const response = await fetch(`${API_URL}/api/users/${currentUser.id}/pseudonym`, {
+                method: "PUT",
+                headers: {
+                    ...authHeader(),
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ pseudonym }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setMessage(data.message || "Pseudonym bol úspešne zmenený!");
+
+                const user = JSON.parse(localStorage.getItem("user"));
+                user.pseudonym = pseudonym;
+                localStorage.setItem("user", JSON.stringify(user));
+
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                setMessage(data.message || "Nepodarilo sa zmeniť pseudonym.");
                 setIsError(true);
             }
         } catch (error) {
@@ -278,6 +316,36 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                 className={`w-full bg-blue-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95 flex items-center justify-center gap-2 ${userLoading ? 'opacity-50' : 'hover:bg-blue-700'}`}
                             >
                                 {userLoading ? "Ukladá sa..." : "Uložiť zmenu mena"}
+                            </button>
+                        </form>
+                    </div>
+
+                    {}
+                    <div className="bg-[#0f172a]/40 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                        <h3 className="text-lg font-bold mb-4 flex items-center text-emerald-400">
+                            <UserCircleIcon className="w-5 h-5 mr-2" />
+                            Plynulosť (Pseudonym)
+                        </h3>
+                        <form onSubmit={handlePseudonymUpdate} className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Váš pseudonym (v rebríčku)</label>
+                                <input
+                                    type="text"
+                                    value={pseudonym}
+                                    onChange={(e) => setPseudonym(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl border bg-slate-900/50 border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-100 text-sm transition-all"
+                                    placeholder="Zadajte pseudonym"
+                                />
+                                <p className="text-[10px] text-slate-500 mt-1 italic">
+                                    Tento pseudonym bude viditeľný pre ostatných študentov v rebríčku namiesto vášho mena.
+                                </p>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={userLoading}
+                                className={`w-full bg-emerald-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/20 active:scale-95 flex items-center justify-center gap-2 ${userLoading ? 'opacity-50' : 'hover:bg-emerald-700'}`}
+                            >
+                                {userLoading ? "Ukladá sa..." : "Uložiť pseudonym"}
                             </button>
                         </form>
                     </div>

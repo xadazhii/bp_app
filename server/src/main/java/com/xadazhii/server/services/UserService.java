@@ -65,13 +65,33 @@ public class UserService {
 
     public void updatePassword(Long userId, String currentPassword, String newPassword) {
         User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
-                .orElseThrow(() -> new RuntimeException("Interná chyba: Používateľ nebol nájdený."));
+                .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený."));
 
         if (!encoder.matches(currentPassword, user.getPassword())) {
-            throw new RuntimeException("Chyba: Súčasné heslo je nesprávne.");
+            throw new RuntimeException("Súčasné heslo je nesprávne!");
         }
 
         user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public void updateUsername(Long userId, String newUsername) {
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
+                .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený."));
+
+        if (userRepository.existsByUsername(newUsername) && !user.getUsername().equals(newUsername)) {
+            throw new RuntimeException("Toto používateľské meno už existuje!");
+        }
+
+        user.setUsername(newUsername);
+        userRepository.save(user);
+    }
+
+    public void updatePseudonym(Long userId, String pseudonym) {
+        User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
+                .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený."));
+
+        user.setPseudonym(pseudonym);
         userRepository.save(user);
     }
 
@@ -106,6 +126,7 @@ public class UserService {
         profile.put("username", user.getUsername());
         profile.put("email", user.getEmail());
         profile.put("points", user.getPoints());
+        profile.put("pseudonym", user.getPseudonym());
         return profile;
     }
 }

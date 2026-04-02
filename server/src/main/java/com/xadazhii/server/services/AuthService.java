@@ -62,7 +62,7 @@ public class AuthService {
     }
 
     @org.springframework.transaction.annotation.Transactional
-    public void registerUser(SignupRequest signUpRequest) {
+    public JwtResponse registerUser(SignupRequest signUpRequest) {
         if (!allowedStudentRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Registrácia je povolená len pre študentov zo zoznamu.");
         }
@@ -85,5 +85,11 @@ public class AuthService {
 
         user.setRoles(roles);
         userRepository.save(user);
+
+        // Auto-login after registration
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(signUpRequest.getUsername());
+        loginRequest.setPassword(signUpRequest.getPassword());
+        return authenticateUser(loginRequest);
     }
 }

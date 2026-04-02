@@ -82,7 +82,8 @@ public class TestService {
             if (settings != null && settings.getSemesterStartDate() != null) {
                 long startMs = settings.getSemesterStartDate().atZone(ZoneId.of("Europe/Bratislava")).toInstant().toEpochMilli();
                 long diffInMs = Instant.now().toEpochMilli() - startMs;
-                int week = (int) (diffInMs / 60000L) + 1;
+                // 1 week = 7 * 24 * 60 * 60 * 1000 = 604800000 ms
+                int week = (int) (diffInMs / 604800000L) + 1;
                 currentWeekValue = Math.max(0, week);
             }
             final int finalWeek = currentWeekValue;
@@ -92,10 +93,11 @@ public class TestService {
                         if (test.getExamDateTime() != null) return true;
                         Integer w = test.getWeekNumber();
                         if (w == null || w <= 0) return true;
-                        if (w <= 12) {
+                        if (w <= 13) {
                             if (w > finalWeek) return false;
                             List<Material> weekMaterials = materialsByWeek.getOrDefault(w, Collections.emptyList());
-                            if (weekMaterials.isEmpty()) return false;
+                            // If there are no materials for this week, we still follow the week number
+                            if (weekMaterials.isEmpty()) return w <= finalWeek;
                             return (completedMaterialIds != null && weekMaterials.stream().allMatch(m -> completedMaterialIds.contains(m.getId())));
                         }
                         return w <= finalWeek;
@@ -116,10 +118,10 @@ public class TestService {
                 if (test.getExamDateTime() != null) {
                     LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Bratislava"));
                     available = now.isAfter(test.getExamDateTime());
-                } else if (test.getWeekNumber() != null && test.getWeekNumber() > 0 && test.getWeekNumber() <= 12) {
+                } else if (test.getWeekNumber() != null && test.getWeekNumber() > 0 && test.getWeekNumber() <= 13) {
                     List<Material> weekMaterials = materialsByWeek.getOrDefault(test.getWeekNumber(), Collections.emptyList());
                     if (weekMaterials.isEmpty()) {
-                        available = false;
+                        available = true; // Use true here if there are no materials to block it, but visibility was already checked.
                     } else {
                         available = completedMaterialIds != null && weekMaterials.stream().allMatch(m -> completedMaterialIds.contains(m.getId()));
                     }

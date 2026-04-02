@@ -28,8 +28,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         try {
-            authService.registerUser(signUpRequest);
-            return ResponseEntity.ok(new MessageResponse("Používateľ bol úspešne registrovaný!"));
+            return ResponseEntity.ok(authService.registerUser(signUpRequest));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
