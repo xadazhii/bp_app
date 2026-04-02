@@ -28,6 +28,7 @@ export default class BoardAdmin extends Component {
             semesterStartDate: "",
             adminEmail: "",
             newMaterial: { title: "", type: "lecture", weekNumber: 1, file: null },
+            isUploadingMaterial: false,
             selectedStudentFile: null,
             uploadingStudentList: false,
             allowedStudents: [],
@@ -102,7 +103,7 @@ export default class BoardAdmin extends Component {
         const diffInMs = now.getTime() - start.getTime();
         if (diffInMs < 0) return 0;
 
-        const week = Math.floor(diffInMs / (1000 * 60)) + 1;
+        const week = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 7)) + 1;
         return Math.min(week, 14);
     }
     setCurrentPage(page) {
@@ -182,28 +183,39 @@ export default class BoardAdmin extends Component {
     }
     handleAddMaterial = async (e) => {
         e.preventDefault();
-        const { newMaterial } = this.state;
+        const { newMaterial, isUploadingMaterial } = this.state;
+        if (isUploadingMaterial) return;
+
         if (!newMaterial.title || !newMaterial.file) {
             this.showMessage("Prosím, vyplňte všetky polia a vyberte súbor.", "error");
             return;
         }
+        this.setState({ isUploadingMaterial: true });
+        this.showMessage("Nahrávam materiál, prosím čakajte...", "info");
+
         const formData = new FormData();
         formData.append("title", newMaterial.title);
         formData.append("type", newMaterial.type);
         formData.append("weekNumber", newMaterial.weekNumber);
         formData.append("file", newMaterial.file);
         try {
-            await fetch(`${API_URL}/api/materials`, {
+            const res = await fetch(`${API_URL}/api/materials`, {
                 method: "POST",
                 headers: { ...authHeader() },
                 body: formData,
             });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || `Chyba servera: ${res.status}`);
+            }
             this.fetchMaterials();
             this.setState({ newMaterial: { title: "", type: "lecture", weekNumber: 1, file: null } });
             this.showMessage("Materiál úspešne pridaný!", "success");
             if (e.target.elements.file) e.target.elements.file.value = "";
-        } catch {
-            this.showMessage("Nepodarilo sa pridať materiál.", "error");
+        } catch (error) {
+            this.showMessage("Nepodarilo sa pridať materiál: " + error.message, "error");
+        } finally {
+            this.setState({ isUploadingMaterial: false });
         }
     };
     async handleDeleteMaterial(materialId) {

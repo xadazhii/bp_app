@@ -92,7 +92,7 @@ public class TestService {
                         if (test.getExamDateTime() != null) return true;
                         Integer w = test.getWeekNumber();
                         if (w == null || w <= 0) return true;
-                        if (w <= 13) {
+                        if (w <= 12) {
                             if (w > finalWeek) return false;
                             List<Material> weekMaterials = materialsByWeek.getOrDefault(w, Collections.emptyList());
                             if (weekMaterials.isEmpty()) return false;

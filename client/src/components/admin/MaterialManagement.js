@@ -5,7 +5,8 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminars, beigeTextColor }) => {
     const {
-        newMaterial
+        newMaterial,
+        isUploadingMaterial
     } = adminCtx.state;
 
     return (<div className="space-y-8">
@@ -67,9 +68,11 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                         </div>
                                         <button
                                             type="submit"
-                                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg"
+                                            disabled={isUploadingMaterial}
+                                            className={`${isUploadingMaterial ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'} text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-200 shadow-md`}
                                         >
-                                            <PlusCircleIcon className="w-5 h-5 mr-2" /> Pridať materiál
+                                            <PlusCircleIcon className={`w-5 h-5 mr-2 ${isUploadingMaterial ? 'animate-spin' : ''}`} />
+                                            {isUploadingMaterial ? 'Nahrávam...' : 'Pridať materiál'}
                                         </button>
                                     </form>
                                 </div>

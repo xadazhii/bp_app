@@ -135,13 +135,21 @@ public class GradesService {
         }
 
         List<GradeTestInfo> testInfos = tests.stream().map(t -> {
-            // Efficient max score calculation - should be pre-calculated in DB ideally but this is in-memory now
-            int max = t.getQuestions().stream()
-                    .mapToInt(q -> q.getAnswers().stream()
-                            .filter(a -> a.getPointsWeight() > 0)
-                            .mapToInt(Answer::getPointsWeight).sum())
-                    .sum();
-            return new GradeTestInfo(t.getId(), t.getTitle(), max, t.getWeekNumber());
+            Integer week = t.getWeekNumber();
+            int limit = 0;
+            if (week == null) limit = t.getQuestions().size();
+            else if (week == 0) limit = 25;
+            else if (week <= 12) limit = 8;
+            else limit = 25;
+
+            int ppq = (week != null && (week == 0 || week >= 13)) ? 2 : 1;
+            int actualQuestions = t.getQuestions() != null ? t.getQuestions().size() : 0;
+            if (limit == 0 || limit > actualQuestions) {
+                limit = actualQuestions;
+            }
+            int max = limit * ppq;
+
+            return new GradeTestInfo(t.getId(), t.getTitle(), max, week);
         }).collect(Collectors.toList());
 
         List<StudentGradeInfo> studentGrades = students.stream().map(s -> new StudentGradeInfo(
