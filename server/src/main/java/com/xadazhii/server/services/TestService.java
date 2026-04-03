@@ -132,7 +132,7 @@ public class TestService {
             List<Question> questions = test.getQuestions();
             int totalQ = (questions != null) ? questions.size() : 0;
             int limit = getQuestionLimit(test.getWeekNumber());
-            int ppq = getPointsPerQuestion(test.getWeekNumber());
+
 
             if (isStudentView && userId != null && limit > 0 && totalQ > limit) {
                 response.setQuestionCount(limit);
@@ -279,9 +279,9 @@ public class TestService {
         Test test = testRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new NoSuchElementException("Test s id " + id + " nebol nájdený"));
 
-        int ppq = getPointsPerQuestion(test.getWeekNumber());
+
         List<Map<String, Object>> questionsDto = test.getQuestions().stream()
-                .map(q -> mapQuestionToDto(q, ppq))
+                .map(q -> mapQuestionToDto(q))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         if (!full && userId != null) {
@@ -299,15 +299,29 @@ public class TestService {
         result.put("weekNumber", test.getWeekNumber());
         result.put("timeLimit", test.getTimeLimit());
         result.put("questions", questionsDto);
+        
+        // Calculate total points based on the actual (potentially shuffled) questions
+        List<Question> finalQuestions;
+        if (!full && userId != null) {
+            int limit = getQuestionLimit(test.getWeekNumber());
+            List<Question> shuffled = new ArrayList<>(test.getQuestions());
+            shuffled.sort(Comparator.comparing(Question::getId));
+            Collections.shuffle(shuffled, new Random(Objects.hash(userId, test.getId())));
+            finalQuestions = (limit > 0 && shuffled.size() > limit) ? shuffled.subList(0, limit) : shuffled;
+        } else {
+            finalQuestions = test.getQuestions();
+        }
+        result.put("totalPossiblePoints", calculatePossiblePoints(finalQuestions));
+        
         return result;
     }
 
-    private Map<String, Object> mapQuestionToDto(Question q, int pointsPerQuestion) {
+    private Map<String, Object> mapQuestionToDto(Question q) {
         Map<String, Object> qDto = new HashMap<>();
         qDto.put("questionId", q.getId());
         qDto.put("question", q.getQuestionText());
         qDto.put("type", q.getType());
-        qDto.put("points", pointsPerQuestion);
+        qDto.put("points", q.getPoints());
 
         List<Map<String, Object>> answersDto = q.getAnswers().stream().map(a -> {
             Map<String, Object> ansDto = new HashMap<>();

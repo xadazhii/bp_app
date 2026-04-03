@@ -82,8 +82,8 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
             }
 
             const data = await res.json();
-
-            const totalPoints = activeTest.questions.reduce((sum, q) => {
+            
+            const totalPoints = activeTest.totalPossiblePoints || activeTest.questions.reduce((sum, q) => {
                 if (q.type === 'MULTIPLE') {
                     const qPossible = q.answers.reduce((acc, a) => acc + Math.max(0, a.pointsWeight || 0), 0);
                     return sum + Math.max(q.points || 0, qPossible);
