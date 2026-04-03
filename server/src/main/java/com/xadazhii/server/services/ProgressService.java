@@ -3,7 +3,6 @@ package com.xadazhii.server.services;
 import com.xadazhii.server.models.Material;
 import com.xadazhii.server.models.Question;
 import com.xadazhii.server.models.TestResult;
-import com.xadazhii.server.models.StudentAnswer;
 import com.xadazhii.server.models.User;
 import com.xadazhii.server.models.UserProgress;
 import com.xadazhii.server.payload.response.UserStatsResponse;
@@ -116,7 +115,5 @@ public class ProgressService {
             }
         }
         return total;
-    }
-
     }
 }
