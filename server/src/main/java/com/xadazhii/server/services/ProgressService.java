@@ -3,6 +3,7 @@ package com.xadazhii.server.services;
 import com.xadazhii.server.models.Material;
 import com.xadazhii.server.models.Question;
 import com.xadazhii.server.models.TestResult;
+import com.xadazhii.server.models.StudentAnswer;
 import com.xadazhii.server.models.User;
 import com.xadazhii.server.models.UserProgress;
 import com.xadazhii.server.payload.response.UserStatsResponse;
@@ -73,16 +74,10 @@ public class ProgressService {
         List<TestResult> results = testResultRepository.findByStudentId(userId);
         int totalPoints = results.stream().mapToInt(TestResult::getScore).sum();
         List<UserStatsResponse.UserTestResultDto> detailed = results.stream().map(r -> {
-            int maxScore;
-            List<Question> questions = (r.getTest().getQuestions() != null) ? r.getTest().getQuestions() : Collections.emptyList();
-            int limit = getQuestionLimit(r.getTest().getWeekNumber());
-
-            int ppq = getPointsPerQuestion(r.getTest().getWeekNumber());
-            if (limit > 0 && questions.size() > limit) {
-                maxScore = limit * ppq;
-            } else {
-                maxScore = questions.size() * ppq;
-            }
+            List<Question> resultQuestions = (r.getSubmittedAnswers() != null) 
+                ? r.getSubmittedAnswers().stream().map(sa -> sa.getQuestion()).collect(Collectors.toList())
+                : Collections.emptyList();
+            int maxScore = calculatePossiblePoints(resultQuestions);
 
             return new UserStatsResponse.UserTestResultDto(
                 r.getTest().getTitle(),
@@ -100,18 +95,28 @@ public class ProgressService {
         return new UserStatsResponse(lectureStats, seminarStats, testStats);
     }
 
-    private int getPointsPerQuestion(Integer week) {
-        if (week == null) return 1;
-        if (week == 0 || week == 13 || week == 14) return 2;
-        return 1;
+    private int calculatePossiblePoints(List<Question> questions) {
+        if (questions == null) return 0;
+        int total = 0;
+        for (Question q : questions) {
+            if ("OPEN".equalsIgnoreCase(q.getType())) {
+                total += q.getPoints();
+            } else if ("MULTIPLE".equalsIgnoreCase(q.getType())) {
+                int qPossible = 0;
+                for (com.xadazhii.server.models.Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > 0) qPossible += a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qPossible);
+            } else {
+                int qMax = 0;
+                for (com.xadazhii.server.models.Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > qMax) qMax = a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qMax);
+            }
+        }
+        return total;
     }
 
-    private int getQuestionLimit(Integer week) {
-        if (week == null) return 0;
-        if (week == 0) return 25;
-        if (week >= 1 && week <= 12) return 8;
-        if (week == 13) return 25;
-        if (week == 14) return 25;
-        return 0;
     }
 }

@@ -84,8 +84,13 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
             const data = await res.json();
 
             const totalPoints = activeTest.questions.reduce((sum, q) => {
-                const maxForQ = Math.max(...q.answers.map(a => a.pointsWeight || 0), 0);
-                return sum + maxForQ;
+                if (q.type === 'MULTIPLE') {
+                    const qPossible = q.answers.reduce((acc, a) => acc + Math.max(0, a.pointsWeight || 0), 0);
+                    return sum + Math.max(q.points || 0, qPossible);
+                } else {
+                    const maxForQ = Math.max(q.points || 0, ...q.answers.map(a => a.pointsWeight || 0), 0);
+                    return sum + maxForQ;
+                }
             }, 0);
 
             setResult({ score: data.score, total: totalPoints, cheated: cheated || reason === "cheating" });
@@ -805,7 +810,17 @@ const TestResultDetailsModal = ({ resultId, onClose, beigeTextColor }) => {
                         <h2 className="text-2xl font-bold text-white tracking-tight">{resultData.testTitle}</h2>
                         <div className="flex items-center gap-4 mt-2">
                             <span className="text-sm font-medium text-slate-400">
-                                Skóre: <span className="text-blue-400 font-bold">{resultData.score} b.</span>
+                                Skóre: <span className="text-blue-400 font-bold">
+                                    {resultData.score} / {resultData.details.reduce((sum, q) => {
+                                        if (q.type === 'MULTIPLE') {
+                                            const qPossible = q.allAnswers.reduce((acc, a) => acc + Math.max(0, a.pointsWeight || 0), 0);
+                                            return sum + Math.max(q.points || 0, qPossible);
+                                        } else {
+                                            const maxForQ = Math.max(q.points || 0, ...q.allAnswers.map(a => a.pointsWeight || 0), 0);
+                                            return sum + maxForQ;
+                                        }
+                                    }, 0)} b.
+                                </span>
                             </span>
                             {resultData.cheated && <span className="px-2 py-0.5 bg-red-500/10 text-red-400 text-[10px] font-bold uppercase rounded border border-red-500/20">Podvádzanie</span>}
                         </div>

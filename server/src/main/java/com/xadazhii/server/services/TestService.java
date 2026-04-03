@@ -139,13 +139,38 @@ public class TestService {
                 List<Question> shuffled = new ArrayList<>(questions);
                 shuffled.sort(Comparator.comparing(Question::getId));
                 Collections.shuffle(shuffled, new Random(Objects.hash(userId, test.getId())));
-                response.setTotalPoints(limit * ppq);
+                List<Question> subList = shuffled.subList(0, limit);
+                response.setQuestions(subList);
+                response.setTotalPoints(calculatePossiblePoints(subList));
             } else {
                 response.setQuestionCount(totalQ);
-                response.setTotalPoints(totalQ * ppq);
+                response.setTotalPoints(calculatePossiblePoints(questions));
             }
             return response;
         }).collect(Collectors.toList());
+    }
+
+    private int calculatePossiblePoints(List<Question> questions) {
+        if (questions == null) return 0;
+        int total = 0;
+        for (Question q : questions) {
+            if ("OPEN".equalsIgnoreCase(q.getType())) {
+                total += q.getPoints();
+            } else if ("MULTIPLE".equalsIgnoreCase(q.getType())) {
+                int qPossible = 0;
+                for (Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > 0) qPossible += a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qPossible);
+            } else {
+                int qMax = 0;
+                for (Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > qMax) qMax = a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qMax);
+            }
+        }
+        return total;
     }
 
     private int getPointsPerQuestion(Integer week) {
