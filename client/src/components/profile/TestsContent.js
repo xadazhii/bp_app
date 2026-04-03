@@ -370,9 +370,7 @@ const TestsContentPage = ({ beigeTextColor, onUpdate, setModal, onTestingStatusC
                     {}
                     <div key={currentQuestionIndex} className="bg-[#0f172a]/40 border border-white/5 rounded-2xl p-8 shadow-sm animate-fade-in">
                         <div className="mb-8">
-                            <span className="text-[10px] font-bold text-blue-500/60 uppercase tracking-widest mb-2 block">
-                                {currentQuestion.points} {currentQuestion.points === 1 ? 'bod' : (currentQuestion.points >= 2 && currentQuestion.points <= 4 ? 'body' : 'bodov')}
-                            </span>
+
                             <h3 className="text-xl md:text-2xl font-semibold text-slate-100 leading-snug">
                                 {currentQuestion.question}
                             </h3>
