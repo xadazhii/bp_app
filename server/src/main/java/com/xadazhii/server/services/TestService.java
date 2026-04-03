@@ -140,7 +140,6 @@ public class TestService {
                 shuffled.sort(Comparator.comparing(Question::getId));
                 Collections.shuffle(shuffled, new Random(Objects.hash(userId, test.getId())));
                 List<Question> subList = shuffled.subList(0, limit);
-                response.setQuestions(subList);
                 response.setTotalPoints(calculatePossiblePoints(subList));
             } else {
                 response.setQuestionCount(totalQ);
