@@ -556,6 +556,17 @@ public class TestService {
 
                     List<Answer> ans = new ArrayList<>();
                     int cCount = 0;
+                    
+                    // Pre-calculate count of correct answers to distribute points
+                    for (JsonNode an : qn.get("answers")) {
+                        String text = an.get("text").asText().trim();
+                        if (text.isEmpty()) continue;
+                        String letter = an.get("letter").asText();
+                        if (!"NEVIEM".equals(letter) && correct.contains(letter)) {
+                            cCount++;
+                        }
+                    }
+
                     for (JsonNode an : qn.get("answers")) {
                         String text = an.get("text").asText().trim();
                         if (text.isEmpty()) continue;
@@ -564,19 +575,11 @@ public class TestService {
                         a.setQuestion(q);
                         String letter = an.get("letter").asText();
                         if (letter.equals("NEVIEM")) a.setPointsWeight(0);
-                        else if (correct.contains(letter)) { cCount++; }
+                        else if (correct.contains(letter)) { 
+                            a.setPointsWeight(Math.max(1, ppq / Math.max(1, cCount)));
+                        }
                         else a.setPointsWeight(-1);
                         ans.add(a);
-                    }
-                    
-                    // Distribute question points among correct answers
-                    for (Answer a : ans) {
-                        if (a.getPointsWeight() == 0) continue;
-                        if (a.getPointsWeight() == -1) continue; 
-                        // If it's a correct answer, assign its weight
-                        // If ppq=2 and cCount=1, weight=2. If cCount=2, weight=1.
-                        // If cCount > ppq, we'll just give 1 per correct answer.
-                        a.setPointsWeight(Math.max(1, ppq / Math.max(1, cCount)));
                     }
                     
                     q.setPoints(ppq);
