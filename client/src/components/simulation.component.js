@@ -150,7 +150,7 @@ const ServerGameIcon = ({ health }) => (
 );
 const SimWrapper = ({ title, onStart, isRunning, info, children, setModal }) => {
     return (
-        <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full w-full bg-slate-800/10 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
             <div className="mb-6 text-center relative z-50">
                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{title}</h2>
                 <div className="flex justify-center items-center gap-2 sm:gap-4 flex-wrap">
