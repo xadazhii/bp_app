@@ -7,7 +7,7 @@ export const SemesterSettings = ({ adminCtx }) => {
     return (
         <div className="space-y-8 animate-fade-in">
             <h2 className="text-3xl font-bold mb-6 text-blue-400">Nastavenia semestra</h2>
-            <div className="mb-10 p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+            <div className="mb-10 p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                 <h3 className="text-2xl font-semibold mb-4 text-blue-400 flex items-center">
                     <CalendarIcon className="mr-2 text-current" /> Termíny a týždne
                 </h3>
@@ -18,7 +18,7 @@ export const SemesterSettings = ({ adminCtx }) => {
                             type="date"
                             value={semesterStartDate ? semesterStartDate.split('T')[0] : ""}
                             onChange={e => adminCtx.setState({ semesterStartDate: e.target.value })}
-                            className="px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
+                            className="w-full sm:w-auto px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
                         />
                         <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all active:scale-95">Uložiť</button>
                     </div>

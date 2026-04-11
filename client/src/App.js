@@ -103,7 +103,7 @@ class App extends Component {
         };
 
         return (
-            <div>
+            <div className="min-h-screen bg-[#0f172a]">
                 {!isTesting && (
                     <nav className={`relative flex items-center justify-between px-3 sm:px-4 py-3 transition-all`} style={navbarStyle}>
                         <div className={`flex items-center gap-3 sm:gap-6`}>
@@ -144,12 +144,12 @@ class App extends Component {
                     </nav>
                 )}
 
-                <div className="">
+                <div className="bg-[#0f172a]">
                     <Routes>
-                        <Route path="/" element={<div className="container mt-3"><Home /></div>} />
-                        <Route path="/home" element={<div className="container mt-3"><Home /></div>} />
-                        <Route path="/login" element={<div className="container mt-3"><Login /></div>} />
-                        <Route path="/register" element={<div className="container mt-3"><Register /></div>} />
+                        <Route path="/" element={<Home />} />
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/admin" element={<BoardAdmin />} />
                         <Route path="/simulation" element={<Simulation />} />

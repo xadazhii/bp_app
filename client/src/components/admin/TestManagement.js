@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { PlusCircleIcon, TrashIcon } from './AdminIcons';
 import { CustomSelect } from './CustomSelect';
 
@@ -6,17 +7,18 @@ export const TestManagement = ({ adminCtx }) => {
     const {
         tests, newTest, creatingTest, newTestQuestions, editingTestId, editingTest, editingTestQuestions
     } = adminCtx.state;
+    const [showGuideModal, setShowGuideModal] = useState(false);
 
     return (<div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa testov</h2>
 
-                                <div className="mb-10 p-3 sm:p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+                                <div className="mb-10 p-3 sm:p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                                     <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: "#F5F5DC" }}>
                                         <PlusCircleIcon className="mr-2 text-blue-400" /> Pridať nový test
                                     </h3>
                                     {!creatingTest ? (
                                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-10">
-                                            <div className="bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative group flex flex-col z-10 hover:z-20">
+                                            <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative group flex flex-col z-10 hover:z-20">
                                                 <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
                                                     <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500/50 group-hover:bg-blue-500 transition-all duration-500"></div>
                                                 </div>
@@ -30,6 +32,16 @@ export const TestManagement = ({ adminCtx }) => {
                                                         <h3 className="text-lg font-black text-white uppercase tracking-tight">Importovať testy</h3>
                                                         <p className="text-xs text-slate-500 mt-0.5">Automatické vytvorenie testov zo súboru</p>
                                                     </div>
+                                                    <button
+                                                        onClick={() => setShowGuideModal(true)}
+                                                        className="ml-auto text-[10px] uppercase font-bold tracking-widest text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20 transition-all active:scale-95 flex items-center"
+                                                        title="Príručka ako formátovať súbory pre import"
+                                                    >
+                                                        <svg className="w-3.5 h-3.5 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        <span className="hidden sm:inline">Príručka</span>
+                                                    </button>
                                                 </div>
 
                                                 <div className="space-y-4 mt-auto">
@@ -65,7 +77,7 @@ export const TestManagement = ({ adminCtx }) => {
                                                 </div>
                                             </div>
 
-                                            <div className="bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative group flex flex-col z-10 hover:z-20">
+                                            <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative group flex flex-col z-10 hover:z-20">
                                                 <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
                                                     <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500/50 group-hover:bg-emerald-500 transition-all duration-500"></div>
                                                 </div>
@@ -440,7 +452,7 @@ export const TestManagement = ({ adminCtx }) => {
                                     </div>
                                 )}
 
-                                <div className="p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+                                <div className="p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                                     <h4 className="text-lg font-semibold mb-4 text-blue-400">Existujúce testy</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {tests.length === 0 ? (
@@ -449,7 +461,7 @@ export const TestManagement = ({ adminCtx }) => {
                                             </div>
                                         ) : (
                                             tests.map((test) => (
-                                                <div key={test.id} className="bg-[#0f172a]/60 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-[#15203d]/40 shadow-lg">
+                                                <div key={test.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-white/5 shadow-lg">
                                                     <div className="flex items-center gap-4 min-w-0">
                                                         <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,5 +504,129 @@ export const TestManagement = ({ adminCtx }) => {
                                         )}
                                     </div>
                                 </div>
+                                {showGuideModal && ReactDOM.createPortal(
+                                    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-[#000000cc] animate-fade-in" style={{ position: 'fixed' }}>
+                                        <div className="bg-slate-900 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden animate-slide-in flex flex-col max-h-[85vh]">
+                                            <div className={`h-2 w-full bg-blue-500`}></div>
+                                            <div className="p-6 md:p-8 flex flex-col flex-1 min-h-0">
+                                                <div className="flex justify-between items-center mb-6 shrink-0">
+                                                    <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+                                                        <svg className="w-6 h-6 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Formát súborov pre import
+                                                    </h3>
+                                                    <button onClick={() => setShowGuideModal(false)} className="text-slate-400 hover:text-white transition-colors bg-slate-800 p-2 rounded-full shrink-0">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                <div className="-mx-2 px-2 sm:mx-0 sm:px-0 overflow-y-auto pr-1 sm:pr-2 space-y-5 md:space-y-6 text-slate-300 text-sm scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                                                    <div className="bg-slate-800/20 p-4 md:p-5 rounded-[1rem] md:rounded-2xl border border-white/5 shadow-inner">
+                                                        <h4 className="font-bold text-white mb-2 text-sm md:text-base flex items-center gap-2">
+                                                            <svg className="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                            Podporované formáty
+                                                        </h4>
+                                                        <p className="text-slate-400 text-xs md:text-sm leading-relaxed">Systém podporuje klasické <strong>Excel zošity (.xlsx, .xls)</strong> a štruktúrované textové súbory <strong>.csv</strong>. Presvedčte sa, že kódovanie je UTF-8 kvôli diakritike.</p>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <h4 className="font-bold text-white text-sm md:text-base">Rozloženie stĺpcov</h4>
+                                                            <span className="md:hidden text-[10px] uppercase font-bold text-slate-500 tracking-wider">Potiahnite doprava ➔</span>
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            <div className="w-full overflow-x-auto rounded-[1rem] md:rounded-xl border border-slate-600 shadow-xl bg-white text-slate-800 font-sans text-xs md:text-[13px] select-none scrollbar-thin scrollbar-thumb-slate-400">
+                                                                <table className="min-w-[700px] md:min-w-[800px] w-full text-left border-collapse">
+                                                                    <thead>
+                                                                        <tr className="bg-slate-200 text-slate-600 text-center font-bold border-b border-slate-300">
+                                                                            <td className="w-8 md:w-10 border-r border-slate-300 bg-slate-300/50"></td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300 w-1/4">A</td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300">B</td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300">C</td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300 w-1/4">D</td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300">E</td>
+                                                                            <td className="px-3 py-1.5 border-r border-slate-300">F</td>
+                                                                            <td className="px-3 py-1.5 border-r border-transparent">G</td>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr className="border-b border-slate-200 bg-slate-50/50">
+                                                                            <td className="text-center font-bold text-slate-500 border-r border-slate-300 bg-slate-100">1</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400">Otázka</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400 text-center">A</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400 text-center">B</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400 text-center">C</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400 text-center">D</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 font-bold text-slate-400 text-center">Neviem</td>
+                                                                            <td className="px-3 py-2 font-bold text-slate-400 text-center">Správna odpoveď</td>
+                                                                        </tr>
+                                                                        <tr className="border-b border-slate-200 hover:bg-slate-100 transition-colors">
+                                                                            <td className="text-center font-bold text-slate-500 border-r border-slate-300 bg-slate-100">2</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[200px] md:max-w-[250px] whitespace-normal">Ktoré vlastnosti najlepšie charakterizujú základné bezpečnostné princípy informačných systémov?</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Dôvernosť zabezpečuje, že k údajom majú prístup iba oprávnené osoby.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Integrita zabezpečuje, že dáta nie sú neautorizovane zmenené počas prenosu alebo uloženia.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Dostupnosť znamená, že systém alebo služba je prístupná používateľom v požadovanom čase.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Anonymita znamená úplné skrytie identity používateľa vo všetkých systémoch.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black text-center font-medium">Neviem</td>
+                                                                            <td className="px-3 py-2 text-black font-bold text-center">BD</td>
+                                                                        </tr>
+                                                                        <tr className="hover:bg-slate-100 transition-colors">
+                                                                            <td className="text-center font-bold text-slate-500 border-r border-slate-300 bg-slate-100">3</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[200px] md:max-w-[250px] whitespace-normal">Ktoré tvrdenia správne opisujú symetrickú kryptografiu?</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Pri symetrickom šifrovaní sa používa jeden spoločný tajný kľúč na šifrovanie aj dešifrovanie.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Symetrická kryptografia je vo všeobecnosti rýchlejšia ako asymetrická pri veľkých objemoch dát.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Symetrická kryptografia používa dvojicu kľúčov – verejný a súkromný.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black leading-relaxed max-w-[160px] md:max-w-[200px] whitespace-normal">Symetrické algoritmy sa často používajú napríklad v algoritmoch AES alebo DES.</td>
+                                                                            <td className="px-3 py-2 border-r border-slate-200 text-black text-center font-medium">Neviem</td>
+                                                                            <td className="px-3 py-2 text-black font-bold text-center">B</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                                <div className="bg-blue-500/10 p-2.5 md:p-3 rounded-xl border border-blue-500/20 shadow-sm grow text-[11px] md:text-xs">
+                                                                    <strong className="block text-blue-400 mb-0.5">Stĺpec A</strong>
+                                                                    <span className="text-blue-200/80 leading-snug">Znenie samotnej otázки</span>
+                                                                </div>
+                                                                <div className="bg-blue-500/10 p-2.5 md:p-3 rounded-xl border border-blue-500/20 shadow-sm grow text-[11px] md:text-xs">
+                                                                    <strong className="block text-blue-400 mb-0.5">Stĺpce možností</strong>
+                                                                    <span className="text-blue-200/80 leading-snug">A, B, C, D... a možnosť Neviem</span>
+                                                                </div>
+                                                                <div className="bg-blue-500/10 p-2.5 md:p-3 rounded-xl border border-blue-500/20 shadow-sm grow text-[11px] md:text-xs">
+                                                                    <strong className="block text-blue-400 mb-0.5">Posledný stĺpec</strong>
+                                                                    <span className="text-blue-200/80 leading-snug">Text správnych odpovedí (B, BD...)</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-[#0f172a] p-4 md:p-5 rounded-[1rem] md:rounded-2xl border border-white/5 mt-4">
+                                                        <h4 className="font-bold text-slate-200 mb-3 text-sm md:text-base flex items-center gap-2">
+                                                            <svg className="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                            Užitočné tipy z praxe
+                                                        </h4>
+                                                        <ul className="list-disc pl-4 md:pl-5 space-y-2 md:space-y-3 text-slate-400 text-[12px] md:text-sm leading-relaxed">
+                                                            <li>Môžete jednoducho načítať štruktúru z dokumentov z prednášok tak, ako ich bežne používate. Presné znenie hlavičkových slov nad možnosťami určuje, na aké písmená odpovedajú.</li>
+                                                            <li>V poslednom stĺpci uvádzate správne odpovede jednoducho za sebou bez čiarok a medzier (napríklad <strong className="text-emerald-400/90 font-mono">BD</strong>). Systém ich automaticky spáruje.</li>
+                                                            <li>Viac ako jedno písmeno v správnej odpovedi = <strong>zaškrtávacie políčka</strong> (viac správnych odpovedí). Jedno písmeno = <strong>okrúhla voľba</strong> (jedna možnosť).</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-6 md:mt-8 shrink-0">
+                                                    <button
+                                                        onClick={() => setShowGuideModal(false)}
+                                                        className="w-full px-4 py-3 md:py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-base font-bold rounded-xl transition-all shadow-lg active:scale-95 tracking-wide"
+                                                    >
+                                                        Zavrieť príručku
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                , document.body)}
                             </div>);
 };

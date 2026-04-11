@@ -17,8 +17,8 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const [currentShape, setCurrentShape] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
-    const rectRef = useRef(null); 
-    const previewRef = useRef(null); // Ref for direct DOM update to avoid re-render lag
+    const rectRef = useRef(null);
+    const previewRef = useRef(null);
 
     useEffect(() => {
         if (isFullscreen) {
@@ -87,22 +87,19 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
             ctxRef.current.stroke();
             currentShape.points.push({x, y});
         } else if (currentShape && previewRef.current) {
-            // Update preview directly via DOM for 60fps performance
+
             const startX = currentShape.startX;
             const startY = currentShape.startY;
             const l = Math.min(startX, x);
             const t = Math.min(startY, y);
             const w = Math.abs(x - startX);
             const h = Math.abs(y - startY);
-            
+
             previewRef.current.style.left = `${l}px`;
             previewRef.current.style.top = `${t}px`;
             previewRef.current.style.width = `${w}px`;
             previewRef.current.style.height = `${h}px`;
-            
-            // Still need to track final coords for when user releases mouse
-            // but we can debounce or just update on mouseUp.
-            // For now, let's keep it simple and update on mouseUp.
+
             currentShape.finalX = x;
             currentShape.finalY = y;
         }
@@ -172,11 +169,11 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         const handleKeys = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
                 e.preventDefault();
-                e.stopPropagation(); // CRITICAL: Stop parent from undoing the block!
+                e.stopPropagation();
                 undo();
             }
         };
-        window.addEventListener('keydown', handleKeys, true); // Use capture phase
+        window.addEventListener('keydown', handleKeys, true);
         return () => window.removeEventListener('keydown', handleKeys, true);
     }, [undo]);
 

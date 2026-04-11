@@ -35,16 +35,16 @@ public class AdminInitializer implements CommandLineRunner {
 
     @Autowired
     private UserRepository userRepository;
- 
+
     @Autowired
     private RoleRepository roleRepository;
- 
+
     @Autowired
     private TestRepository testRepository;
- 
+
     @Autowired
     private PasswordEncoder passwordEncoder;
- 
+
     @Override
     @Transactional
     public void run(String... args) {

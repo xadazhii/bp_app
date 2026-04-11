@@ -68,7 +68,6 @@ public class TestService {
                 : null;
 
         List<Test> testList;
-        // Pre-fetch all materials once per request to avoid N+1
         List<Material> allMaterials = materialRepository.findAll();
         Map<Integer, List<Material>> materialsByWeek = allMaterials.stream()
                 .filter(m -> m.getWeekNumber() != null)
@@ -82,7 +81,6 @@ public class TestService {
             if (settings != null && settings.getSemesterStartDate() != null) {
                 long startMs = settings.getSemesterStartDate().atZone(ZoneId.of("Europe/Bratislava")).toInstant().toEpochMilli();
                 long diffInMs = Instant.now().toEpochMilli() - startMs;
-                // 1 week = 7 * 24 * 60 * 60 * 1000 = 604800000 ms
                 int week = (int) (diffInMs / 604800000L) + 1;
                 currentWeekValue = Math.max(0, week);
             }
@@ -96,7 +94,6 @@ public class TestService {
                         if (w <= 13) {
                             if (w > finalWeek) return false;
                             List<Material> weekMaterials = materialsByWeek.getOrDefault(w, Collections.emptyList());
-                            // If there are no materials for this week, we still follow the week number
                             if (weekMaterials.isEmpty()) return w <= finalWeek;
                             return (completedMaterialIds != null && weekMaterials.stream().allMatch(m -> completedMaterialIds.contains(m.getId())));
                         }
@@ -121,7 +118,6 @@ public class TestService {
                 } else if (test.getWeekNumber() != null && test.getWeekNumber() > 0 && test.getWeekNumber() <= 13) {
                     List<Material> weekMaterials = materialsByWeek.getOrDefault(test.getWeekNumber(), Collections.emptyList());
                     if (weekMaterials.isEmpty()) {
-                        available = true; // Use true here if there are no materials to block it, but visibility was already checked.
                     } else {
                         available = completedMaterialIds != null && weekMaterials.stream().allMatch(m -> completedMaterialIds.contains(m.getId()));
                     }
@@ -132,7 +128,6 @@ public class TestService {
             List<Question> questions = test.getQuestions();
             int totalQ = (questions != null) ? questions.size() : 0;
             int limit = getQuestionLimit(test.getWeekNumber());
-
 
             if (isStudentView && userId != null && limit > 0 && totalQ > limit) {
                 response.setQuestionCount(limit);
@@ -174,17 +169,12 @@ public class TestService {
 
     private int getPointsPerQuestion(Integer week) {
         if (week == null) return 1;
-        // Entry (0), Final (13) and Exam (14) are 2 points per question
         if (week == 0 || week == 13 || week == 14) return 2;
         return 1;
     }
 
     private int getQuestionLimit(Integer week) {
         if (week == null) return 0;
-        if (week == 0) return 25;   // Entry test limit
-        if (week >= 1 && week <= 12) return 8; // Weekly test limit
-        if (week == 13) return 25;  // Final test limit
-        if (week == 14) return 25;  // Exam limit
         return 0;
     }
 
@@ -279,7 +269,6 @@ public class TestService {
         Test test = testRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new NoSuchElementException("Test s id " + id + " nebol nájdený"));
 
-
         List<Map<String, Object>> questionsDto = test.getQuestions().stream()
                 .map(q -> mapQuestionToDto(q))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -299,8 +288,7 @@ public class TestService {
         result.put("weekNumber", test.getWeekNumber());
         result.put("timeLimit", test.getTimeLimit());
         result.put("questions", questionsDto);
-        
-        // Calculate total points based on the actual (potentially shuffled) questions
+
         List<Question> finalQuestions;
         if (!full && userId != null) {
             int limit = getQuestionLimit(test.getWeekNumber());
@@ -312,7 +300,7 @@ public class TestService {
             finalQuestions = test.getQuestions();
         }
         result.put("totalPossiblePoints", calculatePossiblePoints(finalQuestions));
-        
+
         return result;
     }
 
@@ -327,7 +315,6 @@ public class TestService {
             Map<String, Object> ansDto = new HashMap<>();
             ansDto.put("answerId", a.getId());
             ansDto.put("text", a.getAnswerText());
-            // Scale pointWeight if necessary, but UI usually just shows text
             ansDto.put("pointsWeight", a.getPointsWeight());
             return ansDto;
         }).collect(Collectors.toList());
@@ -552,14 +539,13 @@ public class TestService {
         Files.copy(file.getInputStream(), temp, StandardCopyOption.REPLACE_EXISTING);
         try {
             ProcessBuilder pb = new ProcessBuilder("python3", "excel_parser.py", temp.toString());
-            // Use current working directory as the script is located in the same directory as the JAR
             pb.directory(new File("."));
             Process p = pb.start();
             String output;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
                 output = reader.lines().collect(Collectors.joining("\n"));
             }
-            if (p.waitFor() != 0) throw new RuntimeException("Python error: " + output);
+            if (p.waitFor() != 0) throw new RuntimeException("Chyba Pythonu: " + output);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(output);
@@ -569,17 +555,14 @@ public class TestService {
             for (JsonNode weekNode : root.get("weeks")) {
                 Test t = new Test();
                 t.setType(type);
-                
-                // If weekNumber is -1, it means "All weekly tests", use file's weekNumber.
-                // Otherwise, it's a specific selection (Entry=0, Weekly=1-12, Final=13, Exam=14), so override.
+
                 int assignedWeek;
                 if (weekNumber == -1) {
                     assignedWeek = weekNode.get("weekNumber").asInt();
-                    if (assignedWeek < 0) assignedWeek = 1; // Default to week 1 only if negative
                 } else {
                     assignedWeek = weekNumber;
                 }
-                
+
                 t.setWeekNumber(assignedWeek);
                 t.setTitle(getAutoTitle(assignedWeek, type, generalTopic));
                 int ppq = getPointsPerQuestion(assignedWeek);
@@ -594,8 +577,7 @@ public class TestService {
 
                     List<Answer> ans = new ArrayList<>();
                     int cCount = 0;
-                    
-                    // Pre-calculate count of correct answers to distribute points
+
                     for (JsonNode an : qn.get("answers")) {
                         String text = an.get("text").asText().trim();
                         if (text.isEmpty()) continue;
@@ -613,13 +595,13 @@ public class TestService {
                         a.setQuestion(q);
                         String letter = an.get("letter").asText();
                         if (letter.equals("NEVIEM")) a.setPointsWeight(0);
-                        else if (correct.contains(letter)) { 
+                        else if (correct.contains(letter)) {
                             a.setPointsWeight(Math.max(1, ppq / Math.max(1, cCount)));
                         }
                         else a.setPointsWeight(-1);
                         ans.add(a);
                     }
-                    
+
                     q.setPoints(ppq);
                     q.setAnswers(ans);
                     qs.add(q);
@@ -640,19 +622,17 @@ public class TestService {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
              CSVParser p = new CSVParser(r, format)) {
             List<CSVRecord> recs = p.getRecords();
-            
-            // If weekNumber is not -1, force that week for everything
+
             int startW;
             if (weekNumber == -1) {
-                startW = 1; // Default starting for sequence
             } else {
                 startW = weekNumber;
             }
 
-            Test cur = new Test(); 
-            cur.setType(type); 
-            cur.setWeekNumber(startW); 
-            cur.setTitle(getAutoTitle(startW, type, "CSV Import"));
+            Test cur = new Test();
+            cur.setType(type);
+            cur.setWeekNumber(startW);
+            cur.setTitle(getAutoTitle(startW, type, "Import CSV"));
 
             List<Test> allTests = new ArrayList<>();
             List<Question> qs = new ArrayList<>();
@@ -666,22 +646,20 @@ public class TestService {
 
                 Matcher m = ptn.matcher(txt);
                 if (m.matches()) {
-                    // New week separator found
-                    if (!qs.isEmpty()) { 
-                        cur.setQuestions(qs); 
-                        allTests.add(cur); 
+                    if (!qs.isEmpty()) {
+                        cur.setQuestions(qs);
+                        allTests.add(cur);
                     }
-                    
+
                     int w;
                     if (weekNumber == -1) {
                         w = Integer.parseInt(m.group(1));
                     } else {
-                        w = weekNumber; // Override even if file says different
                     }
-                    
-                    cur = new Test(); 
+
+                    cur = new Test();
                     cur.setType(type);
-                    cur.setWeekNumber(w); 
+                    cur.setWeekNumber(w);
                     cur.setTitle(getAutoTitle(w, type, "CSV Import"));
                     qs = new ArrayList<>();
                     continue;
@@ -713,9 +691,9 @@ public class TestService {
                 }
                 q.setPoints(ppq); q.setAnswers(ans); qs.add(q);
             }
-            if (!qs.isEmpty()) { 
-                cur.setQuestions(qs); 
-                allTests.add(cur); 
+            if (!qs.isEmpty()) {
+                cur.setQuestions(qs);
+                allTests.add(cur);
             }
             if (!allTests.isEmpty()) {
                 testRepository.saveAll(allTests);

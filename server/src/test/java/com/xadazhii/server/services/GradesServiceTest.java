@@ -32,10 +32,6 @@ public class GradesServiceTest {
     @InjectMocks
     private GradesService gradesService;
 
-    // ────────────────────────────────────────────────────────────
-    // Допоміжні методи
-    // ────────────────────────────────────────────────────────────
-
     private User makeStudent(Long id, String username, String email, String pseudonym, int basePoints) {
         User u = new User();
         u.setId(id);
@@ -66,10 +62,6 @@ public class GradesServiceTest {
         return r;
     }
 
-    // ────────────────────────────────────────────────────────────
-    // БЛОК 1: Leaderboard
-    // ────────────────────────────────────────────────────────────
-
     @Nested
     @DisplayName("getLeaderboard — розрахунок рейтингу")
     class LeaderboardTests {
@@ -77,29 +69,22 @@ public class GradesServiceTest {
         @Test
         @DisplayName("Розраховує загальні бали: тести + навчальні матеріали")
         void leaderboard_calculatesCorrectTotal() {
-            // Arrange
             User s1 = makeStudent(1L, "student1", "s1@test.com", null, 0);
-            
+
             com.xadazhii.server.models.Test t1 = makeTest(10L, "Test 1");
             TestResult r1 = makeResult(100L, s1, t1, 15, false);
 
             when(userRepository.findAll()).thenReturn(List.of(s1));
             when(testResultRepository.findAll()).thenReturn(List.of(r1));
 
-            // Для s1: 2 лекції (2*2=4) і 1 семінар (1*3=3) = 7 балів за навчання
             List<Object[]> learning = List.of(
                 new Object[]{1L, "lecture", 2L},
                 new Object[]{1L, "seminar", 1L}
             );
             when(userProgressRepository.countCompletedLearningMaterialsByUserAndType()).thenReturn(learning);
 
-            // Act
-            List<Map<String, Object>> result = gradesService.getLeaderboard(2L); // Поточний користувач не цей студент
-
-            // Assert
             assertThat(result).hasSize(1);
             Map<String, Object> map = result.get(0);
-            // 15 (тест) + 7 (навчання) = 22
             assertThat(map.get("points")).isEqualTo(22);
             assertThat(map.get("testPoints")).isEqualTo(15);
             assertThat(map.get("learningPoints")).isEqualTo(7);
@@ -128,8 +113,6 @@ public class GradesServiceTest {
             when(testResultRepository.findAll()).thenReturn(Collections.emptyList());
 
             List<Object[]> learning = List.of(
-                new Object[]{1L, "lecture", 5L}, // 10 pts
-                new Object[]{2L, "lecture", 10L} // 20 pts
             );
             when(userProgressRepository.countCompletedLearningMaterialsByUserAndType()).thenReturn(learning);
 
@@ -148,16 +131,10 @@ public class GradesServiceTest {
             when(testResultRepository.findAll()).thenReturn(Collections.emptyList());
             when(userProgressRepository.countCompletedLearningMaterialsByUserAndType()).thenReturn(Collections.emptyList());
 
-            List<Map<String, Object>> result = gradesService.getLeaderboard(1L); // ID збігається
-
             assertThat(result.get(0).get("username")).asString().contains("(Vy)");
             assertThat(result.get(0).get("isCurrentUser")).isEqualTo(true);
         }
     }
-
-    // ────────────────────────────────────────────────────────────
-    // БЛОК 2: Grades Summary (Admin View)
-    // ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("getGradesSummary — зведена таблиця для адміна")
@@ -181,10 +158,6 @@ public class GradesServiceTest {
             assertThat(resp.getStudentGrades().get(0).getScores()).containsEntry(10L, 8);
         }
     }
-
-    // ────────────────────────────────────────────────────────────
-    // БЛОК 3: CSV Export
-    // ────────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("exportGradesToCsv — генерує валідний CSV з BOM")

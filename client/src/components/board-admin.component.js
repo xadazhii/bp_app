@@ -8,7 +8,7 @@ import { SemesterSettings } from './admin/SemesterSettings';
 import React, { Component } from "react";
 import authHeader from "../services/auth-header";
 import axios from "axios";
-import { UserIcon, BookOpenIcon, UploadIcon, CalendarIcon, TestIcon, GraduationCap, LogoutIcon, ExclamationTriangleIcon, CheckCircleIcon, SearchIcon, TrendingUpIcon, SettingsIcon } from './admin/AdminIcons';
+import { UserIcon, BookOpenIcon, UploadIcon, CalendarIcon, TestIcon, GraduationCap, LogoutIcon, ExclamationTriangleIcon, CheckCircleIcon, SearchIcon, TrendingUpIcon, SettingsIcon, TrashIcon } from './admin/AdminIcons';
 import { TestResultDetailsModal } from './admin/TestResultDetailsModal';
 import { ProgressAnalysis } from './admin/ProgressAnalysis';
 
@@ -56,6 +56,7 @@ export default class BoardAdmin extends Component {
             studentSearchQuery: "",
             userSearchQuery: "",
             importTestType: "-1",
+            adminModal: { show: false, title: '', message: '', onConfirm: null, type: 'danger' },
         };
         this.handleStudentFileChange = this.handleStudentFileChange.bind(this);
         this.handleTestExcelUpload = this.handleTestExcelUpload.bind(this);
@@ -106,6 +107,11 @@ export default class BoardAdmin extends Component {
         const week = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 7)) + 1;
         return Math.min(week, 14);
     }
+    setAdminModal = (modalState) => {
+        this.setState(prevState => ({
+            adminModal: typeof modalState === 'function' ? modalState(prevState.adminModal) : { ...prevState.adminModal, ...modalState }
+        }));
+    };
     setCurrentPage(page) {
         this.setState({ currentPage: page });
         if (page === "student-list-upload") this.fetchAllowedStudents();
@@ -160,16 +166,25 @@ export default class BoardAdmin extends Component {
         }
     }
     async handleDeleteUser(userId) {
-        try {
-            await fetch(`${API_URL}/api/users/${userId}`, {
-                method: "DELETE",
-                headers: authHeader(),
-            });
-            this.fetchUsers();
-            this.showMessage("Používateľ odstránený.", "success");
-        } catch {
-            this.showMessage("Nepodarilo sa odstrániť používateľa.", "error");
-        }
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť používateľa?',
+            message: 'Naozaj chcete vymazať tohto používateľa? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: async () => {
+                this.setAdminModal({ show: false });
+                try {
+                    await fetch(`${API_URL}/api/users/${userId}`, {
+                        method: "DELETE",
+                        headers: authHeader(),
+                    });
+                    this.fetchUsers();
+                    this.showMessage("Používateľ odstránený.", "success");
+                } catch {
+                    this.showMessage("Nepodarilo sa odstrániť používateľa.", "error");
+                }
+            }
+        });
     }
     async fetchMaterials() {
         try {
@@ -219,16 +234,25 @@ export default class BoardAdmin extends Component {
         }
     };
     async handleDeleteMaterial(materialId) {
-        try {
-            await fetch(`${API_URL}/api/materials/${materialId}`, {
-                method: "DELETE",
-                headers: authHeader(),
-            });
-            this.fetchMaterials();
-            this.showMessage("Materiál odstránený.", "success");
-        } catch {
-            this.showMessage("Nepodarilo sa odstrániť materiál.", "error");
-        }
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť materiál?',
+            message: 'Naozaj chcete vymazať tento študijný materiál? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: async () => {
+                this.setAdminModal({ show: false });
+                try {
+                    await fetch(`${API_URL}/api/materials/${materialId}`, {
+                        method: "DELETE",
+                        headers: authHeader(),
+                    });
+                    this.fetchMaterials();
+                    this.showMessage("Materiál odstránený.", "success");
+                } catch {
+                    this.showMessage("Nepodarilo sa odstrániť materiál.", "error");
+                }
+            }
+        });
     }
     handleStudentFileChange(e) {
         this.setState({ selectedStudentFile: e.target.files[0] });
@@ -306,25 +330,34 @@ export default class BoardAdmin extends Component {
         }
     };
     async handleDeleteAllowedStudent(email) {
-        this.setState({ deletingAllowedStudentEmail: email });
-        try {
-            const res = await fetch(`${API_URL}/api/allowed-students?email=${encodeURIComponent(email)}`, {
-                method: "DELETE",
-                headers: authHeader(),
-            });
-            let message = "Študent odstránený zo zoznamu povolených.";
-            if (res.status !== 204) {
-                const data = await res.json();
-                message = data.message || message;
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť študenta?',
+            message: `Naozaj chcete vymazať študenta ${email}? Táto akcia je nevratná.`,
+            type: 'danger',
+            onConfirm: async () => {
+                this.setAdminModal({ show: false });
+                this.setState({ deletingAllowedStudentEmail: email });
+                try {
+                    const res = await fetch(`${API_URL}/api/allowed-students?email=${encodeURIComponent(email)}`, {
+                        method: "DELETE",
+                        headers: authHeader(),
+                    });
+                    let message = "Študent odstránený zo zoznamu povolených.";
+                    if (res.status !== 204) {
+                        const data = await res.json();
+                        message = data.message || message;
+                    }
+                    if (!res.ok) throw new Error(message);
+                    this.showMessage(message, "success");
+                    await this.fetchAllowedStudents();
+                } catch (error) {
+                    this.showMessage(error.message, "error");
+                } finally {
+                    this.setState({ deletingAllowedStudentEmail: null });
+                }
             }
-            if (!res.ok) throw new Error(message);
-            this.showMessage(message, "success");
-            await this.fetchAllowedStudents();
-        } catch (error) {
-            this.showMessage(error.message, "error");
-        } finally {
-            this.setState({ deletingAllowedStudentEmail: null });
-        }
+        });
     }
     async fetchStudentGrades() {
         this.setState({ gradesLoading: true });
@@ -404,19 +437,28 @@ export default class BoardAdmin extends Component {
         }
     };
     async handleDeleteEvent(eventId) {
-        this.setState({ deletingEventId: eventId });
-        try {
-            await fetch(`${API_URL}/api/calendar-events/${eventId}`, {
-                method: "DELETE",
-                headers: authHeader(),
-            });
-            this.fetchCalendarEvents();
-            this.showMessage("Udalosť odstránená.", "success");
-        } catch {
-            this.showMessage("Nepodarilo sa odstrániť udalosť.", "error");
-        } finally {
-            this.setState({ deletingEventId: null });
-        }
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť udalosť?',
+            message: 'Naozaj chcete vymazať túto udalosť v kalendári? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: async () => {
+                this.setAdminModal({ show: false });
+                this.setState({ deletingEventId: eventId });
+                try {
+                    await fetch(`${API_URL}/api/calendar-events/${eventId}`, {
+                        method: "DELETE",
+                        headers: authHeader(),
+                    });
+                    this.fetchCalendarEvents();
+                    this.showMessage("Udalosť odstránená.", "success");
+                } catch {
+                    this.showMessage("Nepodarilo sa odstrániť udalosť.", "error");
+                } finally {
+                    this.setState({ deletingEventId: null });
+                }
+            }
+        });
     }
 
     async fetchTests() {
@@ -447,13 +489,22 @@ export default class BoardAdmin extends Component {
         }));
     };
     removeQuestion = (idx) => {
-        const questions = [...this.state.newTestQuestions];
-        if (questions.length > 1) {
-            questions.splice(idx, 1);
-            this.setState({ newTestQuestions: questions });
-        } else {
-            this.showMessage("Test musí obsahovať aspoň jednu otázku.", "error");
-        }
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť otázku?',
+            message: 'Naozaj chcete vymazať túto otázku? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: () => {
+                this.setAdminModal({ show: false });
+                const questions = [...this.state.newTestQuestions];
+                if (questions.length > 1) {
+                    questions.splice(idx, 1);
+                    this.setState({ newTestQuestions: questions });
+                } else {
+                    this.showMessage("Test musí obsahovať aspoň jednu otázku.", "error");
+                }
+            }
+        });
     };
     updateQuestion = (idx, field, value) => {
         const questions = [...this.state.newTestQuestions];
@@ -540,20 +591,29 @@ export default class BoardAdmin extends Component {
         e.target.value = "";
     };
     async handleDeleteTest(testId) {
-        try {
-            const res = await fetch(`${API_URL}/api/tests/${testId}`, {
-                method: "DELETE",
-                headers: authHeader(),
-            });
-            if (!res.ok) {
-                const errorData = await res.text();
-                throw new Error(errorData || "Nepodarilo sa odstrániť test.");
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť test?',
+            message: 'Naozaj chcete vymazať tento test? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: async () => {
+                this.setAdminModal({ show: false });
+                try {
+                    const res = await fetch(`${API_URL}/api/tests/${testId}`, {
+                        method: "DELETE",
+                        headers: authHeader(),
+                    });
+                    if (!res.ok) {
+                        const errorData = await res.text();
+                        throw new Error(errorData || "Nepodarilo sa odstrániť test.");
+                    }
+                    this.fetchTests();
+                    this.showMessage("Test odstránený.", "success");
+                } catch (error) {
+                    this.showMessage(error.message, "error");
+                }
             }
-            this.fetchTests();
-            this.showMessage("Test odstránený.", "success");
-        } catch (error) {
-            this.showMessage(error.message, "error");
-        }
+        });
     }
     async openEditTest(test) {
         try {
@@ -596,13 +656,22 @@ export default class BoardAdmin extends Component {
         this.setState({ editingTestQuestions: questions });
     };
     removeEditQuestion = (idx) => {
-        const questions = [...this.state.editingTestQuestions];
-        if (questions.length > 1) {
-            questions.splice(idx, 1);
-            this.setState({ editingTestQuestions: questions });
-        } else {
-            this.showMessage("Test musí obsahovať aspoň jednu otázku.", "error");
-        }
+        this.setAdminModal({
+            show: true,
+            title: 'Odstrániť otázku?',
+            message: 'Naozaj chcete vymazať túto otázku? Táto akcia je nevratná.',
+            type: 'danger',
+            onConfirm: () => {
+                this.setAdminModal({ show: false });
+                const questions = [...this.state.editingTestQuestions];
+                if (questions.length > 1) {
+                    questions.splice(idx, 1);
+                    this.setState({ editingTestQuestions: questions });
+                } else {
+                    this.showMessage("Test musí obsahovať aspoň jednu otázku.", "error");
+                }
+            }
+        });
     };
     updateEditAnswer = (qIdx, aIdx, field, value) => {
         this.setState(prevState => {
@@ -835,6 +904,40 @@ export default class BoardAdmin extends Component {
                         beigeTextColor={beigeTextColor}
                     />
                 )
+                }
+                {
+                    this.state.adminModal && this.state.adminModal.show && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+                            <div className="bg-slate-900 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
+                                <div className={`h-2 w-full ${this.state.adminModal.type === 'danger' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                <div className="p-8 text-center">
+                                    <div className={`w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center ${this.state.adminModal.type === 'danger' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                                        {this.state.adminModal.type === 'danger' ? <TrashIcon className="w-8 h-8" /> : <ExclamationTriangleIcon className="w-8 h-8" />}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-2">{this.state.adminModal.title}</h3>
+                                    <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                                        {this.state.adminModal.message}
+                                    </p>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => this.setAdminModal({ show: false })}
+                                            className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all active:scale-95"
+                                        >
+                                            Zrušiť
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (this.state.adminModal.onConfirm) this.state.adminModal.onConfirm();
+                                            }}
+                                            className={`flex-1 px-4 py-3 ${this.state.adminModal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold rounded-xl transition-all shadow-lg active:scale-95`}
+                                        >
+                                            {this.state.adminModal.type === 'danger' ? 'Odstrániť' : 'Potvrdiť'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 }
             </div>
         );

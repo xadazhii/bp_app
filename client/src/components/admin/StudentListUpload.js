@@ -15,7 +15,7 @@ export const StudentListUpload = ({ adminCtx }) => {
 
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                                     {}
-                                    <div className="bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
+                                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/50 group-hover:bg-blue-500 transition-all duration-500"></div>
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="p-2.5 bg-blue-500/10 rounded-2xl">
@@ -53,7 +53,7 @@ export const StudentListUpload = ({ adminCtx }) => {
                                     </div>
 
                                     {}
-                                    <div className="bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
+                                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50 group-hover:bg-emerald-500 transition-all duration-500"></div>
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="p-2.5 bg-emerald-500/10 rounded-2xl">
@@ -91,7 +91,7 @@ export const StudentListUpload = ({ adminCtx }) => {
                                     </div>
                                 </div>
 
-                                <div className="bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-3xl shadow-2xl overflow-hidden">
+                                <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl shadow-2xl overflow-hidden">
                                     <div className="px-6 py-3 border-b border-white/5 bg-[#0f172a]/20 flex justify-between items-center">
                                         <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
@@ -119,10 +119,10 @@ export const StudentListUpload = ({ adminCtx }) => {
                                                     </tr>
                                                 ) : (
                                                     allowedStudents.map((student) => (
-                                                        <tr key={student.id} className="hover:bg-[#15203d]/20 transition-all group">
+                                                        <tr key={student.id} className="hover:bg-white/5 transition-all group">
                                                             <td className="px-6 py-4">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 rounded-lg bg-[#15203d]/60 flex items-center justify-center text-slate-300 font-black text-xs relative flex-shrink-0">
+                                                                    <div className="w-8 h-8 rounded-lg bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs relative flex-shrink-0">
                                                                         {student.email.substring(0, 1).toUpperCase()}
                                                                         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-slate-800 bg-blue-500"></div>
                                                                     </div>

@@ -58,7 +58,7 @@ const CalendarContent = ({ beigeTextColor }) => {
             ) : error ? (
                 <div className="text-red-500">{error}</div>
             ) : (
-                <div className="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                <div className="bg-slate-800/20 backdrop-blur-sm p-6 rounded-2xl border border-white/5">
                     <h3 className="font-bold text-blue-400 mb-2">Nadchádzajúce udalosti:</h3>
                     <ul className="space-y-2">
                         {events.length === 0 ? (

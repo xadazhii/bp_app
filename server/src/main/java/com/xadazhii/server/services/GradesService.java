@@ -106,7 +106,6 @@ public class GradesService {
                 .collect(Collectors.toList());
         Set<Long> studentIds = students.stream().map(User::getId).collect(Collectors.toSet());
 
-        // Fetch results and associate with student
         List<TestResult> allResults = testResultRepository.findAll().stream()
                 .filter(r -> r.getStudent() != null && studentIds.contains(r.getStudent().getId()))
                 .collect(Collectors.toList());
@@ -118,7 +117,7 @@ public class GradesService {
         for (TestResult r : allResults) {
             Long sId = r.getStudent().getId();
             Long tId = r.getTest().getId();
-            
+
             scores.computeIfAbsent(sId, k -> new HashMap<>());
             cheated.computeIfAbsent(sId, k -> new HashMap<>());
             resultIdsMap.computeIfAbsent(sId, k -> new HashMap<>());
@@ -129,8 +128,6 @@ public class GradesService {
                 resultIdsMap.get(sId).put(tId, r.getId());
                 cheated.get(sId).put(tId, r.isCheated());
             } else if (r.getScore() == oldScore) {
-                // If scores are equal, keep existing if not cheated, or update if this one is less "problematic"
-                // Actually usually we just keep the first one found or highest ID.
             }
         }
 

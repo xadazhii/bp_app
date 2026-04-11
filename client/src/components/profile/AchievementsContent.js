@@ -115,10 +115,6 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
     const [leaderboard, setLeaderboard] = useState([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
     const [leaderboardError, setLeaderboardError] = useState(null);
-    const [isEditingPseudonym, setIsEditingPseudonym] = useState(false);
-    const [newPseudonym, setNewPseudonym] = useState("");
-    const [pseudonymLoading, setPseudonymLoading] = useState(false);
-    const [message, setMessage] = useState({ text: "", type: "" });
 
     const fetchLeaderboard = () => {
         setLeaderboardLoading(true);
@@ -140,43 +136,7 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
         }
     }, [activeSubTab]);
 
-    const handlePseudonymUpdate = async (e) => {
-        e.preventDefault();
-        setPseudonymLoading(true);
-        setMessage({ text: "", type: "" });
 
-        try {
-            const response = await fetch(`${API_URL}/api/profile/pseudonym`, {
-                method: "PUT",
-                headers: {
-                    ...authHeader(),
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ pseudonym: newPseudonym.trim() }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                setMessage({ text: "Pseudonym bol úspešne aktualizovaný!", type: "success" });
-                setIsEditingPseudonym(false);
-
-                const user = JSON.parse(localStorage.getItem("user"));
-                if (user) {
-                    user.pseudonym = newPseudonym.trim();
-                    localStorage.setItem("user", JSON.stringify(user));
-                }
-
-                fetchLeaderboard();
-                setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-            } else {
-                setMessage({ text: data.message || "Nepodarilo sa zmeniť pseudonym.", type: "error" });
-            }
-        } catch (error) {
-            setMessage({ text: `Chyba: ${error.message}`, type: "error" });
-        } finally {
-            setPseudonymLoading(false);
-        }
-    };
 
     if (statsLoading) {
         return <div className="text-center text-lg text-slate-400">Načítavam úspechy...</div>;
@@ -303,60 +263,10 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
                                                         <div className="p-6 text-center font-mono text-2xl text-slate-500 tracking-tight">{nearestBetterScore}</div>
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pl-1">
+                                                <div className="flex flex-col gap-4 pl-1">
                                                     <p className="text-slate-500 text-sm">
                                                         Patríte medzi <span className="font-bold text-slate-300">{percentile} %</span> najlepších študentov podľa dosiahnutého študijného skóre.
                                                     </p>
-
-                                                    {isEditingPseudonym ? (
-                                                        <form onSubmit={handlePseudonymUpdate} className="flex items-center gap-2 w-full sm:w-auto animate-fade-in">
-                                                            <input
-                                                                type="text"
-                                                                value={newPseudonym}
-                                                                onChange={(e) => setNewPseudonym(e.target.value)}
-                                                                placeholder="Zadajte pseudonym..."
-                                                                maxLength={20}
-                                                                className="bg-slate-900/50 border border-slate-700/50 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 transition-colors w-full sm:w-48"
-                                                                autoFocus
-                                                            />
-                                                            <button
-                                                                type="submit"
-                                                                disabled={pseudonymLoading}
-                                                                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
-                                                            >
-                                                                {pseudonymLoading ? "..." : "Uložiť"}
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setIsEditingPseudonym(false);
-                                                                    setMessage({ text: "", type: "" });
-                                                                }}
-                                                                className="text-slate-500 hover:text-slate-300 px-2 py-1.5 text-xs font-bold transition-all"
-                                                            >
-                                                                Zrušiť
-                                                            </button>
-                                                        </form>
-                                                    ) : (
-                                                        <div className="flex flex-col items-end gap-1">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setIsEditingPseudonym(true);
-                                                                    const user = JSON.parse(localStorage.getItem("user"));
-                                                                    setNewPseudonym(user?.pseudonym || "");
-                                                                }}
-                                                                className="group flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-all bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                                                                {currentUser.rawPseudonym ? "Zmeniť pseudonym" : "Nastaviť pseudonym"}
-                                                            </button>
-                                                            {message.text && (
-                                                                <span className={`text-[10px] font-bold ${message.type === 'success' ? 'text-emerald-400' : 'text-rose-400'} animate-fade-in`}>
-                                                                    {message.text}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
                                         );

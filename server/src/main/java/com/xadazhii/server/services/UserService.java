@@ -67,6 +67,10 @@ public class UserService {
         User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený."));
 
+        if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
+            throw new RuntimeException("Chyba: Heslo hlavného administrátora je možné zmeniť iba v konfigurácii servera.");
+        }
+
         if (!encoder.matches(currentPassword, user.getPassword())) {
             throw new RuntimeException("Súčasné heslo je nesprávne!");
         }
@@ -78,6 +82,10 @@ public class UserService {
     public void updateUsername(Long userId, String newUsername) {
         User user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new RuntimeException("Používateľ nebol nájdený."));
+
+        if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
+            throw new RuntimeException("Chyba: Meno hlavného administrátora je možné zmeniť iba v konfigurácii servera.");
+        }
 
         if (userRepository.existsByUsername(newUsername) && !user.getUsername().equals(newUsername)) {
             throw new RuntimeException("Toto používateľské meno už existuje!");
@@ -127,6 +135,7 @@ public class UserService {
         profile.put("email", user.getEmail());
         profile.put("points", user.getPoints());
         profile.put("pseudonym", user.getPseudonym());
+        profile.put("isSystemAdmin", user.getEmail() != null && user.getEmail().equals(adminEmail));
         return profile;
     }
 }

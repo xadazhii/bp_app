@@ -60,10 +60,8 @@ public class MaterialService {
         if (!(all && isAdmin)) {
             final int effectiveWeek;
             if (currentWeek == 0) {
-                // Semester date not set at all
                 effectiveWeek = 0;
             } else if (currentWeek < 0) {
-                // Semester set to future, show week 1 by default
                 effectiveWeek = 1;
             } else {
                 effectiveWeek = currentWeek;

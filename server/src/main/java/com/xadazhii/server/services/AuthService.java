@@ -86,7 +86,6 @@ public class AuthService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        // Auto-login after registration
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername(signUpRequest.getUsername());
         loginRequest.setPassword(signUpRequest.getPassword());

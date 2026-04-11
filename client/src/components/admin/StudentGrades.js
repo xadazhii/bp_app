@@ -45,7 +45,7 @@ export const StudentGrades = ({ adminCtx }) => {
                                             placeholder={window.innerWidth < 640 ? "Hľadať študenta..." : "Hľadať študenta podľa mena alebo emailu..."}
                                             value={studentSearchQuery}
                                             onChange={(e) => adminCtx.setState({ studentSearchQuery: e.target.value })}
-                                            className="block w-full pl-12 pr-4 py-3 bg-[#0f172a]/40 border border-white/5 rounded-2xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner text-sm"
+                                            className="block w-full pl-12 pr-4 py-3 bg-[#0f172a] border border-white/5 rounded-2xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner text-sm"
                                         />
                                         {studentSearchQuery && (
                                             <button
@@ -83,7 +83,7 @@ export const StudentGrades = ({ adminCtx }) => {
                                                         const totalPoints = scoresArray.reduce((sum, score) => sum + score, 0);
                                                         const averageScore = scoresArray.length > 0 ? (totalPoints / scoresArray.length).toFixed(1) : 'N/A';
                                                         return (
-                                                            <div key={student.id} className="bg-[#0f172a]/40 backdrop-blur-sm border border-white/5 rounded-[2rem] shadow-xl p-5 sm:p-7 transition-all hover:border-blue-500/40 hover:bg-[#0f172a]/60 group">
+                                                            <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-[2rem] shadow-xl p-5 sm:p-7 transition-all hover:border-blue-500/40 hover:bg-white/5 group">
                                                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 pb-6 border-b border-white/5">
                                                                     <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
                                                                         <div className="relative flex-shrink-0">
@@ -171,7 +171,7 @@ export const StudentGrades = ({ adminCtx }) => {
                                             </div>
                                         )}
                                         {gradesViewMode === 'table' && (
-                                            <div className="bg-[#0f172a]/30 backdrop-blur-md border border-white/5 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+                                            <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
                                                 <div className="overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                                                     <table className="min-w-full border-separate border-spacing-0">
                                                         <thead>
@@ -209,10 +209,10 @@ export const StudentGrades = ({ adminCtx }) => {
                                                                         return false;
                                                                     });
                                                                     return (
-                                                                        <tr key={student.id} className="hover:bg-[#15203d]/10 transition-colors group">
+                                                                        <tr key={student.id} className="hover:bg-white/5 transition-colors group">
                                                                             <td className="px-4 py-3 sticky left-0 bg-[#0f172a]/90 backdrop-blur-md z-10 border-r border-white/5 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.5)]">
                                                                                 <div className="flex items-center gap-3 max-w-[120px] md:max-w-none">
-                                                                                    <div className="w-8 h-8 rounded-lg bg-[#15203d]/50 flex items-center justify-center text-slate-300 font-black text-[10px] flex-shrink-0">
+                                                                                    <div className="w-8 h-8 rounded-lg bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] flex-shrink-0">
                                                                                         {student.username.substring(0, 1).toUpperCase()}
                                                                                     </div>
                                                                                     <div className="min-w-0">

@@ -38,10 +38,6 @@ public class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    // ────────────────────────────────────────────────────────────
-    // Допоміжні методи
-    // ────────────────────────────────────────────────────────────
-
     private SignupRequest makeSignupRequest(String username, String email, String password) {
         SignupRequest req = new SignupRequest();
         req.setUsername(username);
@@ -50,10 +46,6 @@ public class AuthServiceTest {
         return req;
     }
 
-    // ────────────────────────────────────────────────────────────
-    // БЛОК 1: registerUser
-    // ────────────────────────────────────────────────────────────
-
     @Nested
     @DisplayName("registerUser — реєстрація користувача")
     class RegisterUserTests {
@@ -61,7 +53,6 @@ public class AuthServiceTest {
         @Test
         @DisplayName("Успішна реєстрація: дозволений email, вільний username та email")
         void registerUser_success() {
-            // Arrange
             SignupRequest req = makeSignupRequest("student01", "student@test.com", "password123");
 
             AllowedStudent allowed = new AllowedStudent();
@@ -76,10 +67,8 @@ public class AuthServiceTest {
             when(encoder.encode("password123")).thenReturn("$hashed_password$");
             when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(userRole));
 
-            // Act — не повинно кинути виняток
             assertThatCode(() -> authService.registerUser(req)).doesNotThrowAnyException();
 
-            // Assert
             verify(userRepository, times(1)).save(any(User.class));
         }
 
@@ -94,7 +83,6 @@ public class AuthServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Registrácia je povolená len");
 
-            // Переконуємося, що збереження НЕ відбулося
             verify(userRepository, never()).save(any());
         }
 
@@ -147,7 +135,6 @@ public class AuthServiceTest {
             when(userRepository.existsByUsername("student01")).thenReturn(false);
             when(userRepository.existsByEmail("student@test.com")).thenReturn(false);
             when(encoder.encode("pass")).thenReturn("$hash$");
-            when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.empty()); // Роль відсутня
 
             assertThatThrownBy(() -> authService.registerUser(req))
                     .isInstanceOf(RuntimeException.class)
@@ -174,10 +161,8 @@ public class AuthServiceTest {
 
             authService.registerUser(req);
 
-            // Перевіряємо що encode() було викликано саме з оригінальним паролем
             verify(encoder, times(1)).encode("myPlainPassword");
 
-            // Перевіряємо що збережений User не містить plain-text пароль
             verify(userRepository).save(argThat(user ->
                     !user.getPassword().equals("myPlainPassword") &&
                     user.getPassword().equals("$bcrypt$hashed$")

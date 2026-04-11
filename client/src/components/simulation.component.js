@@ -131,42 +131,58 @@ const FirewallGameIcon = () => (
     </svg>
 );
 const ServerGameIcon = ({ health }) => (
-    <div className="relative">
+    <div className="relative flex justify-center">
         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={health > 50 ? "text-blue-400" : "text-red-400 transition-colors duration-500"}>
             <rect x="4" y="2" width="16" height="20" rx="2" />
             <line x1="8" y1="6" x2="16" y2="6" />
             <line x1="8" y1="18" x2="16" y2="18" />
             <circle cx="12" cy="12" r="2" fill="currentColor" className="animate-pulse" />
         </svg>
-        <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-bold w-full text-center ${health < 30 ? 'text-red-500 animate-bounce' : 'text-slate-400'}`}>
-            Zdravie: {health}%
+        <div className="absolute top-full pt-1 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div className={`text-[11px] uppercase font-bold whitespace-nowrap ${health < 30 ? 'text-red-500 animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'text-emerald-400'}`}>
+                Zdravie: {health}%
+            </div>
+            <div className="text-xs font-bold text-slate-400 whitespace-nowrap mt-1">
+                Interný Server
+            </div>
         </div>
     </div>
 );
-const SimWrapper = ({ title, onStart, isRunning, info, children }) => {
-    const [showInfo, setShowInfo] = useState(false);
+const SimWrapper = ({ title, onStart, isRunning, info, children, setModal }) => {
     return (
         <div className="flex flex-col h-full w-full">
             <div className="mb-6 text-center relative z-50">
-                <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
-                <div className="flex justify-center items-center gap-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{title}</h2>
+                <div className="flex justify-center items-center gap-2 sm:gap-4 flex-wrap">
                     <button
                         onClick={onStart}
                         disabled={isRunning}
-                        className={`px-8 py-2 text-sm font-bold text-white rounded-lg transition-all shadow-lg shadow-blue-600/20 ${isRunning ? 'bg-slate-700 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-500 hover:scale-105'}`}
+                        className={`px-6 sm:px-8 py-2 text-sm font-bold text-white rounded-lg transition-all shadow-lg shadow-blue-600/20 ${isRunning ? 'bg-slate-700 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-500 hover:scale-105'}`}
                     >
                         {isRunning ? "Simulácia beží..." : "Spustiť simuláciu"}
                     </button>
-                    <button
-                        onClick={() => setShowInfo(!showInfo)}
-                        className="w-8 h-8 rounded-full border border-slate-500 text-slate-400 hover:text-white flex items-center justify-center font-bold transition-colors"
-                    >?</button>
+                    {setModal && (
+                        <button
+                            onClick={() => setModal({
+                                show: true,
+                                title: "Informácie o simulácii",
+                                message: info || "K tejto simulácii momentálne nie sú dostupné žiadne podrobné informácie.",
+                                type: 'info',
+                                iconType: 'warning',
+                                confirmText: "Rozumiem",
+                                showCancel: false,
+                                onConfirm: () => setModal({ show: false })
+                            })}
+                            className="w-8 h-8 rounded-full border border-slate-500 text-slate-400 hover:text-white flex items-center justify-center font-bold transition-colors shrink-0"
+                        >?</button>
+                    )}
                 </div>
-                {showInfo && <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-slate-800 p-4 rounded border border-slate-600 text-left text-xs text-slate-300 z-50 shadow-xl whitespace-pre-line leading-relaxed">{info}</div>}
             </div>
-            { }
-            <div className="relative w-full px-4 h-[560px] overflow-hidden flex items-center justify-center">
-                {children}
+
+            <div className="relative w-full h-[520px] sm:h-[560px] overflow-x-auto overflow-y-hidden flex items-center justify-start sm:justify-center scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                <div className="min-w-[850px] w-full h-full flex justify-center items-center px-4">
+                    {children}
+                </div>
             </div>
         </div>
     );
@@ -276,7 +292,7 @@ const PacketFlow = ({ active, direction = "right", label, color = "cyan", speed 
         </div>
     );
 };
-const SimDNS = () => {
+const SimDNS = ({ setModal }) => {
     const [step, setStep] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     useEffect(() => {
@@ -294,7 +310,13 @@ const SimDNS = () => {
         setTimeout(() => setIsRunning(true), 100);
     };
     return (
-        <SimWrapper title="DNS Vyhľadávanie" onStart={handleStart} isRunning={isRunning && step < 9} info="Celý cyklus: Dopyt -> Rekurzia -> Odpoveď">
+        <SimWrapper title="DNS Vyhľadávanie" onStart={handleStart} isRunning={isRunning && step < 9} setModal={setModal} info={`DNS (Domain Name System) funguje ako "telefónny zoznam" internetu. Bez neho by ste si museli pamätať číselné IP adresy každého webu.
+
+1. Dopyt (Query): Používateľ zadá adresu (napr. google.com). Počítač nepozná jej IP, tak sa spýta Resolvera (váš poskytovateľ internetu).
+2. Koreňový server (Root): Prvý bod kontaktu, ktorý nasmeruje hľadanie na správnu doménu najvyššej úrovne (.com).
+3. TLD Server: Spravuje domény ako .com, .sk, .org. Vie, ktorý autoritatívny server spravuje konkrétne "google.com".
+4. Autoritatívny Server: Má konečnú odpoveď a vráti IP adresu (napr. 142.250.1.1).
+5. Odpoveď: IP adresa sa vráti používateľovi a prehliadač sa môže úspešne pripojiť.`}>
             <div className="w-full h-[520px] max-w-6xl grid grid-cols-[1fr_2.5fr_1fr] gap-4 items-center relative p-8">
                 <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step === 1 || step >= 8} color={step >= 8 ? "green" : "cyan"} subLabel={step >= 8 ? "IP: 142.250.1.1" : "google.com?"} />
                 <div className="relative h-[450px] w-full">
@@ -317,7 +339,7 @@ const SimDNS = () => {
         </SimWrapper>
     );
 };
-const SimDHCP = () => {
+const SimDHCP = ({ setModal }) => {
     const [step, setStep] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [simData, setSimData] = useState({ ip: "..." });
@@ -405,7 +427,13 @@ const SimDHCP = () => {
         );
     };
     return (
-        <SimWrapper title="DHCP (DORA)" onStart={handleStart} isRunning={isRunning && step < 5} info={`1. Discover\n2. Offer\n3. Request\n4. Ack`}>
+        <SimWrapper title="DHCP (DORA Proces)" onStart={handleStart} isRunning={isRunning && step < 5} setModal={setModal} info={`DHCP (Dynamic Host Configuration Protocol) priraďuje IP adresy automaticky, aby ste ich nemuseli v každom zariadení nastavovať ručne.
+
+Celý proces priradenia sa volá DORA:
+1. D - Discover: Nový počítač v sieti "zakričí" (Broadcast): "Je tu nejaký DHCP server? Potrebujem IP adresu!"
+2. O - Offer: DHCP server odpovie: "Ahoj, mám tu voľnú adresu 192.168.1.10, chceš ju?"
+3. R - Request: Počítač povie: "Áno, prosím, rezervuj mi túto adresu."
+4. A - Acknowledge: Server potvrdí: "Dobre, adresa je tvoja na určený čas. Teraz si online."`}>
             <div className="w-full h-[520px] relative p-8">
                 <div className="absolute left-[10%] top-[5%] w-24 flex flex-col items-center z-10">
                     <DeviceNode IconComponent={RetroClientIcon} label="Klient" active={step === 1} color="cyan" />
@@ -442,7 +470,7 @@ const SimDHCP = () => {
         </SimWrapper>
     );
 };
-const SimTcpUdp = () => {
+const SimTcpUdp = ({ setModal }) => {
     const [step, setStep] = useState(0);
     const [udpStep, setUdpStep] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
@@ -466,7 +494,23 @@ const SimTcpUdp = () => {
         };
     }, [isRunning]);
     return (
-        <SimWrapper title="TCP vs UDP" onStart={() => { setStep(0); setUdpStep(0); setTimeout(() => setIsRunning(true), 100); }} isRunning={isRunning} info="TCP: Handshake -> Reliable\nUDP: Fire & Forget -> Fast">
+        <SimWrapper
+            title="TCP vs UDP"
+            onStart={() => { setStep(0); setUdpStep(0); setTimeout(() => setIsRunning(true), 100); }}
+            isRunning={isRunning}
+            setModal={setModal}
+            info={`Tieto dva protokoly určujú, ako sa dáта fyzicky prenášajú sieťou. Každý má iný účel:
+
+TCP (Prenos so zárukou):
+• Používa "3-cestný handshake" (Ahoj? - Ahoj! - Super!).
+• Každý balík musí byť potvrdený. Ak sa časť dát stratí, pošle sa znova.
+• Vhodné pre: Prezeranie webu, e-маily, sťahovanie súborov.
+
+UDP (Rýchly prenos):
+• Len posiela dáta a nečaká na žiadne potvrdenie.
+• Je omnoho rýchlejší, ale ak sa balík stratí, je preč (žiadna oprava).
+• Vhodné pre: Online hry, video hovory, streaming v reálnom čase.`}
+        >
             <div className="w-full h-[520px] grid grid-cols-2 gap-0 relative">
                 { }
                 <div className="border-r border-slate-700/50 relative p-6 flex flex-col items-center">
@@ -599,8 +643,8 @@ const FirewallGame = () => {
         setRules(prev => ({ ...prev, [rule]: !prev[rule] }));
     };
     return (
-        <div className="w-full h-full flex flex-col p-2 overflow-x-hidden">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-700 pb-4">
+        <div className="w-full min-h-full flex flex-col p-2 overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6 border-b border-slate-700 pb-4 shrink-0">
                 <div>
                     <h3 className="text-xl font-bold text-white">Firewall - Riadenie prevádzky</h3>
                     <p className="text-sm text-slate-400">Nastavte pravidlá na ochranu servera pred útokmi.</p>
@@ -612,9 +656,9 @@ const FirewallGame = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex-1 flex flex-col lg:flex-row gap-8 lg:h-[380px]">
+            <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-8 min-h-[380px]">
                 { }
-                <div className="w-full lg:w-1/3 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-700 flex flex-col gap-4 shadow-lg shrink-0">
+                <div className="w-full md:w-1/3 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-700 flex flex-col gap-4 shadow-lg shrink-0">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Konfigurácia Firewallu</h4>
                     { }
                     <div className="flex items-center justify-between p-4 bg-slate-900/80 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
@@ -661,24 +705,23 @@ const FirewallGame = () => {
                     </div>
                 </div>
                 { }
-                <div className="flex-1 bg-slate-900/30 rounded-xl border border-slate-700 relative overflow-hidden flex items-center px-12">
+                <div className="flex-1 min-h-[250px] bg-slate-900/30 rounded-xl border border-slate-700 relative overflow-hidden flex items-center px-6 sm:px-12 mt-2 md:mt-0">
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:40px_40px] opacity-10"></div>
                     <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-700/50"></div>
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center z-10">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10">
                         <div className="w-16 h-16 bg-slate-800 rounded-full border border-slate-600 flex items-center justify-center shadow-xl">
                             <span className="text-xs font-bold text-slate-300">WAN</span>
                         </div>
                     </div>
-                    <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center z-20">
-                        <div className="bg-slate-900 p-4 rounded-xl border border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.15)] relative">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20">
+                        <div className="bg-slate-900 p-4 rounded-xl border border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.15)] relative flex justify-center">
                             <FirewallGameIcon />
                             <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                            <span className="absolute top-full pt-3 left-1/2 -translate-x-1/2 text-xs font-bold text-orange-400 tracking-widest whitespace-nowrap">FIREWALL</span>
                         </div>
-                        <span className="mt-2 text-xs font-bold text-orange-400 tracking-widest">FIREWALL</span>
                     </div>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center z-10">
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10">
                         <ServerGameIcon health={serverHealth} />
-                        <span className="mt-2 text-xs font-bold text-slate-400">Interný Server</span>
                     </div>
                     <AnimatePresence>
                         {packets.map(p => (
@@ -717,10 +760,10 @@ const FirewallGame = () => {
 };
 const CyberLab = () => {
     const [nodes, setNodes] = useState([
-        { id: 1, type: 'pc', x: 80, y: 100, name: 'Client A', ip: '192.168.1.10' },
+        { id: 1, type: 'pc', x: 80, y: 100, name: 'Klient A', ip: '192.168.1.10' },
         { id: 2, type: 'switch', x: 300, y: 100, name: 'Switch-1' },
-        { id: 3, type: 'router', x: 300, y: 250, name: 'Router-Main', ip: '192.168.1.1' },
-        { id: 4, type: 'server', x: 550, y: 250, name: 'Web Server', ip: '10.0.0.5' },
+        { id: 3, type: 'router', x: 300, y: 250, name: 'Hlavný-Router', ip: '192.168.1.1' },
+        { id: 4, type: 'server', x: 550, y: 250, name: 'Webový Server', ip: '10.0.0.5' },
     ]);
     const [links, setLinks] = useState([[1, 2], [2, 3], [3, 4]]);
     const [tool, setTool] = useState('cursor');
@@ -740,15 +783,15 @@ const CyberLab = () => {
     const ALL_TASKS = [
         {
             id: 't1',
-            text: "Nastavte IP adresu hlavného routera ('Router-Main') na 192.168.1.1 (Gateway).",
+            text: "Nastavte IP adresu hlavného routera ('Hlavný-Router') na 192.168.1.1 (Brána).",
             check: (ns) => {
-                const r = ns.find(n => n.name === 'Router-Main');
+                const r = ns.find(n => n.name === 'Hlavný-Router');
                 return r && r.ip === '192.168.1.1';
             }
         },
         {
             id: 't2',
-            text: "Vytvorte DMZ: Pridajte Firewall a zapojte ho medzi Router a Web Server (Router <-> Firewall <-> Server).",
+            text: "Vytvorte DMZ: Pridajte Firewall a zapojte ho medzi Router a Webový Server (Router <-> Firewall <-> Server).",
             check: (ns, ls) => {
                 const fw = ns.find(n => n.type === 'firewall');
                 const router = ns.find(n => n.type === 'router');
@@ -762,7 +805,7 @@ const CyberLab = () => {
         },
         {
             id: 't3',
-            text: "Premenujte 'Client A' na 'Admin-PC' a nastavte mu IP z rozsahu routera (napr. 192.168.1.100).",
+            text: "Premenujte 'Klient A' na 'Admin-PC' a nastavte mu IP z rozsahu routera (napr. 192.168.1.100).",
             check: (ns) => {
                 const pc = ns.find(n => n.name === 'Admin-PC');
                 return pc && pc.ip && pc.ip.startsWith('192.168.1.');
@@ -770,16 +813,16 @@ const CyberLab = () => {
         },
         {
             id: 't4',
-            text: "Zabezpečte redundanciu: Pridajte druhý Router s názvom 'Backup-Router'.",
-            check: (ns) => ns.some(n => n.type === 'router' && n.name === 'Backup-Router')
+            text: "Zabezpečte redundanciu: Pridajte druhý Router s názvom 'Záložný-Router'.",
+            check: (ns) => ns.some(n => n.type === 'router' && n.name === 'Záložný-Router')
         },
         {
             id: 't5',
-            text: "Pripojte 'Switch-1' k obom routerom (Main aj Backup) pre výpadok linky.",
+            text: "Pripojte 'Switch-1' k obom routerom (Hlavný aj Záložný) pre prípad výpadku linky.",
             check: (ns, ls) => {
                 const sw = ns.find(n => n.name === 'Switch-1');
-                const r1 = ns.find(n => n.name === 'Router-Main');
-                const r2 = ns.find(n => n.name === 'Backup-Router');
+                const r1 = ns.find(n => n.name === 'Hlavný-Router');
+                const r2 = ns.find(n => n.name === 'Záložný-Router');
                 if (!sw || !r1 || !r2) return false;
                 const link1 = ls.some(l => (l[0] === sw.id && l[1] === r1.id) || (l[0] === r1.id && l[1] === sw.id));
                 const link2 = ls.some(l => (l[0] === sw.id && l[1] === r2.id) || (l[0] === r2.id && l[1] === sw.id));
@@ -1169,28 +1212,28 @@ const CyberLab = () => {
         </div>
     );
 };
-const ProtocolsView = ({ onBack, beigeTextColor }) => {
+const ProtocolsView = ({ onBack, beigeTextColor, setModal }) => {
     const [activeTab, setActiveTab] = useState('dns');
     return (
         <div className="w-full flex flex-col h-full text-left">
             { }
-            <div className="flex items-center justify-between mb-6 border-b border-slate-700 pb-4">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 border-b border-slate-700 pb-4 gap-4">
+                <div className="flex items-center gap-4 min-w-0">
                     <button
                         onClick={onBack}
-                        className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
+                        className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium shrink-0"
                     >
                         ← Späť
                     </button>
-                    <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>Sieťové protokoly</h2>
+                    <h2 className="text-lg sm:text-xl font-bold border-l border-slate-700 pl-4 truncate" style={{ color: beigeTextColor }}>Sieťové protokoly</h2>
                 </div>
-                { }
-                <div className="flex bg-[#111827] p-1 rounded-lg border border-slate-700">
+
+                <div className="flex bg-[#111827] p-1 rounded-lg border border-slate-700 w-full sm:w-auto overflow-x-auto">
                     {['dns', 'dhcp', 'tcp/udp'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${activeTab === tab
+                            className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === tab
                                 ? 'bg-blue-600 text-white shadow-sm'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
@@ -1205,17 +1248,17 @@ const ProtocolsView = ({ onBack, beigeTextColor }) => {
                 <AnimatePresence mode="wait">
                     {activeTab === 'dhcp' && (
                         <motion.div key="dhcp" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <SimDHCP />
+                            <SimDHCP setModal={setModal} />
                         </motion.div>
                     )}
                     {activeTab === 'dns' && (
                         <motion.div key="dns" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <SimDNS />
+                            <SimDNS setModal={setModal} />
                         </motion.div>
                     )}
                     {activeTab === 'tcp/udp' && (
                         <motion.div key="tcp" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <SimTcpUdp />
+                            <SimTcpUdp setModal={setModal} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -1226,11 +1269,11 @@ const ProtocolsView = ({ onBack, beigeTextColor }) => {
 const GamesView = ({ onBack, beigeTextColor }) => {
     return (
         <div className="w-full flex flex-col h-full text-left">
-            <div className="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4">
+            <div className="flex items-center gap-4 mb-4 sm:mb-6 border-b border-slate-700 pb-4 shrink-0">
                 <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors text-sm font-medium">← Späť</button>
                 <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>Firewall Defense</h2>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-slate-700">
                 <FirewallGame />
             </div>
         </div>
@@ -1239,11 +1282,11 @@ const GamesView = ({ onBack, beigeTextColor }) => {
 const LabView = ({ onBack, beigeTextColor }) => {
     return (
         <div className="w-full flex flex-col h-full text-left">
-            <div className="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4">
+            <div className="flex items-center gap-4 mb-4 sm:mb-6 border-b border-slate-700 pb-4 shrink-0">
                 <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors text-sm font-medium">← Späť</button>
                 <h2 className="text-xl font-bold border-l border-slate-700 pl-4" style={{ color: beigeTextColor }}>CyberLab Sandbox</h2>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-slate-700">
                 <CyberLab />
             </div>
         </div>
@@ -1254,8 +1297,8 @@ const MainMenu = ({ onSelect, beigeTextColor }) => {
         <motion.div
             whileHover={{ y: -5 }}
             className="group relative flex flex-col items-center text-center p-8
-                       bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl
-                       hover:border-blue-500/50 hover:bg-slate-800/80 hover:shadow-2xl hover:shadow-blue-900/20
+                       bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl
+                       hover:border-blue-500/30 hover:bg-slate-800/20 hover:shadow-2xl hover:shadow-blue-900/20
                        transition-all duration-300 h-full justify-between shadow-lg"
         >
             <div className="flex flex-col items-center w-full">
@@ -1318,10 +1361,33 @@ const MainMenu = ({ onSelect, beigeTextColor }) => {
         </div>
     );
 };
-const Simulation = ({ beigeTextColor }) => {
+const Simulation = ({ beigeTextColor, setModal }) => {
     const [view, setView] = useState('menu');
     return (
         <div className="w-full transition-all duration-500">
+            <AnimatePresence>
+                {view !== 'menu' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="sm:hidden mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-3 relative overflow-hidden group"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent"></div>
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0 relative z-10">
+                            <svg className="w-6 h-6 text-blue-400 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1 relative z-10">
+                            <p className="text-[11px] text-blue-200 font-bold leading-tight uppercase tracking-wider">Odporúčanie</p>
+                            <p className="text-[9px] text-blue-400/80 mt-0.5 leading-relaxed">
+                                Pre lepšiu viditeľnosť odporúčame otočiť telefón horizontálne.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <AnimatePresence mode="wait">
                 {view === 'menu' && (
                     <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
@@ -1330,7 +1396,7 @@ const Simulation = ({ beigeTextColor }) => {
                 )}
                 {view === 'protocols' && (
                     <motion.div key="protocols" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                        <ProtocolsView onBack={() => setView('menu')} beigeTextColor={beigeTextColor} />
+                        <ProtocolsView onBack={() => setView('menu')} beigeTextColor={beigeTextColor} setModal={setModal} />
                     </motion.div>
                 )}
                 {view === 'games' && (

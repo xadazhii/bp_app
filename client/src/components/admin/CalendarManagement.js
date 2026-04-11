@@ -15,7 +15,7 @@ export const CalendarManagement = ({ adminCtx }) => {
                                         onChange={(e) =>
                                             adminCtx.setState({ newEvent: { ...newEvent, date: e.target.value } })
                                         }
-                                        className="px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 text-slate-100"
+                                        className="w-full sm:w-auto px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 text-slate-100"
                                         required
                                     />
                                     <input
@@ -25,7 +25,7 @@ export const CalendarManagement = ({ adminCtx }) => {
                                         onChange={(e) =>
                                             adminCtx.setState({ newEvent: { ...newEvent, message: e.target.value } })
                                         }
-                                        className="px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 text-slate-100 flex-1"
+                                        className="px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 text-slate-100 flex-1"
                                         required
                                     />
                                     <button
@@ -37,7 +37,7 @@ export const CalendarManagement = ({ adminCtx }) => {
                                         {addingEvent ? "Pridávanie..." : "Pridať udalosť"}
                                     </button>
                                 </form>
-                                <div className="bg-[#15203d]/50 p-4 rounded-2xl border border-white/5">
+                                <div className="bg-slate-800/10 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
                                     <h3 className="font-bold text-blue-400 mb-2">Nadchádzajúce udalosti:</h3>
                                     <ul className="space-y-2">
                                         {calendarEvents.length === 0 ? (
@@ -55,7 +55,7 @@ export const CalendarManagement = ({ adminCtx }) => {
                                                     return (
                                                         <li
                                                             key={ev.id}
-                                                            className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg transition-all duration-200 bg-blue-900/20 border-l-4 border-blue-500"
+                                                            className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg transition-all duration-200 bg-white/5 border-l-4 border-blue-500"
                                                         >
                                                             <div>
                                                                 <span className="font-bold text-blue-400">

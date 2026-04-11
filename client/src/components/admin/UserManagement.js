@@ -28,7 +28,7 @@ export const UserManagement = ({ adminCtx, roles }) => {
                                             placeholder="Hľadať používateľa"
                                             value={userSearchQuery}
                                             onChange={(e) => adminCtx.setState({ userSearchQuery: e.target.value })}
-                                            className="block w-full pl-12 pr-4 py-2.5 bg-[#0f172a]/50 border border-white/5 rounded-2xl text-xs md:text-base font-medium text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner"
+                                            className="block w-full pl-12 pr-4 py-2.5 bg-[#0f172a] border border-white/5 rounded-2xl text-xs md:text-base font-medium text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-inner"
                                         />
                                         {userSearchQuery && (
                                             <button
@@ -41,7 +41,7 @@ export const UserManagement = ({ adminCtx, roles }) => {
                                     </div>
 
                                     {}
-                                    <div className="overflow-x-auto rounded-[1.25rem] border border-white/5 shadow-xl bg-[#0f172a]/20 backdrop-blur-md">
+                                    <div className="overflow-x-auto rounded-[1.25rem] border border-white/5 shadow-xl bg-slate-800/10 backdrop-blur-sm">
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr className="bg-[#0f172a]/60 border-b border-white/5">
@@ -52,10 +52,10 @@ export const UserManagement = ({ adminCtx, roles }) => {
                                             </thead>
                                             <tbody className="divide-y divide-slate-700/30">
                                                 {filteredUsers.map((user) => (
-                                                    <tr key={user.id} className="hover:bg-[#15203d]/20 transition-all group">
+                                                    <tr key={user.id} className="hover:bg-white/5 transition-all group">
                                                         <td className="px-3 md:px-6 py-2 md:py-3">
                                                             <div className="flex items-center gap-2 md:gap-3">
-                                                                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#15203d]/60 flex items-center justify-center text-slate-300 font-black text-[10px] md:text-xs relative flex-shrink-0">
+                                                                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] md:text-xs relative flex-shrink-0">
                                                                     {user.username.substring(0, 2).toUpperCase()}
                                                                     <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-slate-800 ${user.role === 'admin' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
                                                                 </div>

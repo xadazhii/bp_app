@@ -73,7 +73,7 @@ public class ProgressService {
         List<TestResult> results = testResultRepository.findByStudentId(userId);
         int totalPoints = results.stream().mapToInt(TestResult::getScore).sum();
         List<UserStatsResponse.UserTestResultDto> detailed = results.stream().map(r -> {
-            List<Question> resultQuestions = (r.getSubmittedAnswers() != null) 
+            List<Question> resultQuestions = (r.getSubmittedAnswers() != null)
                 ? r.getSubmittedAnswers().stream().map(sa -> sa.getQuestion()).collect(Collectors.toList())
                 : Collections.emptyList();
             int maxScore = calculatePossiblePoints(resultQuestions);

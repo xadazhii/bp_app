@@ -170,7 +170,7 @@ const Profile = () => {
             case 'learning':
                 return <LearningContent beigeTextColor={beigeTextColor} onUpdate={() => loadStats(currentUser.id)} setModal={setModal} />;
             case 'simulation':
-                return <Simulation beigeTextColor={beigeTextColor} />;
+                return <Simulation beigeTextColor={beigeTextColor} setModal={setModal} />;
             case 'tests':
                 return <TestsContentPage
                     beigeTextColor={beigeTextColor}
@@ -197,6 +197,7 @@ const Profile = () => {
                     beigeTextColor={beigeTextColor}
                     profileImage={profileImage}
                     onImageChange={handleImageChange}
+                    setModal={setModal}
                 />;
             case 'contacts':
                 return <ContactsContent beigeTextColor={beigeTextColor} currentUser={currentUser} />;
@@ -219,8 +220,8 @@ const Profile = () => {
         <div className="relative flex min-h-screen bg-[#0f172a] font-sans text-slate-200">
             {!isTesting && (
                 <aside
-                    className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl
-                           transform transition-transform duration-300 ease-in-out md:static md:translate-x-0
+                    className={`fixed inset-y-0 left-0 z-[100] w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl
+                           transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0
                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 >
                     <div className="text-2xl font-bold mb-8 text-center mt-2 tracking-wide" style={{ color: beigeTextColor }}>
@@ -305,7 +306,7 @@ const Profile = () => {
 
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 z-40 md:hidden"
+                    className="fixed inset-0 bg-black/60 z-[90] lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 ></div>
             )}
@@ -323,7 +324,7 @@ const Profile = () => {
 
             <div className={`flex flex-col flex-1 min-w-0 ${isTesting ? 'h-screen w-full overflow-hidden' : ''}`}>
                 {!isTesting && (
-                    <header className="sticky top-0 bg-[#0f172a]/50 backdrop-blur-sm p-4 border-b border-white/5 md:hidden z-10 flex items-center justify-between">
+                    <header className="sticky top-0 bg-[#0f172a]/50 backdrop-blur-sm p-4 border-b border-white/5 lg:hidden z-10 flex items-center justify-between">
                         <div className="flex items-center">
                             <button onClick={() => setSidebarOpen(true)} className="text-slate-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -348,30 +349,34 @@ const Profile = () => {
             {
                 modal.show && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-                        <div className="bg-slate-900 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
-                            <div className={`h-2 w-full ${modal.type === 'danger' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                            <div className="p-8 text-center">
-                                <div className={`w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center ${modal.type === 'danger' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                                    {modal.type === 'danger' ? <TrashIcon className="w-8 h-8" /> : <ExclamationTriangleIcon className="w-8 h-8" />}
+                        <div className="bg-slate-900 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+                            <div className={`h-1.5 w-full shrink-0 ${modal.type === 'danger' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                            <div className="p-6 sm:p-8 text-center flex flex-col min-h-0">
+                                <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-4 sm:mb-6 flex items-center justify-center shrink-0 ${modal.type === 'danger' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                                    {modal.iconType === 'warning' ? <ExclamationTriangleIcon className="w-6 h-6 sm:w-8 sm:h-8" /> : (modal.type === 'danger' ? <TrashIcon className="w-6 h-6 sm:w-8 sm:h-8" /> : <ExclamationTriangleIcon className="w-6 h-6 sm:w-8 sm:h-8" />)}
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">{modal.title}</h3>
-                                <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                                    {modal.message}
-                                </p>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setModal({ ...modal, show: false })}
-                                        className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all active:scale-95"
-                                    >
-                                        Zrušiť
-                                    </button>
+                                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 shrink-0">{modal.title}</h3>
+                                <div className="overflow-y-auto pr-2 mb-6 sm:mb-8 custom-scrollbar">
+                                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed whitespace-pre-line text-center">
+                                        {modal.message}
+                                    </p>
+                                </div>
+                                <div className="flex gap-3 shrink-0">
+                                    {modal.showCancel !== false && (
+                                        <button
+                                            onClick={() => setModal({ ...modal, show: false })}
+                                            className="flex-1 px-4 py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all text-sm active:scale-95"
+                                        >
+                                            Zrušiť
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => {
                                             if (modal.onConfirm) modal.onConfirm();
                                         }}
-                                        className={`flex-1 px-4 py-3 ${modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold rounded-xl transition-all shadow-lg active:scale-95`}
+                                        className={`flex-1 px-4 py-2.5 sm:py-3 ${modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold rounded-xl transition-all shadow-lg text-sm active:scale-95`}
                                     >
-                                        {modal.type === 'danger' ? 'Odstrániť' : 'Potvrdiť'}
+                                        {modal.confirmText || (modal.type === 'danger' ? 'Odstrániť' : 'Potvrdiť')}
                                     </button>
                                 </div>
                             </div>

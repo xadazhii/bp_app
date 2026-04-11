@@ -11,7 +11,7 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
 
     return (<div className="space-y-8">
                                 <h2 className="text-3xl font-bold mb-6 text-blue-400">Správa materiálov</h2>
-                                <div className="mb-10 p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+                                <div className="mb-10 p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                                     <h3 className="text-2xl font-semibold mb-4 flex items-center" style={{ color: beigeTextColor }}>
                                         <UploadIcon className="mr-2 text-blue-400" /> Pridať nový materiál
                                     </h3>
@@ -24,7 +24,7 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                                 onChange={(e) =>
                                                     adminCtx.setState({ newMaterial: { ...newMaterial, title: e.target.value } })
                                                 }
-                                                className="w-full px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
+                                                className="w-full px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
                                                 required
                                             />
                                             <label className="flex items-center w-full">
@@ -33,7 +33,7 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                                     onChange={(e) =>
                                                         adminCtx.setState({ newMaterial: { ...newMaterial, weekNumber: parseInt(e.target.value) } })
                                                     }
-                                                    className="w-full px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
+                                                    className="w-full px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100"
                                                     required
                                                 >
                                                     {[...Array(12)].map((_, i) => (
@@ -48,7 +48,7 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                                 onChange={(e) =>
                                                     adminCtx.setState({ newMaterial: { ...newMaterial, type: e.target.value } })
                                                 }
-                                                className="w-full px-4 py-2 rounded-lg border bg-[#15203d] border-white/5 text-slate-100"
+                                                className="w-full px-4 py-2 rounded-lg border bg-[#0f172a] border-white/5 text-slate-100"
                                             >
                                                 <option value="lecture">Prednáška</option>
                                                 <option value="seminar">Seminár</option>
@@ -77,16 +77,16 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                     </form>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+                                    <div className="p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                                         <h4 className="text-lg font-semibold mb-4 text-blue-400">Prednášky</h4>
                                         <div className="space-y-3">
                                             {filteredLectures.length === 0 ? (
-                                                <div className="text-center py-6 bg-[#0f172a]/30 rounded-2xl border border-white/5">
+                                                <div className="text-center py-6 bg-slate-800/10 rounded-2xl border border-white/5">
                                                     <p className="text-slate-400 text-sm italic">Zatiaľ žiadne prednášky.</p>
                                                 </div>
                                             ) : (
                                                 filteredLectures.map((material) => (
-                                                    <div key={material.id} className="bg-[#0f172a]/60 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-[#15203d]/40 shadow-lg">
+                                                    <div key={material.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-white/5 shadow-lg">
                                                         <div className="flex items-center gap-4 min-w-0">
                                                             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
                                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,16 +126,16 @@ export const MaterialManagement = ({ adminCtx, filteredLectures, filteredSeminar
                                             )}
                                         </div>
                                     </div>
-                                    <div className="p-6 border border-white/5 rounded-2xl bg-[#0f172a]/50">
+                                    <div className="p-6 border border-white/5 rounded-2xl bg-slate-800/10 backdrop-blur-sm">
                                         <h4 className="text-lg font-semibold mb-4 text-blue-400">Cvičenia</h4>
                                         <div className="space-y-3">
                                             {filteredSeminars.length === 0 ? (
-                                                <div className="text-center py-6 bg-[#0f172a]/30 rounded-2xl border border-white/5">
+                                                <div className="text-center py-6 bg-slate-800/10 rounded-2xl border border-white/5">
                                                     <p className="text-slate-400 text-sm italic">Zatiaľ žiadne cvičenia.</p>
                                                 </div>
                                             ) : (
                                                 filteredSeminars.map((material) => (
-                                                    <div key={material.id} className="bg-[#0f172a]/60 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-[#15203d]/40 shadow-lg">
+                                                    <div key={material.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30 hover:bg-white/5 shadow-lg">
                                                         <div className="flex items-center gap-4 min-w-0">
                                                             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
                                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

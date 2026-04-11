@@ -38,7 +38,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
 
     if (!entryTest) {
         return (
-            <div className="p-12 bg-[#0f172a]/50 rounded-[2rem] border border-white/5 text-center animate-fade-in">
+            <div className="p-12 bg-slate-800/10 backdrop-blur-sm rounded-[2rem] border border-white/5 text-center animate-fade-in">
                 <div className="w-20 h-20 bg-amber-500/10 text-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <ExclamationTriangleIcon className="w-10 h-10" />
                 </div>
@@ -68,7 +68,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </p>
                 </div>
                 {studentsProgress.length > 0 && (
-                    <div className="bg-[#0f172a]/60 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group self-start lg:self-auto w-full sm:w-auto">
+                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group self-start lg:self-auto w-full sm:w-auto">
                         <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
                             <TrendingUpIcon className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
                         </div>
@@ -91,9 +91,9 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
 
             <div className="lg:hidden space-y-4">
                 {studentsProgress.map(student => (
-                    <div key={student.id} className="bg-[#0f172a]/50 border border-white/5 rounded-2xl p-5 shadow-lg group">
+                    <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-5 shadow-lg group">
                         <div className="flex items-center gap-4 mb-5 pb-4 border-b border-white/5">
-                            <div className="w-10 h-10 rounded-2xl bg-[#15203d] flex items-center justify-center text-slate-300 font-black text-xs uppercase shadow-inner">
+                            <div className="w-10 h-10 rounded-2xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs uppercase shadow-inner">
                                 {student.username.substring(0, 2)}
                             </div>
                             <div className="min-w-0">
@@ -141,7 +141,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
             </div>
 
             <div className="hidden lg:block overflow-x-auto rounded-[2rem] border border-white/5 shadow-2xl">
-                <table className="min-w-full bg-[#0f172a]/40 backdrop-blur-sm overflow-hidden">
+                <table className="min-w-full bg-slate-800/10 backdrop-blur-sm overflow-hidden">
                     <thead>
                         <tr className="bg-[#0f172a]/60 border-b border-white/5">
                             <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
@@ -152,10 +152,10 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </thead>
                     <tbody className="divide-y divide-slate-700/50">
                         {studentsProgress.map(student => (
-                            <tr key={student.id} className="hover:bg-[#15203d]/30 transition-all group">
+                            <tr key={student.id} className="hover:bg-white/5 transition-all group">
                                 <td className="px-8 py-5">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-2xl bg-[#15203d]/50 flex items-center justify-center text-slate-300 font-black text-xs shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        <div className="w-10 h-10 rounded-2xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                             {student.username.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="min-w-0">
@@ -168,7 +168,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                     {student.entryScore !== null ? (
                                         <span className="text-lg font-black text-white">{student.entryScore}</span>
                                     ) : (
-                                        <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                        <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
                                     )}
                                 </td>
                                 <td className="px-8 py-5 text-center">
@@ -176,7 +176,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                         student.exitScore !== null ? (
                                             <span className="text-lg font-black text-white">{student.exitScore}</span>
                                         ) : (
-                                            <span className="px-3 py-1 bg-[#0f172a]/50 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                            <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
                                         )
                                     ) : (
                                         <span className="text-slate-700 font-bold text-xs uppercase tracking-tighter">Čaká sa...</span>
@@ -199,8 +199,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
             </div>
 
             {studentsProgress.length === 0 && (
-                <div className="p-12 text-center bg-[#0f172a]/40 backdrop-blur-sm rounded-[2rem] border border-dashed border-white/5 shadow-inner">
-                    <div className="w-16 h-16 bg-[#15203d]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="p-12 text-center bg-slate-800/10 backdrop-blur-sm rounded-[2rem] border border-dashed border-white/5 shadow-inner">
+                    <div className="w-16 h-16 bg-slate-800/30 rounded-full flex items-center justify-center mx-auto mb-4">
                         <UserIcon className="w-8 h-8 text-slate-600" />
                     </div>
                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Zatiaľ žiadni študenti na analýzu</p>
