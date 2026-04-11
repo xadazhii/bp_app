@@ -37,6 +37,10 @@ public class TestServiceTest {
     @InjectMocks
     private TestService testService;
 
+    // ────────────────────────────────────────────────────────────
+    // Допоміжні фабричні методи
+    // ────────────────────────────────────────────────────────────
+
     private com.xadazhii.server.models.Test makeTest(Long id, String title, Integer week) {
         com.xadazhii.server.models.Test t = new com.xadazhii.server.models.Test();
         t.setId(id);
@@ -63,15 +67,26 @@ public class TestServiceTest {
         return a;
     }
 
+    // ────────────────────────────────────────────────────────────
+    // БЛОК 1: Логіка балів та лімітів питань
+    // ────────────────────────────────────────────────────────────
+
     @Nested
     @DisplayName("getTests — підрахунок балів та кількості питань")
     class GetTestsScoring {
 
         @ParameterizedTest(name = "тиждень {0} → {1} балів за питання")
         @CsvSource({
+                "0,  2",   // Вхідний тест
+                "1,  1",   // Тижневий 1
+                "6,  1",   // Тижневий 6
+                "12, 1",   // Тижневий 12
+                "13, 2",   // Підсумковий тест
+                "14, 2",   // Іспит
         })
         @DisplayName("Правильна кількість балів за питання залежно від тижня")
         void pointsPerQuestion_correctByWeek(int week, int expectedPoints) {
+            // Arrange: тест із 5 питань
             com.xadazhii.server.models.Test t = makeTest(1L, "Test", week);
             List<Question> questions = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -83,8 +98,10 @@ public class TestServiceTest {
             lenient().when(materialRepository.findAll()).thenReturn(Collections.emptyList());
             lenient().when(globalSettingsRepository.findAll()).thenReturn(Collections.emptyList());
 
+            // Act
             List<TestSummaryResponse> result = testService.getTests(true, null);
 
+            // Assert
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getTotalPoints()).isEqualTo(5 * expectedPoints);
         }
@@ -92,6 +109,7 @@ public class TestServiceTest {
         @Test
         @DisplayName("Вхідний тест (тиждень 0): ліміт 25 питань, 2 бали кожне → max 50 балів для студента")
         void entryTest_studentView_capped25Questions() {
+            // Arrange: 30 питань у тесті (більше ліміту)
             com.xadazhii.server.models.Test t = makeTest(1L, "Vstupný test", 0);
             List<Question> questions = new ArrayList<>();
             for (int i = 0; i < 30; i++) {
@@ -105,8 +123,10 @@ public class TestServiceTest {
             when(userProgressRepository.findCompletedMaterialIdsByUserId(userId)).thenReturn(Collections.emptySet());
             when(globalSettingsRepository.findAll()).thenReturn(Collections.emptyList());
 
+            // Act: all=false → student view
             List<TestSummaryResponse> result = testService.getTests(false, userId);
 
+            // Assert: студент бачить рівно 25 питань та max 50 балів
             assertThat(result).hasSize(1);
             TestSummaryResponse summary = result.get(0);
             assertThat(summary.getQuestionCount()).isEqualTo(25);
@@ -116,6 +136,7 @@ public class TestServiceTest {
         @Test
         @DisplayName("Тижневий тест (тиждень 1): ліміт 8 питань, 1 бал кожне → max 8 балів для студента")
         void weeklyTest_studentView_capped8Questions() {
+            // Arrange: 20 питань у тесті
             com.xadazhii.server.models.Test t = makeTest(2L, "Test 1", 1);
             List<Question> questions = new ArrayList<>();
             for (int i = 0; i < 20; i++) {
@@ -123,6 +144,7 @@ public class TestServiceTest {
             }
             t.setQuestions(questions);
 
+            // Материал тижня 1 завершено
             Material mat = new Material();
             mat.setId(10L);
             mat.setWeekNumber(1);
@@ -133,11 +155,14 @@ public class TestServiceTest {
             when(userProgressRepository.findCompletedMaterialIdsByUserId(userId)).thenReturn(Set.of(10L));
 
             GlobalSettings settings = new GlobalSettings();
+            // Задаємо початок семестру в далекому минулому, щоб поточний тиждень >> 1
             settings.setSemesterStartDate(java.time.LocalDate.of(2024, 1, 1).atStartOfDay());
             when(globalSettingsRepository.findAll()).thenReturn(List.of(settings));
 
+            // Act
             List<TestSummaryResponse> result = testService.getTests(false, userId);
 
+            // Assert
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getQuestionCount()).isEqualTo(8);
             assertThat(result.get(0).getTotalPoints()).isEqualTo(8);
@@ -146,6 +171,8 @@ public class TestServiceTest {
         @Test
         @DisplayName("Підсумковий тест (тиждень 13): ліміт 25 питань × 2 бали → max 50 якщо питань >= 25 (admin view)")
         void finalTest_adminView_50pointsCap() {
+            // Підсумковий тест у student view потребує складних умов семестру.
+            // Перевіряємо підрахунок балів через адмін-перегляд (all=true), де немає фільтрації.
             com.xadazhii.server.models.Test t = makeTest(5L, "Záverečný test", 13);
             List<Question> questions = new ArrayList<>();
             for (int i = 0; i < 30; i++) {
@@ -156,9 +183,11 @@ public class TestServiceTest {
             when(testRepository.findAllWithQuestions()).thenReturn(List.of(t));
             when(materialRepository.findAll()).thenReturn(Collections.emptyList());
 
+            // all=true → адмін не обмежений, але ліміт все одно відображається у getTotalPoints
             List<TestSummaryResponse> result = testService.getTests(true, null);
 
             assertThat(result).hasSize(1);
+            // Адмін бачить всі 30 питань, але TotalPoints = 30 * 2 = 60
             assertThat(result.get(0).getQuestionCount()).isEqualTo(30);
             assertThat(result.get(0).getTotalPoints()).isEqualTo(60);
         }
@@ -174,6 +203,11 @@ public class TestServiceTest {
             t.setQuestions(questions);
 
             Long userId = 7L;
+            // Щоб підсумковий тест (w=13) з'явився в student view,
+            // потрібно:
+            // 1. finalWeek >= 13 (задаємо дату семестру в минулому)
+            // 2. Наявність матеріалів для 13 тижня
+            // 3. Усі матеріали 13 тижня завершені студентом
 
             Material week13Material = new Material();
             week13Material.setId(130L);
@@ -209,10 +243,15 @@ public class TestServiceTest {
 
             List<TestSummaryResponse> result = testService.getTests(true, null);
 
+            // Адмін бачить всі 40 питань, 2 бали кожне
             assertThat(result.get(0).getQuestionCount()).isEqualTo(40);
             assertThat(result.get(0).getTotalPoints()).isEqualTo(80);
         }
     }
+
+    // ────────────────────────────────────────────────────────────
+    // БЛОК 2: CRUD операції
+    // ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("createTest — створення тесту")
@@ -221,6 +260,7 @@ public class TestServiceTest {
         @Test
         @DisplayName("Успішне збереження нового тесту")
         void createTest_success() {
+            // Arrange
             TestRequest req = new TestRequest();
             req.setTitle("Новий тест");
             req.setWeekNumber(3);
@@ -229,8 +269,10 @@ public class TestServiceTest {
             com.xadazhii.server.models.Test saved = makeTest(99L, "Новий тест", 3);
             when(testRepository.save(any())).thenReturn(saved);
 
+            // Act
             com.xadazhii.server.models.Test result = testService.createTest(req);
 
+            // Assert
             assertThat(result.getId()).isEqualTo(99L);
             assertThat(result.getTitle()).isEqualTo("Новий тест");
             verify(testRepository, times(1)).save(any());
@@ -251,6 +293,7 @@ public class TestServiceTest {
         @Test
         @DisplayName("Видалення тесту зменшує бали студента")
         void deleteTest_reducesStudentPoints() {
+            // Arrange
             com.xadazhii.server.models.Test t = makeTest(1L, "Test", 1);
 
             User student = new User();
@@ -265,8 +308,10 @@ public class TestServiceTest {
             when(testRepository.findById(1L)).thenReturn(Optional.of(t));
             when(testResultRepository.findByTestId(1L)).thenReturn(List.of(result));
 
+            // Act
             testService.deleteTest(1L);
 
+            // Assert: бали студента зменшено на 10
             assertThat(student.getPoints()).isEqualTo(20);
             verify(userRepository).save(student);
             verify(testRepository).delete(t);
@@ -289,6 +334,7 @@ public class TestServiceTest {
 
             User student = new User();
             student.setId(10L);
+            student.setPoints(5); // 5 балів, але результат містить 20
 
             TestResult result = new TestResult();
             result.setStudent(student);
@@ -300,8 +346,13 @@ public class TestServiceTest {
 
             testService.deleteTest(1L);
 
+            assertThat(student.getPoints()).isEqualTo(0); // max(0, 5-20) = 0
         }
     }
+
+    // ────────────────────────────────────────────────────────────
+    // БЛОК 3: Підрахунок балів при списуванні
+    // ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("toggleCheatStatus — переключення статусу списування")
@@ -321,14 +372,17 @@ public class TestServiceTest {
             result.setStudent(student);
             result.setTest(t);
             result.setScore(10);
+            result.setCheated(false); // Ще не позначено як списування
             result.setSubmittedAnswers(new ArrayList<>());
 
             when(testResultRepository.findById(1L)).thenReturn(Optional.of(result));
 
             testService.toggleCheatStatus(1L);
 
+            // Після toggle: cheated=true → score=0
             assertThat(result.isCheated()).isTrue();
             assertThat(result.getScore()).isEqualTo(0);
+            assertThat(student.getPoints()).isEqualTo(40); // 50 - 10
         }
 
         @Test
@@ -340,6 +394,7 @@ public class TestServiceTest {
 
             com.xadazhii.server.models.Test t = makeTest(1L, "Test", 1);
 
+            // Підготуємо відповідь: правильну, 5 балів
             StudentAnswer sa = new StudentAnswer();
             sa.setCorrect(true);
             sa.setEarnedPoints(5);
@@ -352,6 +407,7 @@ public class TestServiceTest {
             result.setId(2L);
             result.setStudent(student);
             result.setTest(t);
+            result.setScore(0); // Зараз 0 бо cheated=true
             result.setCheated(true);
             result.setSubmittedAnswers(List.of(sa));
 
@@ -359,10 +415,16 @@ public class TestServiceTest {
 
             testService.toggleCheatStatus(2L);
 
+            // Після toggle: cheated=false → score=5
             assertThat(result.isCheated()).isFalse();
             assertThat(result.getScore()).isEqualTo(5);
+            assertThat(student.getPoints()).isEqualTo(25); // 20 + 5
         }
     }
+
+    // ────────────────────────────────────────────────────────────
+    // БЛОК 4: getTestDetail
+    // ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("getTestDetail — деталі тесту")
@@ -398,9 +460,14 @@ public class TestServiceTest {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> questions = (List<Map<String, Object>>) detail.get("questions");
             assertThat(questions).hasSize(1);
+            // Вхідний тест (тиждень 0) → 2 бали за питання
             assertThat(questions.get(0).get("points")).isEqualTo(2);
         }
     }
+
+    // ────────────────────────────────────────────────────────────
+    // БЛОК 5: getAutoTitle (через createTest — опосередковано)
+    // ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Автоматичні назви тестів при імпорті")
