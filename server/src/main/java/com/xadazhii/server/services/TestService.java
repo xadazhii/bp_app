@@ -625,6 +625,7 @@ public class TestService {
 
             int startW;
             if (weekNumber == -1) {
+                startW = 1;
             } else {
                 startW = weekNumber;
             }
@@ -655,6 +656,7 @@ public class TestService {
                     if (weekNumber == -1) {
                         w = Integer.parseInt(m.group(1));
                     } else {
+                        w = weekNumber;
                     }
 
                     cur = new Test();
