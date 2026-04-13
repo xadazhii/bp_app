@@ -19,6 +19,9 @@ public interface TestResultRepository extends JpaRepository<TestResult, Long> {
     @Transactional
     void deleteByStudentId(Long studentId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT r FROM TestResult r LEFT JOIN FETCH r.submittedAnswers sa LEFT JOIN FETCH sa.question WHERE r.test.id IN (SELECT t.id FROM Test t)")
+    List<TestResult> findAllWithAnswersAndQuestions();
+
     boolean existsByTestId(Long testId);
 
     boolean existsByStudentIdAndTestId(Long studentId, Long testId);

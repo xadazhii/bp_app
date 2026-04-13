@@ -106,7 +106,7 @@ public class GradesService {
                 .collect(Collectors.toList());
         Set<Long> studentIds = students.stream().map(User::getId).collect(Collectors.toSet());
 
-        List<TestResult> allResults = testResultRepository.findAll().stream()
+        List<TestResult> allResults = testResultRepository.findAllWithAnswersAndQuestions().stream()
                 .filter(r -> r.getStudent() != null && studentIds.contains(r.getStudent().getId()))
                 .collect(Collectors.toList());
 
@@ -130,7 +130,6 @@ public class GradesService {
                 resultIdsMap.get(sId).put(tId, r.getId());
                 cheated.get(sId).put(tId, r.isCheated());
                 maxScoresMap.get(sId).put(tId, calculateMaxForAttempt(r));
-            } else if (r.getScore() == oldScore) {
             }
         }
 
@@ -142,14 +141,22 @@ public class GradesService {
             else if (week <= 12) limit = 8;
             else limit = 25;
 
-            int ppq = (week != null && (week == 0 || week >= 13)) ? 2 : 1;
             int actualQuestions = t.getQuestions() != null ? t.getQuestions().size() : 0;
             if (limit == 0 || limit > actualQuestions) {
                 limit = actualQuestions;
             }
-            int max = limit * ppq;
 
-            return new GradeTestInfo(t.getId(), t.getTitle(), max, week);
+            // Calculate representative max score for the header
+            int totalPossiblePoints = 0;
+            if (t.getQuestions() != null) {
+                totalPossiblePoints = t.getQuestions().stream().mapToInt(Question::getPoints).sum();
+            }
+            int representativeMax = 0;
+            if (actualQuestions > 0) {
+                representativeMax = (int) Math.round(((double) totalPossiblePoints / actualQuestions) * limit);
+            }
+
+            return new GradeTestInfo(t.getId(), t.getTitle(), representativeMax, week);
         }).collect(Collectors.toList());
 
         List<StudentGradeInfo> studentGrades = students.stream().map(s -> new StudentGradeInfo(
