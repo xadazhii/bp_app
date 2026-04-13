@@ -113,6 +113,7 @@ public class GradesService {
         Map<Long, Map<Long, Integer>> scores = new HashMap<>();
         Map<Long, Map<Long, Boolean>> cheated = new HashMap<>();
         Map<Long, Map<Long, Long>> resultIdsMap = new HashMap<>();
+        Map<Long, Map<Long, Integer>> maxScoresMap = new HashMap<>();
 
         for (TestResult r : allResults) {
             Long sId = r.getStudent().getId();
@@ -121,12 +122,14 @@ public class GradesService {
             scores.computeIfAbsent(sId, k -> new HashMap<>());
             cheated.computeIfAbsent(sId, k -> new HashMap<>());
             resultIdsMap.computeIfAbsent(sId, k -> new HashMap<>());
+            maxScoresMap.computeIfAbsent(sId, k -> new HashMap<>());
 
             Integer oldScore = scores.get(sId).get(tId);
             if (oldScore == null || r.getScore() > oldScore) {
                 scores.get(sId).put(tId, r.getScore());
                 resultIdsMap.get(sId).put(tId, r.getId());
                 cheated.get(sId).put(tId, r.isCheated());
+                maxScoresMap.get(sId).put(tId, calculateMaxForAttempt(r));
             } else if (r.getScore() == oldScore) {
             }
         }
@@ -153,10 +156,25 @@ public class GradesService {
                 s.getId(), s.getUsername(), s.getEmail(),
                 scores.getOrDefault(s.getId(), Collections.emptyMap()),
                 cheated.getOrDefault(s.getId(), Collections.emptyMap()),
-                resultIdsMap.getOrDefault(s.getId(), Collections.emptyMap())
+                resultIdsMap.getOrDefault(s.getId(), Collections.emptyMap()),
+                maxScoresMap.getOrDefault(s.getId(), Collections.emptyMap())
         )).collect(Collectors.toList());
 
         return new GradesSummaryResponse(testInfos, studentGrades);
+    }
+
+    private int calculateMaxForAttempt(TestResult r) {
+        if (r.getSubmittedAnswers() == null || r.getSubmittedAnswers().isEmpty()) {
+            return 0;
+        }
+        int total = 0;
+        for (StudentAnswer sa : r.getSubmittedAnswers()) {
+            Question q = sa.getQuestion();
+            if (q != null) {
+                total += q.getPoints();
+            }
+        }
+        return total;
     }
 
     public byte[] exportGradesToCsv() {

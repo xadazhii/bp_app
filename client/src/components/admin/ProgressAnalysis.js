@@ -15,11 +15,14 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     const studentsProgress = summaryData.studentGrades.map(student => {
         const entryScore = entryTest ? (student.scores[entryTest.id] ?? null) : null;
         const exitScore = exitTest ? (student.scores[exitTest.id] ?? null) : null;
+        
+        const entryMax = entryTest ? (student.maxScores[entryTest.id] ?? entryTest.maxScore) : (entryTest?.maxScore || 1);
+        const exitMax = exitTest ? (student.maxScores[exitTest.id] ?? exitTest.maxScore) : (exitTest?.maxScore || 1);
 
         let progress = null;
-        if (entryScore !== null && exitScore !== null && entryTest.maxScore > 0 && exitTest.maxScore > 0) {
-            const entryPercent = (entryScore / entryTest.maxScore) * 100;
-            const exitPercent = (exitScore / exitTest.maxScore) * 100;
+        if (entryScore !== null && exitScore !== null && entryMax > 0 && exitMax > 0) {
+            const entryPercent = (entryScore / entryMax) * 100;
+            const exitPercent = (exitScore / exitMax) * 100;
             
             if (entryPercent >= 100) {
                 // Ak mal 100% na vstupe, progres je buď 0 (ak má 100% znova) або від'ємний
@@ -114,7 +117,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Vstupný test</p>
                                 <p className="text-lg font-black text-white">
                                     {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
-                                    {student.entryScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {entryTest.maxScore}b</span>}
+                                    {student.entryScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>}
                                 </p>
                             </div>
                             <div className="space-y-1">
@@ -123,7 +126,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                     {exitTest ? (
                                         <>
                                             {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
-                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {exitTest.maxScore}b</span>}
+                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>}
                                         </>
                                     ) : (
                                         <span className="text-slate-700 font-bold text-sm">Zatiaľ neprístupné</span>
@@ -152,8 +155,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     <thead>
                         <tr className="bg-[#0f172a]/60 border-b border-white/5">
                             <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
-                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test ({entryTest.maxScore}b)</th>
-                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test {exitTest ? `(${exitTest.maxScore}b)` : ''}</th>
+                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test</th>
+                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test</th>
                             <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Normalizovaný zisk (g)</th>
                         </tr>
                     </thead>
@@ -173,7 +176,10 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                 </td>
                                 <td className="px-8 py-5 text-center">
                                     {student.entryScore !== null ? (
-                                        <span className="text-lg font-black text-white">{student.entryScore}</span>
+                                        <span className="text-lg font-black text-white">
+                                            {student.entryScore}
+                                            <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>
+                                        </span>
                                     ) : (
                                         <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
                                     )}
@@ -181,7 +187,10 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                 <td className="px-8 py-5 text-center">
                                     {exitTest ? (
                                         student.exitScore !== null ? (
-                                            <span className="text-lg font-black text-white">{student.exitScore}</span>
+                                            <span className="text-lg font-black text-white">
+                                                {student.exitScore}
+                                                <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>
+                                            </span>
                                         ) : (
                                             <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
                                         )

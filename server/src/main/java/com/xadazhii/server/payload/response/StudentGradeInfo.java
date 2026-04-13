@@ -13,4 +13,5 @@ public class StudentGradeInfo {
     private Map<Long, Integer> scores;
     private Map<Long, Boolean> cheatedMap;
     private Map<Long, Long> resultIds;
+    private Map<Long, Integer> maxScores;
 }
