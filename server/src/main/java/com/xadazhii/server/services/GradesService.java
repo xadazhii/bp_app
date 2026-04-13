@@ -129,7 +129,7 @@ public class GradesService {
                 scores.get(sId).put(tId, r.getScore());
                 resultIdsMap.get(sId).put(tId, r.getId());
                 cheated.get(sId).put(tId, r.isCheated());
-                maxScoresMap.get(sId).put(tId, calculateMaxForAttempt(r));
+                maxScoresMap.get(sId).put(tId, calculateAccurateMaxForStudentTest(r.getStudent().getId(), r.getTest()));
             }
         }
 
@@ -170,15 +170,44 @@ public class GradesService {
         return new GradesSummaryResponse(testInfos, studentGrades);
     }
 
-    private int calculateMaxForAttempt(TestResult r) {
-        if (r.getSubmittedAnswers() == null || r.getSubmittedAnswers().isEmpty()) {
+    private int calculateAccurateMaxForStudentTest(Long userId, Test test) {
+        if (test.getQuestions() == null || test.getQuestions().isEmpty()) {
             return 0;
         }
+        Integer week = test.getWeekNumber();
+        int limit = 0;
+        if (week != null) {
+            if (week == 0) limit = 25;
+            else if (week >= 1 && week <= 12) limit = 8;
+            else if (week >= 13) limit = 25;
+        }
+        
+        List<Question> finalQuestions;
+        if (limit > 0) {
+            List<Question> shuffled = new ArrayList<>(test.getQuestions());
+            shuffled.sort(Comparator.comparing(Question::getId));
+            Collections.shuffle(shuffled, new Random(Objects.hash(userId, test.getId())));
+            finalQuestions = shuffled.size() > limit ? shuffled.subList(0, limit) : shuffled;
+        } else {
+            finalQuestions = test.getQuestions();
+        }
+        
         int total = 0;
-        for (StudentAnswer sa : r.getSubmittedAnswers()) {
-            Question q = sa.getQuestion();
-            if (q != null) {
+        for (Question q : finalQuestions) {
+            if ("OPEN".equalsIgnoreCase(q.getType())) {
                 total += q.getPoints();
+            } else if ("MULTIPLE".equalsIgnoreCase(q.getType())) {
+                int qPossible = 0;
+                for (Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > 0) qPossible += a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qPossible);
+            } else {
+                int qMax = 0;
+                for (Answer a : q.getAnswers()) {
+                    if (a.getPointsWeight() > qMax) qMax = a.getPointsWeight();
+                }
+                total += Math.max(q.getPoints(), qMax);
             }
         }
         return total;
