@@ -20,7 +20,14 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
         if (entryScore !== null && exitScore !== null && entryTest.maxScore > 0 && exitTest.maxScore > 0) {
             const entryPercent = (entryScore / entryTest.maxScore) * 100;
             const exitPercent = (exitScore / exitTest.maxScore) * 100;
-            progress = exitPercent - entryPercent;
+            
+            if (entryPercent >= 100) {
+                // Ak mal 100% na vstupe, progres je buď 0 (ak má 100% znova) або від'ємний
+                progress = exitPercent - 100;
+            } else {
+                // Hakeho normalizovaný zisk: (Post - Pre) / (100 - Pre)
+                progress = ((exitPercent - entryPercent) / (100 - entryPercent)) * 100;
+            }
         }
 
         return {
@@ -58,7 +65,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                 <div className="max-w-xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight">Analýza progresu</h2>
                     <p className="text-slate-400 mt-2 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-3">
-                        Sledovanie rastu vedomostí medzi začiatkom a koncom semestra.
+                        Objektívne meranie progresu pomocou Hakeho normalizovaného zisku.
                         {!exitTest && (
                             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/5 border border-blue-500/10 rounded-full text-[10px] font-bold text-blue-400/80 uppercase tracking-wider">
                                 <ClockIcon className="w-3.5 h-3.5" />
@@ -126,7 +133,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                         </div>
 
                         <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
-                            <p className="text-xs font-bold text-slate-400">Progresívny posun:</p>
+                            <p className="text-xs font-bold text-slate-400">Normalizovaný zisk (g):</p>
                             {student.progress !== null ? (
                                 <span className={`flex items-center gap-1.5 font-black text-lg ${student.progress >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
@@ -147,7 +154,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
                             <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test ({entryTest.maxScore}b)</th>
                             <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test {exitTest ? `(${exitTest.maxScore}b)` : ''}</th>
-                            <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Progresívny posun</th>
+                            <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Normalizovaný zisk (g)</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700/50">
