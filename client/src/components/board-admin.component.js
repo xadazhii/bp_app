@@ -205,6 +205,12 @@ export default class BoardAdmin extends Component {
             this.showMessage("Prosím, vyplňte všetky polia a vyberte súbor.", "error");
             return;
         }
+
+        if (newMaterial.file.size > 50 * 1024 * 1024) {
+            this.showMessage("Súbor je príliš veľký. Maximálna veľkosť je 50MB.", "error");
+            return;
+        }
+
         this.setState({ isUploadingMaterial: true });
         this.showMessage("Nahrávam materiál, prosím čakajte...", "info");
 
@@ -255,7 +261,13 @@ export default class BoardAdmin extends Component {
         });
     }
     handleStudentFileChange(e) {
-        this.setState({ selectedStudentFile: e.target.files[0] });
+        const file = e.target.files[0];
+        if (file && file.size > 50 * 1024 * 1024) {
+            this.showMessage("Súbor je príliš veľký. Maximálna veľkosť je 50MB.", "error");
+            e.target.value = "";
+            return;
+        }
+        this.setState({ selectedStudentFile: file });
     }
     handleStudentListUpload = async (e) => {
         e.preventDefault();
@@ -561,6 +573,12 @@ export default class BoardAdmin extends Component {
     handleTestExcelUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        if (file.size > 50 * 1024 * 1024) {
+            this.showMessage("Súbor je príliš veľký. Maximálna veľkosť je 50MB.", "error");
+            e.target.value = "";
+            return;
+        }
 
         this.showMessage("Importujem test...", "info");
         const formData = new FormData();

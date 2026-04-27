@@ -19,6 +19,7 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const rectRef = useRef(null);
     const previewRef = useRef(null);
+    const initialImgRef = useRef(null);
 
     useEffect(() => {
         if (isFullscreen) {
@@ -45,6 +46,7 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         if (initialValue && initialValue.startsWith("data:image")) {
             const img = new Image();
             img.onload = () => {
+                initialImgRef.current = img;
                 ctx.drawImage(img, 0, 0, rect.width, rect.height);
             };
             img.src = initialValue;
@@ -110,13 +112,20 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
         const canvas = canvasRef.current;
         const ctx = ctxRef.current;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.globalCompositeOperation = "source-over";
+        if (initialImgRef.current) {
+            const rect = canvas.getBoundingClientRect();
+            ctx.drawImage(initialImgRef.current, 0, 0, rect.width, rect.height);
+        }
 
         shapes.forEach(shape => {
             ctx.beginPath();
-            ctx.strokeStyle = shape.color;
+            ctx.strokeStyle = shape.isEraser ? "rgba(0,0,0,1)" : shape.color;
             ctx.lineWidth = shape.size;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
+            ctx.globalCompositeOperation = shape.isEraser ? "destination-out" : "source-over";
 
             const sx = shape.startX + offset.x;
             const sy = shape.startY + offset.y;
@@ -152,6 +161,9 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
                 }
             }
         });
+        
+        // Reset composite operation for future new drawings
+        ctx.globalCompositeOperation = "source-over";
     };
 
     const undo = useCallback(() => {
@@ -305,7 +317,7 @@ const CanvasDrawing = ({ initialValue, onSave, onCancel, standalone = false }) =
     );
 };
 
-const NotesContent = ({ beigeTextColor, setModal }) => {
+const NotesContent = ({ beigeTextColor, setModal, showMessage }) => {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -411,8 +423,18 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
 
     const handleBlockFileChange = (id, e) => {
         if (e.target.files && e.target.files[0]) {
-            saveHistory();
             const file = e.target.files[0];
+            if (file.size > 50 * 1024 * 1024) {
+                setModal({
+                    show: true,
+                    title: 'Chyba',
+                    message: 'Súbor je príliš veľký. Maximálna veľkosť je 50MB.',
+                    type: 'danger',
+                    onConfirm: () => setModal(prev => ({ ...prev, show: false }))
+                });
+                return;
+            }
+            saveHistory();
             setBlocks(prev => prev.map(b =>
                 b.id === id ? { ...b, file: file, preview: URL.createObjectURL(file) } : b
             ));
@@ -476,13 +498,9 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                 setNotesActiveTab('browse');
                 historyRef.current = [];
                 setCanUndo(false);
-                setModal({
-                    show: true,
-                    title: 'Úspešne uložené',
-                    message: editingNoteId ? 'Poznámka bola úspešne aktualizovaná!' : 'Poznámka bola úspešne uložená!',
-                    type: 'info',
-                    onConfirm: () => setModal(prev => ({ ...prev, show: false }))
-                });
+                if (showMessage) {
+                    showMessage(editingNoteId ? 'Poznámka bola úspešne aktualizovaná!' : 'Poznámka bola úspešne uložená!', 'success');
+                }
             })
             .catch((error) => {
                 console.error("Error saving note:", error);
@@ -683,6 +701,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                         fetchNotes();
                         setSelectedNote(null);
                         setModal(prev => ({ ...prev, show: false }));
+                        if (showMessage) showMessage('Poznámka bola odstránená.', 'success');
                     });
             }
         });
@@ -1057,7 +1076,7 @@ const NotesContent = ({ beigeTextColor, setModal }) => {
                                                                 </svg>
                                                             </div>
                                                             <span className="text-slate-300 font-bold text-lg">Kliknite sem pre výber obrázka</span>
-                                                            <span className="text-slate-500 text-sm mt-2">Maximálna veľkosť súboru: 1GB</span>
+                                                            <span className="text-slate-500 text-sm mt-2">Maximálna veľkosť súboru: 50MB</span>
                                                         </label>
                                                     </div>
                                                 )}

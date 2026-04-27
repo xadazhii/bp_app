@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { EnvelopeIcon, PhoneIcon, OfficeIcon } from '../common/ProfileIcons';
 
-const ContactsContent = ({ beigeTextColor, currentUser }) => {
+const ContactsContent = ({ beigeTextColor, currentUser, showMessage }) => {
     const [message, setMessage] = useState({
         name: currentUser?.username || "",
         email: currentUser?.email || "",
         text: ""
     });
-    const [showAlert, setShowAlert] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,8 +28,7 @@ const ContactsContent = ({ beigeTextColor, currentUser }) => {
             "66HOGV_BzxfI4lLwh"
         )
             .then(() => {
-                setShowAlert(true);
-                setTimeout(() => setShowAlert(false), 5000);
+                if (showMessage) showMessage("Správa bola úspešne odoslaná", "success");
                 setMessage((prev) => ({ ...prev, text: "" }));
             })
             .catch((err) => {
@@ -40,20 +38,6 @@ const ContactsContent = ({ beigeTextColor, currentUser }) => {
 
     return (
         <div className="space-y-10">
-            {showAlert && (
-                <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4
-              bg-[#0f172a]/90 backdrop-blur-md text-slate-100 rounded-2xl shadow-xl
-              border border-white/5 animate-slide-in">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-blue-400"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                            d="M5 13l4 4L19 7" />
-                    </svg>
-                    <p className="font-medium text-base">Správa bola úspešne odoslaná</p>
-                </div>
-            )}
-
             <h2 className="text-3xl font-bold mb-6" style={{ color: beigeTextColor }}>Kontakty</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

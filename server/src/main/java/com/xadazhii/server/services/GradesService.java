@@ -73,7 +73,7 @@ public class GradesService {
                     String name;
                     if (isMe) {
                         name = (user.getPseudonym() != null && !user.getPseudonym().isBlank()) ? user.getPseudonym() : user.getUsername();
-                        map.put("username", name + " (Vy)");
+                        map.put("username", name);
                         map.put("isCurrentUser", true);
                     } else {
                         if (user.getPseudonym() != null && !user.getPseudonym().isBlank()) {

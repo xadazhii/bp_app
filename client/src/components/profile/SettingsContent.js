@@ -5,7 +5,7 @@ import { UserCircleIcon, KeyIcon, CameraIcon, ExclamationTriangleIcon, CheckCirc
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageChange, setModal }) => {
+const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageChange, setModal, showMessage }) => {
     const fileInputRef = useRef(null);
     const isAdmin = currentUser?.roles?.includes('ROLE_ADMIN');
     const isSystemAdmin = currentUser?.isSystemAdmin;
@@ -14,34 +14,9 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [usernameMessage, setUsernameMessage] = useState({ text: "", isError: false });
-    const [pseudonymMessage, setPseudonymMessage] = useState({ text: "", isError: false });
-    const [passwordMessage, setPasswordMessage] = useState({ text: "", isError: false });
     const [loading, setLoading] = useState(false);
     const [userLoading, setUserLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [imageUpdateFeedback, setImageUpdateFeedback] = useState(false);
-
-    React.useEffect(() => {
-        if (usernameMessage.text) {
-            const timer = setTimeout(() => setUsernameMessage({ text: "", isError: false }), 4000);
-            return () => clearTimeout(timer);
-        }
-    }, [usernameMessage.text]);
-
-    React.useEffect(() => {
-        if (pseudonymMessage.text) {
-            const timer = setTimeout(() => setPseudonymMessage({ text: "", isError: false }), 4000);
-            return () => clearTimeout(timer);
-        }
-    }, [pseudonymMessage.text]);
-
-    React.useEffect(() => {
-        if (passwordMessage.text) {
-            const timer = setTimeout(() => setPasswordMessage({ text: "", isError: false }), 4000);
-            return () => clearTimeout(timer);
-        }
-    }, [passwordMessage.text]);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -99,25 +74,23 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                     const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
 
                     onImageChange(dataUrl);
-                    setImageUpdateFeedback(true);
-                    setTimeout(() => setImageUpdateFeedback(false), 3000);
+                    if (showMessage) showMessage("Profilové foto bolo aktualizované!", "success");
                 };
                 img.onerror = () => {
-                    alert("Tento obrázok nie je podporovaný alebo je poškodený.");
+                    if (showMessage) showMessage("Tento obrázok nie je podporovaný alebo je poškodený.", "error");
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         } catch (error) {
             console.error("Vyskytla sa chyba pri spracovaní obrázka:", error);
-            alert("Chyba spracovania: " + (error.message || error.toString()));
+            if (showMessage) showMessage("Chyba spracovania: " + (error.message || error.toString()), "error");
         } finally {
             event.target.value = '';
         }
     };
 
     const executeUsernameUpdate = async () => {
-        setUsernameMessage({ text: "", isError: false });
         setUserLoading(true);
 
         try {
@@ -132,7 +105,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
             const data = await response.json();
             if (response.ok) {
-                setUsernameMessage({ text: data.message || "Meno bolo úspešne zmenené!", isError: false });
+                if (showMessage) showMessage(data.message || "Meno bolo úspešne zmenené!", "success");
 
                 const user = JSON.parse(localStorage.getItem("user"));
                 user.username = newUsername;
@@ -141,13 +114,12 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                 }
                 localStorage.setItem("user", JSON.stringify(user));
 
-
                 currentUser.username = newUsername;
             } else {
-                setUsernameMessage({ text: data.message || "Nepodarilo sa zmeniť meno.", isError: true });
+                if (showMessage) showMessage(data.message || "Nepodarilo sa zmeniť meno.", "error");
             }
         } catch (error) {
-            setUsernameMessage({ text: `Chyba: ${error.message}`, isError: true });
+            if (showMessage) showMessage(`Chyba: ${error.message}`, "error");
         } finally {
             setUserLoading(false);
         }
@@ -155,13 +127,12 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
     const handleUsernameUpdate = (e) => {
         e.preventDefault();
-        setUsernameMessage({ text: "", isError: false });
         if (!newUsername || newUsername.trim() === "") {
-            setUsernameMessage({ text: "Chyba: Používateľské meno nemôže byť prázdne.", isError: true });
+            if (showMessage) showMessage("Chyba: Používateľské meno nemôže byť prázdne.", "error");
             return;
         }
         if (newUsername.trim() === currentUser?.username) {
-            setUsernameMessage({ text: "Zadané meno je identické s vaším aktuálnym menom.", isError: true });
+            if (showMessage) showMessage("Zadané meno je identické s vaším aktuálnym menom.", "error");
             return;
         }
         setModal({
@@ -177,7 +148,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
     };
 
     const executePseudonymUpdate = async () => {
-        setPseudonymMessage({ text: "", isError: false });
         setUserLoading(true);
 
         try {
@@ -192,7 +162,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
             const data = await response.json();
             if (response.ok) {
-                setPseudonymMessage({ text: data.message || "Pseudonym bol úspešne zmenený!", isError: false });
+                if (showMessage) showMessage(data.message || "Pseudonym bol úspešne zmenený!", "success");
 
                 const user = JSON.parse(localStorage.getItem("user"));
                 user.pseudonym = pseudonym;
@@ -200,10 +170,10 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
                 currentUser.pseudonym = pseudonym;
             } else {
-                setPseudonymMessage({ text: data.message || "Nepodarilo sa zmeniť pseudonym.", isError: true });
+                if (showMessage) showMessage(data.message || "Nepodarilo sa zmeniť pseudonym.", "error");
             }
         } catch (error) {
-            setPseudonymMessage({ text: `Chyba: ${error.message}`, isError: true });
+            if (showMessage) showMessage(`Chyba: ${error.message}`, "error");
         } finally {
             setUserLoading(false);
         }
@@ -211,10 +181,9 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
     const handlePseudonymUpdate = (e) => {
         e.preventDefault();
-        setPseudonymMessage({ text: "", isError: false });
 
         if (pseudonym.trim() === currentUser?.pseudonym) {
-            setPseudonymMessage({ text: "Zadaný pseudonym je identický s vaším aktuálnym pseudonymom.", isError: true });
+            if (showMessage) showMessage("Zadaný pseudonym je identický s vaším aktuálnym pseudonymom.", "error");
             return;
         }
 
@@ -231,7 +200,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
     };
 
     const executePasswordUpdate = async () => {
-        setPasswordMessage({ text: "", isError: false });
         setLoading(true);
 
         try {
@@ -246,7 +214,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
             if (response.ok) {
                 const data = await response.json();
-                setPasswordMessage({ text: data.message || "Heslo bolo úspešne aktualizované!", isError: false });
+                if (showMessage) showMessage(data.message || "Heslo bolo úspešne aktualizované!", "success");
                 setOldPassword("");
                 setNewPassword("");
                 setConfirmPassword("");
@@ -263,7 +231,7 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
             }
 
         } catch (error) {
-            setPasswordMessage({ text: `Chyba: ${error.message}`, isError: true });
+            if (showMessage) showMessage(`Chyba: ${error.message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -271,22 +239,21 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
 
     const handlePasswordUpdate = (e) => {
         e.preventDefault();
-        setPasswordMessage({ text: "", isError: false });
 
         if (!oldPassword || !newPassword || !confirmPassword) {
-            setPasswordMessage({ text: "Chyba: Vyplňte všetky polia.", isError: true });
+            if (showMessage) showMessage("Chyba: Vyplňte všetky polia.", "error");
             return;
         }
         if (newPassword !== confirmPassword) {
-            setPasswordMessage({ text: "Chyba: Nové heslá sa nezhodujú!", isError: true });
+            if (showMessage) showMessage("Chyba: Nové heslá sa nezhodujú!", "error");
             return;
         }
         if (newPassword.length < 6) {
-            setPasswordMessage({ text: "Chyba: Heslo musí mať aspoň 6 znakov.", isError: true });
+            if (showMessage) showMessage("Chyba: Heslo musí mať aspoň 6 znakov.", "error");
             return;
         }
         if (oldPassword === newPassword) {
-            setPasswordMessage({ text: "Chyba: Nové heslo sa nesmie zhodovať s aktuálnym heslom.", isError: true });
+            if (showMessage) showMessage("Chyba: Nové heslo sa nesmie zhodovať s aktuálnym heslom.", "error");
             return;
         }
         setModal({
@@ -343,12 +310,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                         <CameraIcon className="w-5 h-5" />
                                         Foto profilu
                                     </h3>
-                                    {imageUpdateFeedback && (
-                                        <div className="flex items-center gap-1.5 text-green-400 text-[11px] font-bold bg-green-400/10 px-3 py-1 rounded-full border border-green-400/20 transition-all duration-300">
-                                            <CheckCircleIcon className="w-3.5 h-3.5" />
-                                            Aktualizované!
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-4">
@@ -363,9 +324,10 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                         onClick={() => setModal({
                                             show: true,
                                             title: "Odstrániť?",
-                                            message: "Chcete odstrániť fotku?",
+                                            message: "Chcete odstrániť profilové foto?",
                                             onConfirm: () => {
                                                 onImageChange(null);
+                                                if (showMessage) showMessage("Profilové foto bolo odstránené.", "success");
                                                 setModal({ show: false });
                                             },
                                             type: 'danger'
@@ -387,18 +349,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                 <UserCircleIcon className="w-5 h-5 mr-2" />
                                 Meno používateľa
                             </h3>
-                            {usernameMessage.text && usernameMessage.isError && (
-                                <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-red-900/20 text-red-300 border border-red-500/30 flex items-center gap-2">
-                                    <ExclamationTriangleIcon className="w-4 h-4" />
-                                    {usernameMessage.text}
-                                </div>
-                            )}
-                            {usernameMessage.text && !usernameMessage.isError && (
-                                <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-green-900/20 text-green-300 border border-green-500/30 flex items-center gap-2">
-                                    <CheckCircleIcon className="w-4 h-4" />
-                                    {usernameMessage.text}
-                                </div>
-                            )}
                             <form onSubmit={handleUsernameUpdate} className="space-y-4">
                                 <div className="space-y-1">
                                     <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Nové meno</label>
@@ -428,19 +378,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                 <KeyIcon className="w-5 h-5 mr-3" />
                                 Zmeniť heslo
                             </h3>
-
-                            {passwordMessage.text && passwordMessage.isError && (
-                                <div className={`p-3 mb-4 rounded-xl text-xs font-medium flex items-center gap-2 border bg-red-900/20 text-red-300 border-red-500/30`}>
-                                    <ExclamationTriangleIcon className="w-4 h-4" />
-                                    {passwordMessage.text}
-                                </div>
-                            )}
-                            {passwordMessage.text && !passwordMessage.isError && (
-                                <div className={`p-3 mb-4 rounded-xl text-xs font-medium flex items-center gap-2 border bg-green-900/20 text-green-300 border-green-500/30`}>
-                                    <CheckCircleIcon className="w-4 h-4" />
-                                    {passwordMessage.text}
-                                </div>
-                            )}
 
                             <form onSubmit={handlePasswordUpdate} className="grid grid-cols-1 gap-4 flex-1">
                                 <div className="space-y-1">
@@ -506,19 +443,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                 Zmeniť heslo
                             </h3>
 
-                            {passwordMessage.text && passwordMessage.isError && (
-                                <div className={`p-3 mb-4 rounded-xl text-xs font-medium flex items-center gap-2 border bg-red-900/20 text-red-300 border-red-500/30`}>
-                                    <ExclamationTriangleIcon className="w-4 h-4" />
-                                    {passwordMessage.text}
-                                </div>
-                            )}
-                            {passwordMessage.text && !passwordMessage.isError && (
-                                <div className={`p-3 mb-4 rounded-xl text-xs font-medium flex items-center gap-2 border bg-green-900/20 text-green-300 border-green-500/30`}>
-                                    <CheckCircleIcon className="w-4 h-4" />
-                                    {passwordMessage.text}
-                                </div>
-                            )}
-
                             <form onSubmit={handlePasswordUpdate} className="grid grid-cols-1 gap-4 flex-1">
                                 <div className="space-y-1">
                                     <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Aktuálne heslo</label>
@@ -577,18 +501,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                     <UserCircleIcon className="w-5 h-5 mr-2" />
                                     Meno používateľa
                                 </h3>
-                                {usernameMessage.text && usernameMessage.isError && (
-                                    <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-red-900/20 text-red-300 border border-red-500/30 flex items-center gap-2">
-                                        <ExclamationTriangleIcon className="w-4 h-4" />
-                                        {usernameMessage.text}
-                                    </div>
-                                )}
-                                {usernameMessage.text && !usernameMessage.isError && (
-                                    <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-green-900/20 text-green-300 border border-green-500/30 flex items-center gap-2">
-                                        <CheckCircleIcon className="w-4 h-4" />
-                                        {usernameMessage.text}
-                                    </div>
-                                )}
                                 <form onSubmit={handleUsernameUpdate} className="space-y-4">
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Nové meno</label>
@@ -616,18 +528,6 @@ const SettingsContent = ({ currentUser, beigeTextColor, profileImage, onImageCha
                                     <IdentificationIcon className="w-5 h-5 mr-2" />
                                     Plynulosť (Pseudonym)
                                 </h3>
-                                {pseudonymMessage.text && pseudonymMessage.isError && (
-                                    <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-red-900/20 text-red-300 border border-red-500/30 flex items-center gap-2">
-                                        <ExclamationTriangleIcon className="w-4 h-4" />
-                                        {pseudonymMessage.text}
-                                    </div>
-                                )}
-                                {pseudonymMessage.text && !pseudonymMessage.isError && (
-                                    <div className="p-3 mb-4 rounded-xl text-xs font-medium bg-green-900/20 text-green-300 border border-green-500/30 flex items-center gap-2">
-                                        <CheckCircleIcon className="w-4 h-4" />
-                                        {pseudonymMessage.text}
-                                    </div>
-                                )}
                                 <form onSubmit={handlePseudonymUpdate} className="space-y-4">
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Váš pseudonym (v rebríčku)</label>

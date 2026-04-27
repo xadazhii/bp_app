@@ -30,11 +30,11 @@ export const CustomSelect = ({ options, value, onChange, placeholder, className 
 
             {isOpen && (
                 <div className="absolute z-[1001] w-full mt-2 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-blue-500/30 backdrop-blur-xl">
-                    <div className="max-h-[320px] overflow-y-auto overflow-x-hidden dropdown-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarColor: '#3b82f6 rgba(15, 23, 42, 0.5)' }}>
+                    <div className="max-h-[150px] overflow-y-auto overflow-x-hidden dropdown-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarColor: '#3b82f6 rgba(15, 23, 42, 0.5)' }}>
                         {options.map((option) => (
                             <div
                                 key={option.value}
-                                className={`px-4 py-3 cursor-pointer transition-all flex items-center justify-between group border-l-4 ${value === option.value
+                                className={`px-4 py-2 cursor-pointer transition-all flex items-center justify-between group border-l-4 ${value === option.value
                                     ? 'bg-blue-600/20 text-blue-400 border-blue-500'
                                     : 'text-slate-300 hover:bg-white/5 hover:text-white border-transparent hover:border-white/10'
                                     }`}
@@ -58,8 +58,8 @@ export const CustomSelect = ({ options, value, onChange, placeholder, className 
                             </div>
                         ))}
                     </div>
-                    {options.length > 5 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0f172a] to-transparent pointer-events-none rounded-b-xl" />
+                    {options.length > 3 && (
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/80 to-transparent pointer-events-none rounded-b-xl" />
                     )}
                 </div>
             )}

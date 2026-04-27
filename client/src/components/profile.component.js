@@ -11,7 +11,8 @@ import AchievementsContent from "./profile/AchievementsContent";
 import SettingsContent from "./profile/SettingsContent";
 import CalendarContent from "./profile/CalendarContent";
 import NotesContent from "./profile/NotesContent";
-import { TestsContentPage, TestResultDetailsModal, ContactsContent } from "./profile/TestsContent";
+import { TestsContentPage, TestResultDetailsModal } from "./profile/TestsContent";
+import ContactsContent from "./profile/ContactsContent";
 
 import {
     UserIcon, ChartBarIcon, BookOpenIcon, CalendarIcon, AwardIcon,
@@ -56,6 +57,20 @@ const Profile = () => {
         id: null,
         points: 0,
     });
+
+    const [messages, setMessages] = useState([]);
+
+    const showMessage = React.useCallback((text, type = "info") => {
+        const id = Date.now() + Math.random();
+        setMessages(prev => [...prev, { id, text, type }]);
+        setTimeout(() => {
+            setMessages(prev => prev.filter(m => m.id !== id));
+        }, 4000);
+    }, []);
+
+    const removeMessage = React.useCallback((id) => {
+        setMessages(prev => prev.filter(m => m.id !== id));
+    }, []);
 
     const [userStats, setUserStats] = useState(null);
     const [statsLoading, setStatsLoading] = useState(true);
@@ -190,7 +205,7 @@ const Profile = () => {
                     onViewResult={handleViewResult}
                 />;
             case 'notes':
-                return <NotesContent beigeTextColor={beigeTextColor} setModal={setModal} />;
+                return <NotesContent beigeTextColor={beigeTextColor} setModal={setModal} showMessage={showMessage} />;
             case 'settings':
                 return <SettingsContent
                     currentUser={currentUser}
@@ -198,9 +213,10 @@ const Profile = () => {
                     profileImage={profileImage}
                     onImageChange={handleImageChange}
                     setModal={setModal}
+                    showMessage={showMessage}
                 />;
             case 'contacts':
-                return <ContactsContent beigeTextColor={beigeTextColor} currentUser={currentUser} />;
+                return <ContactsContent beigeTextColor={beigeTextColor} currentUser={currentUser} showMessage={showMessage} />;
             default:
                 return <ProfileOverview
                     currentUser={currentUser}
@@ -218,6 +234,36 @@ const Profile = () => {
 
     return (
         <div className="relative flex min-h-screen bg-[#0f172a] font-sans text-slate-200">
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[150] flex flex-col gap-3 w-[90%] max-w-md pointer-events-none">
+                {messages.map((msg) => (
+                    <div
+                        key={msg.id}
+                        className={`p-4 rounded-2xl shadow-2xl border flex items-center justify-between backdrop-blur-md pointer-events-auto animate-fade-in-down transition-all transform hover:scale-[1.02] ${msg.type === "success"
+                            ? "bg-emerald-500/90 border-emerald-400/30 text-white shadow-emerald-900/40"
+                            : msg.type === "error" || msg.type === "danger"
+                                ? "bg-rose-500/90 border-rose-400/30 text-white shadow-rose-900/40"
+                                : "bg-blue-500/90 border-blue-400/30 text-white shadow-blue-900/40"
+                            }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-white/20 rounded-lg">
+                                {msg.type === "success" && <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                                {(msg.type === "error" || msg.type === "danger") && <ExclamationTriangleIcon className="w-5 h-5 text-white" />}
+                                {msg.type !== "success" && msg.type !== "error" && msg.type !== "danger" && <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                            </div>
+                            <span className="font-bold text-sm tracking-tight">{msg.text}</span>
+                        </div>
+                        <button
+                            onClick={() => removeMessage(msg.id)}
+                            className="ml-4 p-1.5 hover:bg-white/20 rounded-2xl transition-colors shrink-0"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                ))}
+            </div>
             {!isTesting && (
                 <aside
                     className={`fixed inset-y-0 left-0 z-[100] w-64 bg-[#0f172a] flex flex-col p-4 border-r border-white/5 shadow-xl

@@ -26,6 +26,15 @@ public class UserService {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private com.xadazhii.server.repository.TestResultRepository testResultRepository;
+
+    @Autowired
+    private com.xadazhii.server.repository.UserProgressRepository userProgressRepository;
+
+    @Autowired
+    private com.xadazhii.server.repository.NoteRepository noteRepository;
+
     @Value("${app.admin.email}")
     private String adminEmail;
 
@@ -59,7 +68,8 @@ public class UserService {
 
         Role role = roleRepository.findByName(roleEnum)
                 .orElseThrow(() -> new RuntimeException("Chyba: Rola nebola nájdená."));
-        user.setRoles(Collections.singleton(role));
+        user.getRoles().clear();
+        user.getRoles().add(role);
         userRepository.save(user);
     }
 
@@ -111,6 +121,11 @@ public class UserService {
         if (user.getEmail() != null && user.getEmail().equals(adminEmail)) {
             throw new RuntimeException("Chyba: Nie je možné vymazať hlavného administrátora.");
         }
+        
+        testResultRepository.deleteAll(testResultRepository.findByStudentId(userId));
+        userProgressRepository.deleteByUserId(userId);
+        noteRepository.deleteByUserId(userId);
+
         userRepository.delete(user);
     }
 
