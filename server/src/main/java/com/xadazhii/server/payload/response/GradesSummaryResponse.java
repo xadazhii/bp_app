@@ -9,4 +9,5 @@ import java.util.List;
 public class GradesSummaryResponse {
     private List<GradeTestInfo> tests;
     private List<StudentGradeInfo> studentGrades;
+    private Double globalNormalizedGain;
 }

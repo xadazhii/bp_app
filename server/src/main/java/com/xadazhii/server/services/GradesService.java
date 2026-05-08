@@ -162,10 +162,20 @@ public class GradesService {
         Test entryTest = tests.stream().filter(t -> Integer.valueOf(0).equals(t.getWeekNumber())).findFirst().orElse(null);
         Test exitTest = tests.stream().filter(t -> Integer.valueOf(13).equals(t.getWeekNumber())).findFirst().orElse(null);
 
+        List<Double> classEntryPercents = new ArrayList<>();
+        List<Double> classExitPercents = new ArrayList<>();
+
         List<StudentGradeInfo> studentGrades = students.stream().map(s -> {
             Map<Long, Integer> sScores = scores.getOrDefault(s.getId(), Collections.emptyMap());
             Map<Long, Integer> sMaxScores = maxScoresMap.getOrDefault(s.getId(), Collections.emptyMap());
-            Double normalizedGain = computeNormalizedGain(entryTest, exitTest, sScores, sMaxScores);
+
+            double[] percents = computeEntryExitPercents(entryTest, exitTest, sScores, sMaxScores);
+            Double normalizedGain = null;
+            if (percents != null) {
+                classEntryPercents.add(percents[0]);
+                classExitPercents.add(percents[1]);
+                normalizedGain = HakeNormalizedGain.calculate(percents[0], percents[1]);
+            }
 
             return new StudentGradeInfo(
                     s.getId(), s.getUsername(), s.getEmail(),
@@ -177,12 +187,19 @@ public class GradesService {
             );
         }).collect(Collectors.toList());
 
-        return new GradesSummaryResponse(testInfos, studentGrades);
+        Double globalNormalizedGain = null;
+        if (!classEntryPercents.isEmpty()) {
+            double meanEntry = classEntryPercents.stream().mapToDouble(d -> d).average().orElse(0.0);
+            double meanExit = classExitPercents.stream().mapToDouble(d -> d).average().orElse(0.0);
+            globalNormalizedGain = HakeNormalizedGain.calculate(meanEntry, meanExit);
+        }
+
+        return new GradesSummaryResponse(testInfos, studentGrades, globalNormalizedGain);
     }
 
-    private Double computeNormalizedGain(Test entryTest, Test exitTest,
-                                         Map<Long, Integer> studentScores,
-                                         Map<Long, Integer> studentMaxScores) {
+    private double[] computeEntryExitPercents(Test entryTest, Test exitTest,
+                                              Map<Long, Integer> studentScores,
+                                              Map<Long, Integer> studentMaxScores) {
         if (entryTest == null || exitTest == null) return null;
         Integer entryScore = studentScores.get(entryTest.getId());
         Integer exitScore = studentScores.get(exitTest.getId());
@@ -194,7 +211,7 @@ public class GradesService {
 
         double entryPercent = ((double) entryScore / entryMax) * 100.0;
         double exitPercent = ((double) exitScore / exitMax) * 100.0;
-        return HakeNormalizedGain.calculate(entryPercent, exitPercent);
+        return new double[]{entryPercent, exitPercent};
     }
 
     private int calculateAccurateMaxForStudentTest(Long userId, Test test) {

@@ -26,9 +26,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
         };
     });
 
-    const activeProgress = studentsProgress.filter(p => p.progress !== null);
-    const avgProgress = activeProgress.length > 0
-        ? (activeProgress.reduce((acc, p) => acc + p.progress, 0) / activeProgress.length).toFixed(1)
+    const avgProgress = summaryData.globalNormalizedGain != null
+        ? summaryData.globalNormalizedGain.toFixed(1)
         : '0';
 
     if (!entryTest) {
