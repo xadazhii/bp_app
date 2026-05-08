@@ -242,7 +242,7 @@ const AchievementsContent = ({ stats, statsLoading, beigeTextColor, onViewResult
                                         const currentUser = leaderboard[currentUserIndex];
                                         const totalStudents = leaderboard.length;
                                         const rank = currentUserIndex + 1;
-                                        const percentile = totalStudents > 0 ? ((rank / totalStudents) * 100).toFixed(1) : 0;
+                                        const percentile = totalStudents > 0 ? ((rank / totalStudents) * 100).toFixed(1).replace('.', ',') : 0;
                                         const nearestBetterScore = currentUserIndex > 0 ? leaderboard[currentUserIndex - 1].points : "-";
 
                                         if (!currentUser) return null;

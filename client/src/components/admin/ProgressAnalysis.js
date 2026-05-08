@@ -15,23 +15,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     const studentsProgress = summaryData.studentGrades.map(student => {
         const entryScore = entryTest ? (student.scores[entryTest.id] ?? null) : null;
         const exitScore = exitTest ? (student.scores[exitTest.id] ?? null) : null;
-        
-        const entryMax = entryTest ? (student.maxScores[entryTest.id] ?? entryTest.maxScore) : (entryTest?.maxScore || 1);
-        const exitMax = exitTest ? (student.maxScores[exitTest.id] ?? exitTest.maxScore) : (exitTest?.maxScore || 1);
 
-        let progress = null;
-        if (entryScore !== null && exitScore !== null && entryMax > 0 && exitMax > 0) {
-            const entryPercent = (entryScore / entryMax) * 100;
-            const exitPercent = (exitScore / exitMax) * 100;
-            
-            if (entryPercent >= 100) {
-                // Ak mal 100% na vstupe, progres je buď 0 (ak má 100% znova) або від'ємний
-                progress = exitPercent - 100;
-            } else {
-                // Hakeho normalizovaný zisk: (Post - Pre) / (100 - Pre)
-                progress = ((exitPercent - entryPercent) / (100 - entryPercent)) * 100;
-            }
-        }
+        const progress = student.normalizedGain ?? null;
 
         return {
             ...student,
@@ -87,7 +72,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             <p className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-1">
                                 {exitTest ? (
                                     <>
-                                        {avgProgress >= 0 ? '+' : ''}{avgProgress}
+                                        {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
                                         <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
                                     </>
                                 ) : (
@@ -139,7 +124,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             <p className="text-xs font-bold text-slate-400">Normalizovaný zisk (g):</p>
                             {student.progress !== null ? (
                                 <span className={`flex items-center gap-1.5 font-black text-lg ${student.progress >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                     <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180 text-rose-400' : 'text-emerald-400'}`} />
                                 </span>
                             ) : (
@@ -201,7 +186,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                 <td className="px-8 py-5 text-right">
                                     {student.progress !== null ? (
                                         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${student.progress >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
-                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                             <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
                                         </div>
                                     ) : (

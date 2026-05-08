@@ -16,12 +16,7 @@ const ProgressAnalysis = ({ summaryData }) => {
         const entryScore = entryTest ? (student.scores[entryTest.id] ?? null) : null;
         const exitScore = exitTest ? (student.scores[exitTest.id] ?? null) : null;
 
-        let progress = null;
-        if (entryScore !== null && exitScore !== null && entryTest.maxScore > 0 && exitTest.maxScore > 0) {
-            const entryPercent = (entryScore / entryTest.maxScore) * 100;
-            const exitPercent = (exitScore / exitTest.maxScore) * 100;
-            progress = exitPercent - entryPercent;
-        }
+        const progress = student.normalizedGain ?? null;
 
         return {
             ...student,
@@ -71,7 +66,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                         <div>
                             <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Globálny rast</p>
                             <p className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-1">
-                                {avgProgress >= 0 ? '+' : ''}{avgProgress}
+                                {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
                                 <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
                             </p>
                         </div>
@@ -114,7 +109,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                             <p className="text-xs font-bold text-slate-400">Progresívny posun:</p>
                             {student.progress !== null ? (
                                 <span className={`flex items-center gap-1.5 font-black text-lg ${student.progress >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                     <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180 text-rose-400' : 'text-emerald-400'}`} />
                                 </span>
                             ) : (
@@ -167,7 +162,7 @@ const ProgressAnalysis = ({ summaryData }) => {
                                 <td className="px-8 py-5 text-right">
                                     {student.progress !== null ? (
                                         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${student.progress >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
-                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1)}%
+                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                             <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
                                         </div>
                                     ) : (

@@ -79,9 +79,10 @@ export const StudentGrades = ({ adminCtx }) => {
                                                             return false;
                                                         });
 
-                                                        const scoresArray = filteredTests.map(t => student.scores[t.id] || 0);
-                                                        const totalPoints = scoresArray.reduce((sum, score) => sum + score, 0);
-                                                        const averageScore = scoresArray.length > 0 ? (totalPoints / scoresArray.length).toFixed(1) : 'N/A';
+                                                        const completedTests = filteredTests.filter(t => student.scores[t.id] !== undefined && t.maxScore > 0);
+                                                        const averagePercent = completedTests.length > 0
+                                                            ? (completedTests.reduce((sum, t) => sum + (student.scores[t.id] / t.maxScore) * 100, 0) / completedTests.length).toFixed(1)
+                                                            : null;
                                                         return (
                                                             <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-[2rem] shadow-xl p-5 sm:p-7 transition-all hover:border-blue-500/40 hover:bg-white/5 group">
                                                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 pb-6 border-b border-white/5">
@@ -98,7 +99,7 @@ export const StudentGrades = ({ adminCtx }) => {
                                                                     <div className="flex flex-col items-end flex-shrink-0 ml-auto sm:ml-0">
                                                                         <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1.5 whitespace-nowrap opacity-60">Priemerné skóre</p>
                                                                         <div className="bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full shadow-sm">
-                                                                            <p className="text-2xl font-black text-blue-400 leading-none">{averageScore}</p>
+                                                                            <p className="text-2xl font-black text-blue-400 leading-none">{averagePercent !== null ? `${averagePercent.replace('.', ',')} %` : 'N/A'}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>

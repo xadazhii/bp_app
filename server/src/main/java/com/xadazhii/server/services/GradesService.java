@@ -159,15 +159,42 @@ public class GradesService {
             return new GradeTestInfo(t.getId(), t.getTitle(), representativeMax, week);
         }).collect(Collectors.toList());
 
-        List<StudentGradeInfo> studentGrades = students.stream().map(s -> new StudentGradeInfo(
-                s.getId(), s.getUsername(), s.getEmail(),
-                scores.getOrDefault(s.getId(), Collections.emptyMap()),
-                cheated.getOrDefault(s.getId(), Collections.emptyMap()),
-                resultIdsMap.getOrDefault(s.getId(), Collections.emptyMap()),
-                maxScoresMap.getOrDefault(s.getId(), Collections.emptyMap())
-        )).collect(Collectors.toList());
+        Test entryTest = tests.stream().filter(t -> Integer.valueOf(0).equals(t.getWeekNumber())).findFirst().orElse(null);
+        Test exitTest = tests.stream().filter(t -> Integer.valueOf(13).equals(t.getWeekNumber())).findFirst().orElse(null);
+
+        List<StudentGradeInfo> studentGrades = students.stream().map(s -> {
+            Map<Long, Integer> sScores = scores.getOrDefault(s.getId(), Collections.emptyMap());
+            Map<Long, Integer> sMaxScores = maxScoresMap.getOrDefault(s.getId(), Collections.emptyMap());
+            Double normalizedGain = computeNormalizedGain(entryTest, exitTest, sScores, sMaxScores);
+
+            return new StudentGradeInfo(
+                    s.getId(), s.getUsername(), s.getEmail(),
+                    sScores,
+                    cheated.getOrDefault(s.getId(), Collections.emptyMap()),
+                    resultIdsMap.getOrDefault(s.getId(), Collections.emptyMap()),
+                    sMaxScores,
+                    normalizedGain
+            );
+        }).collect(Collectors.toList());
 
         return new GradesSummaryResponse(testInfos, studentGrades);
+    }
+
+    private Double computeNormalizedGain(Test entryTest, Test exitTest,
+                                         Map<Long, Integer> studentScores,
+                                         Map<Long, Integer> studentMaxScores) {
+        if (entryTest == null || exitTest == null) return null;
+        Integer entryScore = studentScores.get(entryTest.getId());
+        Integer exitScore = studentScores.get(exitTest.getId());
+        if (entryScore == null || exitScore == null) return null;
+
+        int entryMax = studentMaxScores.getOrDefault(entryTest.getId(), 0);
+        int exitMax = studentMaxScores.getOrDefault(exitTest.getId(), 0);
+        if (entryMax <= 0 || exitMax <= 0) return null;
+
+        double entryPercent = ((double) entryScore / entryMax) * 100.0;
+        double exitPercent = ((double) exitScore / exitMax) * 100.0;
+        return HakeNormalizedGain.calculate(entryPercent, exitPercent);
     }
 
     private int calculateAccurateMaxForStudentTest(Long userId, Test test) {
