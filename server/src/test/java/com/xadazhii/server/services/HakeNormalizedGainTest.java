@@ -14,7 +14,7 @@ class HakeNormalizedGainTest {
     @Test
     @DisplayName("Pre=30 %, Post=70 % → g ≈ 57,14 %")
     void typicalImprovement() {
-        Double g = HakeNormalizedGain.calculate(30.0, 70.0);
+        double g = HakeNormalizedGain.calculate(30.0, 70.0);
         assertThat(g).isCloseTo(57.1428, TOLERANCE);
     }
 
@@ -27,7 +27,7 @@ class HakeNormalizedGainTest {
     @Test
     @DisplayName("Post < Pre → záporný zisk")
     void regression() {
-        Double g = HakeNormalizedGain.calculate(60.0, 40.0);
+        double g = HakeNormalizedGain.calculate(60.0, 40.0);
         assertThat(g).isNegative().isCloseTo(-50.0, TOLERANCE);
     }
 
@@ -38,10 +38,9 @@ class HakeNormalizedGainTest {
     }
 
     @Test
-    @DisplayName("Pre=100 % → null (vzorec je nedefinovaný, delenie nulou)")
-    void entryHundredPercentIsUndefined() {
-        assertThat(HakeNormalizedGain.calculate(100.0, 100.0)).isNull();
-        assertThat(HakeNormalizedGain.calculate(100.0, 80.0)).isNull();
-        assertThat(HakeNormalizedGain.calculate(100.5, 80.0)).isNull();
+    @DisplayName("Pre=100 % → absolútny rozdiel (zachytenie regresie po dosiahnutí maxima)")
+    void entryHundredPercentReturnsAbsoluteDelta() {
+        assertThat(HakeNormalizedGain.calculate(100.0, 100.0)).isEqualTo(0.0);
+        assertThat(HakeNormalizedGain.calculate(100.0, 80.0)).isEqualTo(-20.0);
     }
 }
