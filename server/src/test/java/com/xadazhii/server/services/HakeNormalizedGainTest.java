@@ -71,17 +71,17 @@ class HakeNormalizedGainTest {
         }
 
         @Test
-        @DisplayName("30 ≤ g < 70 → MEDIUM")
+        @DisplayName("0,3 ≤ g ≤ 0,7 → MEDIUM (Hake: medium-g, oba konce zahrnuté)")
         void mediumGainBucket() {
             assertThat(HakeNormalizedGain.classify(30.0)).isEqualTo(MEDIUM);
             assertThat(HakeNormalizedGain.classify(48.0)).isEqualTo(MEDIUM);
-            assertThat(HakeNormalizedGain.classify(69.999)).isEqualTo(MEDIUM);
+            assertThat(HakeNormalizedGain.classify(70.0)).isEqualTo(MEDIUM);
         }
 
         @Test
-        @DisplayName("g ≥ 70 → HIGH")
+        @DisplayName("g > 0,7 → HIGH (Hake: high-g, prísne väčšie)")
         void highGainBucket() {
-            assertThat(HakeNormalizedGain.classify(70.0)).isEqualTo(HIGH);
+            assertThat(HakeNormalizedGain.classify(70.001)).isEqualTo(HIGH);
             assertThat(HakeNormalizedGain.classify(85.0)).isEqualTo(HIGH);
             assertThat(HakeNormalizedGain.classify(100.0)).isEqualTo(HIGH);
         }

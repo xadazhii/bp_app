@@ -22,7 +22,7 @@ public final class HakeNormalizedGain {
     public static Classification classify(double gainPercent) {
         if (gainPercent < 0.0) return Classification.REGRESSION;
         if (gainPercent < 30.0) return Classification.LOW;
-        if (gainPercent < 70.0) return Classification.MEDIUM;
+        if (gainPercent <= 70.0) return Classification.MEDIUM;
         return Classification.HIGH;
     }
 }
