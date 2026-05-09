@@ -12,6 +12,19 @@ const classifyGain = (gainPercent) => {
 
 export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     const [chartOpen, setChartOpen] = React.useState(false);
+    const [legendOpen, setLegendOpen] = React.useState(false);
+    const legendRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (!legendOpen) return;
+        const handler = (e) => {
+            if (legendRef.current && !legendRef.current.contains(e.target)) {
+                setLegendOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [legendOpen]);
 
     if (!summaryData) return (
         <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -61,7 +74,32 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
         <div className="space-y-4 animate-fade-in pb-12">
             <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
                 <div className="max-w-xl">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight">Analýza progresu</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight flex items-center gap-2">
+                        Analýza progresu
+                        <button
+                            ref={legendRef}
+                            type="button"
+                            onClick={() => setLegendOpen(o => !o)}
+                            className="relative inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-800/50 hover:bg-blue-500/20 text-slate-500 hover:text-blue-400 text-[10px] font-bold transition-colors border border-white/5"
+                            aria-label="Vysvetlenie farieb"
+                        >
+                            ?
+                            {legendOpen && (
+                                <div
+                                    className="absolute left-0 top-full mt-2 z-30 w-64 bg-slate-900 border border-white/10 rounded-xl shadow-2xl p-3 text-left cursor-default"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Hakeho klasifikácia</p>
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20"></span><span className="text-slate-300 font-medium">Vysoký zisk</span><span className="text-slate-500 ml-auto font-mono">g ≥ 70%</span></div>
+                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-blue-400 ring-2 ring-blue-400/20"></span><span className="text-slate-300 font-medium">Stredný zisk</span><span className="text-slate-500 ml-auto font-mono">30 - 70%</span></div>
+                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-400/20"></span><span className="text-slate-300 font-medium">Nízky zisk</span><span className="text-slate-500 ml-auto font-mono">0 - 30%</span></div>
+                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-rose-400 ring-2 ring-rose-400/20"></span><span className="text-slate-300 font-medium">Regresia</span><span className="text-slate-500 ml-auto font-mono">g &lt; 0%</span></div>
+                                    </div>
+                                </div>
+                            )}
+                        </button>
+                    </h2>
                     <p className="text-slate-400 mt-1 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-2">
                         Objektívne meranie progresu pomocou Hakeho normalizovaného zisku.
                         {!exitTest && (
@@ -95,26 +133,26 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                         </button>
                     )}
                     <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg transition-all hover:border-blue-500/30 group w-full sm:w-auto">
-                        <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
-                            <TrendingUpIcon className="w-4 h-4 text-blue-400" />
-                        </div>
+                        {(() => {
+                            const cls = exitTest && summaryData.globalNormalizedGain != null ? classifyGain(summaryData.globalNormalizedGain) : null;
+                            return (
+                                <div className={`p-2 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0 ${cls ? cls.bg : 'bg-blue-500/10'}`}>
+                                    <TrendingUpIcon className={`w-4 h-4 ${cls ? cls.text : 'text-blue-400'}`} />
+                                </div>
+                            );
+                        })()}
                         <div className="leading-tight">
                             <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Globálny rast</p>
                             <p className="text-lg font-black text-white flex items-baseline gap-1">
-                                {exitTest ? (
-                                    <>
-                                        {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
-                                        <span className="text-xs text-blue-400 font-bold">%</span>
-                                        {summaryData.globalNormalizedGain != null && (() => {
-                                            const cls = classifyGain(summaryData.globalNormalizedGain);
-                                            return cls ? (
-                                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${cls.bg} ${cls.border} ${cls.text} border`}>
-                                                    {cls.label}
-                                                </span>
-                                            ) : null;
-                                        })()}
-                                    </>
-                                ) : (
+                                {exitTest ? (() => {
+                                    const cls = summaryData.globalNormalizedGain != null ? classifyGain(summaryData.globalNormalizedGain) : null;
+                                    return (
+                                        <span className={cls ? cls.text : 'text-white'}>
+                                            {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
+                                            <span className="text-xs font-bold ml-0.5">%</span>
+                                        </span>
+                                    );
+                                })() : (
                                     <span className="text-slate-600 italic text-sm">—</span>
                                 )}
                             </p>
@@ -165,10 +203,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             {student.progress !== null ? (() => {
                                 const cls = classifyGain(student.progress);
                                 return (
-                                    <span className={`inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
                                         {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                        <span className="opacity-50 font-normal">·</span>
-                                        <span className="text-[9px] uppercase tracking-wider opacity-90 font-bold">{cls.label}</span>
                                     </span>
                                 );
                             })() : (
@@ -231,10 +267,8 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                     {student.progress !== null ? (() => {
                                         const cls = classifyGain(student.progress);
                                         return (
-                                            <span className={`inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
                                                 {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                                <span className="opacity-50 font-normal">·</span>
-                                                <span className="text-[9px] uppercase tracking-wider opacity-90 font-bold">{cls.label}</span>
                                             </span>
                                         );
                                     })() : (
