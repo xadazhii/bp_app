@@ -1,5 +1,6 @@
 import React from "react";
 import { UserIcon, ExclamationTriangleIcon, ClockIcon, TrendingUpIcon } from './AdminIcons';
+import { ProgressChartModal } from './ProgressChartModal';
 
 const classifyGain = (gainPercent) => {
     if (gainPercent == null) return null;
@@ -10,6 +11,8 @@ const classifyGain = (gainPercent) => {
 };
 
 export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
+    const [chartOpen, setChartOpen] = React.useState(false);
+
     if (!summaryData) return (
         <div className="flex flex-col items-center justify-center p-12 text-slate-400">
             <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
@@ -70,7 +73,24 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </p>
                 </div>
                 {studentsProgress.length > 0 && (
-                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group self-start lg:self-auto w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3 self-start lg:self-auto w-full sm:w-auto">
+                    {exitTest && (
+                        <button
+                            onClick={() => setChartOpen(true)}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-lg shadow-blue-900/30 transition-all active:scale-95 border border-blue-500/30"
+                        >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="6" cy="18" r="1.5" />
+                                <circle cx="11" cy="13" r="1.5" />
+                                <circle cx="16" cy="15" r="1.5" />
+                                <circle cx="19" cy="7" r="1.5" />
+                                <path d="M3 21h18" />
+                                <path d="M3 3v18" />
+                            </svg>
+                            Zobraziť graf
+                        </button>
+                    )}
+                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group w-full sm:w-auto">
                         <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
                             <TrendingUpIcon className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
                         </div>
@@ -96,6 +116,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             })()}
                         </div>
                     </div>
+                </div>
                 )}
             </div>
 
@@ -233,6 +254,16 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </div>
                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Zatiaľ žiadni študenti na analýzu</p>
                 </div>
+            )}
+
+            {chartOpen && (
+                <ProgressChartModal
+                    studentsProgress={studentsProgress}
+                    entryTest={entryTest}
+                    exitTest={exitTest}
+                    globalGain={summaryData.globalNormalizedGain}
+                    onClose={() => setChartOpen(false)}
+                />
             )}
         </div>
     );
