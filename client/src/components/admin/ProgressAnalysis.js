@@ -1,6 +1,14 @@
 import React from "react";
 import { UserIcon, ExclamationTriangleIcon, ClockIcon, TrendingUpIcon } from './AdminIcons';
 
+const classifyGain = (gainPercent) => {
+    if (gainPercent == null) return null;
+    if (gainPercent < 0) return { label: 'Regresia', color: 'rose', bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-400' };
+    if (gainPercent < 30) return { label: 'Nízky zisk', color: 'amber', bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400' };
+    if (gainPercent < 70) return { label: 'Stredný zisk', color: 'blue', bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' };
+    return { label: 'Vysoký zisk', color: 'emerald', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400' };
+};
+
 export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     if (!summaryData) return (
         <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -78,6 +86,14 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                     <span className="text-slate-600 italic">—</span>
                                 )}
                             </p>
+                            {exitTest && summaryData.globalNormalizedGain != null && (() => {
+                                const cls = classifyGain(summaryData.globalNormalizedGain);
+                                return cls ? (
+                                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${cls.bg} ${cls.border} ${cls.text} border`}>
+                                        {cls.label}
+                                    </span>
+                                ) : null;
+                            })()}
                         </div>
                     </div>
                 )}
@@ -119,14 +135,20 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             </div>
                         </div>
 
-                        <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
+                        <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-start">
                             <p className="text-xs font-bold text-slate-400">Normalizovaný zisk (g):</p>
-                            {student.progress !== null ? (
-                                <span className={`flex items-center gap-1.5 font-black text-lg ${student.progress >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                    <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180 text-rose-400' : 'text-emerald-400'}`} />
-                                </span>
-                            ) : (
+                            {student.progress !== null ? (() => {
+                                const cls = classifyGain(student.progress);
+                                return (
+                                    <div className="flex flex-col items-end gap-0.5">
+                                        <span className={`flex items-center gap-1.5 font-black text-lg ${cls.text}`}>
+                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
+                                            <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
+                                        </span>
+                                        <span className={`text-[9px] font-bold uppercase tracking-wider ${cls.text}`}>{cls.label}</span>
+                                    </div>
+                                );
+                            })() : (
                                 <span className="text-slate-600 text-[10px] uppercase font-bold italic">Nedostupné</span>
                             )}
                         </div>
@@ -183,12 +205,18 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                     )}
                                 </td>
                                 <td className="px-8 py-5 text-right">
-                                    {student.progress !== null ? (
-                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${student.progress >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
-                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                            <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
-                                        </div>
-                                    ) : (
+                                    {student.progress !== null ? (() => {
+                                        const cls = classifyGain(student.progress);
+                                        return (
+                                            <div className="inline-flex flex-col items-end gap-1">
+                                                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${cls.bg} ${cls.border} ${cls.text}`}>
+                                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
+                                                    <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
+                                                </div>
+                                                <span className={`text-[9px] font-bold uppercase tracking-wider ${cls.text}`}>{cls.label}</span>
+                                            </div>
+                                        );
+                                    })() : (
                                         <span className="text-slate-700 font-bold text-[10px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
                                     )}
                                 </td>

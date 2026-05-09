@@ -1,6 +1,14 @@
 import React from 'react';
 import { ExclamationTriangleIcon, TrendingUpIcon, UserIcon } from './ProfileIcons';
 
+const classifyGain = (gainPercent) => {
+    if (gainPercent == null) return null;
+    if (gainPercent < 0) return { label: 'Regresia', bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-400' };
+    if (gainPercent < 30) return { label: 'Nízky zisk', bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400' };
+    if (gainPercent < 70) return { label: 'Stredný zisk', bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' };
+    return { label: 'Vysoký zisk', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400' };
+};
+
 const ProgressAnalysis = ({ summaryData }) => {
     if (!summaryData) return (
         <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -68,6 +76,14 @@ const ProgressAnalysis = ({ summaryData }) => {
                                 {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
                                 <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
                             </p>
+                            {summaryData.globalNormalizedGain != null && (() => {
+                                const cls = classifyGain(summaryData.globalNormalizedGain);
+                                return cls ? (
+                                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${cls.bg} ${cls.border} ${cls.text} border`}>
+                                        {cls.label}
+                                    </span>
+                                ) : null;
+                            })()}
                         </div>
                     </div>
                 )}
