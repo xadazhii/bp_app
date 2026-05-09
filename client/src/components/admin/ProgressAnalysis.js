@@ -97,7 +97,7 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => setLegendOpen(false)}
-                                                className="sm:hidden w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 hover:text-rose-400 transition-colors flex items-center justify-center text-lg leading-none"
+                                                className="w-6 h-6 sm:w-5 sm:h-5 rounded-lg bg-slate-800/60 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors flex items-center justify-center text-base leading-none flex-shrink-0"
                                                 aria-label="Zatvoriť"
                                             >
                                                 ×
