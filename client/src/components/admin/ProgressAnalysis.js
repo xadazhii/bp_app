@@ -74,70 +74,84 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                 <div className="max-w-xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight flex items-center gap-2">
                         Analýza progresu
-                        <button
-                            ref={legendRef}
-                            type="button"
-                            onClick={() => setLegendOpen(o => !o)}
-                            className="relative inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-800/50 hover:bg-blue-500/20 text-slate-500 hover:text-blue-400 text-[10px] font-bold transition-colors border border-white/5"
-                            aria-label="Vysvetlenie farieb"
-                        >
-                            ?
+                        <span ref={legendRef} className="relative inline-block">
+                            <button
+                                type="button"
+                                onClick={() => setLegendOpen(o => !o)}
+                                className="inline-flex items-center justify-center w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-slate-800/50 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 text-xs sm:text-[10px] font-bold transition-colors border border-white/10"
+                                aria-label="Vysvetlenie farieb"
+                            >
+                                ?
+                            </button>
                             {legendOpen && (
-                                <div
-                                    className="absolute left-0 top-full mt-2 z-30 w-72 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden text-left cursor-default"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <div className="px-4 py-3 bg-slate-800/40 border-b border-white/5">
-                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Hakeho klasifikácia ⟨g⟩</p>
+                                <>
+                                    <div
+                                        className="sm:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                                        onClick={() => setLegendOpen(false)}
+                                    />
+                                    <div
+                                        className="fixed sm:absolute z-50 sm:z-30 left-1/2 sm:left-0 top-1/2 sm:top-full -translate-x-1/2 sm:translate-x-0 -translate-y-1/2 sm:translate-y-0 sm:mt-2 w-[calc(100vw-2rem)] max-w-[340px] sm:w-72 sm:max-w-none bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden text-left cursor-default"
+                                    >
+                                        <div className="px-4 py-3 bg-slate-800/40 border-b border-white/5 flex items-center justify-between">
+                                            <p className="text-[11px] uppercase tracking-widest text-slate-300 font-bold">Hakeho klasifikácia ⟨g⟩</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setLegendOpen(false)}
+                                                className="sm:hidden w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 hover:text-rose-400 transition-colors flex items-center justify-center text-lg leading-none"
+                                                aria-label="Zatvoriť"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            <div className="flex items-start gap-3">
+                                                <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)] flex-shrink-0 mt-0.5"></span>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                                                        <span className="text-emerald-400 font-black text-sm tracking-tight">high-g</span>
+                                                        <span className="text-slate-400 text-xs font-medium tabular-nums">g &gt; 0,7</span>
+                                                    </div>
+                                                    <p className="text-slate-400 text-xs leading-snug mt-1">Vysoká miera aktívneho učenia</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <span className="w-3.5 h-3.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.6)] flex-shrink-0 mt-0.5"></span>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                                                        <span className="text-blue-400 font-black text-sm tracking-tight">medium-g</span>
+                                                        <span className="text-slate-400 text-xs font-medium tabular-nums">0,3 ≤ g ≤ 0,7</span>
+                                                    </div>
+                                                    <p className="text-slate-400 text-xs leading-snug mt-1">Stredný stupeň interaktivity</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <span className="w-3.5 h-3.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)] flex-shrink-0 mt-0.5"></span>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                                                        <span className="text-amber-400 font-black text-sm tracking-tight">low-g</span>
+                                                        <span className="text-slate-400 text-xs font-medium tabular-nums">g &lt; 0,3</span>
+                                                    </div>
+                                                    <p className="text-slate-400 text-xs leading-snug mt-1">Pasívna výučba</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="px-4 pt-3 pb-4 bg-slate-800/30 border-t border-white/5">
+                                            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2.5">Rozšírenie</p>
+                                            <div className="flex items-start gap-3">
+                                                <span className="w-3.5 h-3.5 rounded-full bg-rose-400 shadow-[0_0_10px_rgba(251,113,133,0.6)] flex-shrink-0 mt-0.5"></span>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                                                        <span className="text-rose-400 font-black text-sm tracking-tight">regresia</span>
+                                                        <span className="text-slate-400 text-xs font-medium tabular-nums">g &lt; 0</span>
+                                                    </div>
+                                                    <p className="text-slate-400 text-xs leading-snug mt-1">Strata vedomostí medzi testami</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="p-3 space-y-2.5">
-                                        <div className="flex items-start gap-3">
-                                            <span className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)] flex-shrink-0 mt-0.5"></span>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="text-emerald-400 font-black text-[12px] tracking-tight">high-g</span>
-                                                    <span className="text-slate-500 text-[10px] font-medium tabular-nums">g &gt; 0,7</span>
-                                                </div>
-                                                <p className="text-slate-400 text-[11px] leading-snug mt-0.5">Vysoká miera aktívneho učenia</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <span className="w-3 h-3 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.5)] flex-shrink-0 mt-0.5"></span>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="text-blue-400 font-black text-[12px] tracking-tight">medium-g</span>
-                                                    <span className="text-slate-500 text-[10px] font-medium tabular-nums">0,3 ≤ g ≤ 0,7</span>
-                                                </div>
-                                                <p className="text-slate-400 text-[11px] leading-snug mt-0.5">Stredný stupeň interaktivity</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <span className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)] flex-shrink-0 mt-0.5"></span>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="text-amber-400 font-black text-[12px] tracking-tight">low-g</span>
-                                                    <span className="text-slate-500 text-[10px] font-medium tabular-nums">g &lt; 0,3</span>
-                                                </div>
-                                                <p className="text-slate-400 text-[11px] leading-snug mt-0.5">Pasívna výučba</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="px-3 pt-2.5 pb-3 bg-slate-800/30 border-t border-white/5">
-                                        <p className="text-[9px] uppercase tracking-widest text-slate-600 font-bold mb-2">Rozšírenie</p>
-                                        <div className="flex items-start gap-3">
-                                            <span className="w-3 h-3 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.5)] flex-shrink-0 mt-0.5"></span>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="text-rose-400 font-black text-[12px] tracking-tight">regresia</span>
-                                                    <span className="text-slate-500 text-[10px] font-medium tabular-nums">g &lt; 0</span>
-                                                </div>
-                                                <p className="text-slate-400 text-[11px] leading-snug mt-0.5">Strata vedomostí medzi testami</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                </>
                             )}
-                        </button>
+                        </span>
                     </h2>
                     <p className="text-slate-400 mt-1 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-2">
                         Objektívne meranie progresu pomocou Hakeho normalizovaného zisku.
