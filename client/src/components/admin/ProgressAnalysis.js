@@ -1,6 +1,5 @@
 import React from "react";
 import { UserIcon, ExclamationTriangleIcon, ClockIcon, TrendingUpIcon } from './AdminIcons';
-import { ProgressChartModal } from './ProgressChartModal';
 
 const classifyGain = (gainPercent) => {
     if (gainPercent == null) return null;
@@ -11,7 +10,6 @@ const classifyGain = (gainPercent) => {
 };
 
 export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
-    const [chartOpen, setChartOpen] = React.useState(false);
     const [legendOpen, setLegendOpen] = React.useState(false);
     const legendRef = React.useRef(null);
 
@@ -111,104 +109,82 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </p>
                 </div>
                 {studentsProgress.length > 0 && (
-                <div className="flex flex-col sm:flex-row gap-2.5 self-start lg:self-auto w-full sm:w-auto">
-                    {exitTest && (
-                        <button
-                            onClick={() => setChartOpen(true)}
-                            type="button"
-                            className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg transition-all hover:border-blue-500/30 hover:bg-slate-800/20 group w-full sm:w-auto text-left active:scale-[0.98]"
-                        >
-                            <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
-                                <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M3 3v18h18" />
-                                    <circle cx="8" cy="14" r="1.5" fill="currentColor" />
-                                    <circle cx="13" cy="9" r="1.5" fill="currentColor" />
-                                    <circle cx="18" cy="6" r="1.5" fill="currentColor" />
-                                </svg>
-                            </div>
-                            <div className="leading-tight">
-                                <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Vizualizácia</p>
-                                <p className="text-sm font-black text-white tracking-tight">Zobraziť graf</p>
-                            </div>
-                        </button>
-                    )}
-                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg transition-all hover:border-blue-500/30 group w-full sm:w-auto">
+                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-lg transition-all hover:border-blue-500/30 group self-start lg:self-auto w-full sm:w-auto">
                         {(() => {
                             const cls = exitTest && summaryData.globalNormalizedGain != null ? classifyGain(summaryData.globalNormalizedGain) : null;
                             return (
-                                <div className={`p-2 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0 ${cls ? cls.bg : 'bg-blue-500/10'}`}>
-                                    <TrendingUpIcon className={`w-4 h-4 ${cls ? cls.text : 'text-blue-400'}`} />
+                                <div className={`p-2.5 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0 ${cls ? cls.bg : 'bg-blue-500/10'}`}>
+                                    <TrendingUpIcon className={`w-5 h-5 ${cls ? cls.text : 'text-blue-400'}`} />
                                 </div>
                             );
                         })()}
                         <div className="leading-tight">
-                            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Globálny rast</p>
-                            <p className="text-lg font-black text-white flex items-baseline gap-1">
+                            <p className="text-slate-500 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-0.5">Globálny rast</p>
+                            <p className="text-xl sm:text-2xl font-black text-white flex items-baseline gap-1">
                                 {exitTest ? (() => {
                                     const cls = summaryData.globalNormalizedGain != null ? classifyGain(summaryData.globalNormalizedGain) : null;
                                     return (
                                         <span className={cls ? cls.text : 'text-white'}>
                                             {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
-                                            <span className="text-xs font-bold ml-0.5">%</span>
+                                            <span className="text-sm font-bold ml-0.5">%</span>
                                         </span>
                                     );
                                 })() : (
-                                    <span className="text-slate-600 italic text-sm">—</span>
+                                    <span className="text-slate-600 italic text-base">—</span>
                                 )}
                             </p>
                         </div>
                     </div>
-                </div>
                 )}
             </div>
 
-            <div className="lg:hidden space-y-2.5">
+            <div className="lg:hidden space-y-3">
                 {studentsProgress.map(student => (
-                    <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 shadow-lg group">
-                        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-white/5">
-                            <div className="w-8 h-8 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] uppercase shadow-inner flex-shrink-0">
+                    <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-5 shadow-lg group">
+                        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/5">
+                            <div className="w-10 h-10 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs uppercase shadow-inner flex-shrink-0">
                                 {student.username.substring(0, 2)}
                             </div>
                             <div className="min-w-0">
-                                <div className="font-bold text-white text-sm leading-tight truncate">{student.username}</div>
-                                <div className="text-[10px] text-slate-500 truncate">{student.email}</div>
+                                <div className="font-bold text-white text-base leading-tight truncate">{student.username}</div>
+                                <div className="text-[11px] text-slate-500 truncate mt-0.5">{student.email}</div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">Vstupný test</p>
-                                <p className="text-sm font-black text-white">
-                                    {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-xs font-normal">N/A</span>}
-                                    {student.entryScore !== null && <span className="text-[9px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>}
+                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Vstupný test</p>
+                                <p className="text-base font-black text-white">
+                                    {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
+                                    {student.entryScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">Záverečný test</p>
-                                <p className="text-sm font-black text-white">
+                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Záverečný test</p>
+                                <p className="text-base font-black text-white">
                                     {exitTest ? (
                                         <>
-                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-xs font-normal">N/A</span>}
-                                            {student.exitScore !== null && <span className="text-[9px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>}
+                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
+                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>}
                                         </>
                                     ) : (
-                                        <span className="text-slate-700 font-bold text-xs">Čaká sa...</span>
+                                        <span className="text-slate-700 font-bold text-sm">Čaká sa...</span>
                                     )}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center gap-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Zisk (g)</p>
+                        <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center gap-2">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Zisk (g)</p>
                             {student.progress !== null ? (() => {
                                 const cls = classifyGain(student.progress);
                                 return (
-                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                    <span className={`inline-flex items-center px-3 py-1.5 rounded-lg border text-sm font-black ${cls.bg} ${cls.border} ${cls.text}`}>
                                         {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                     </span>
                                 );
                             })() : (
-                                <span className="text-slate-600 text-[10px] uppercase font-bold italic">Nedostupné</span>
+                                <span className="text-slate-600 text-[11px] uppercase font-bold italic">Nedostupné</span>
                             )}
                         </div>
                     </div>
@@ -219,60 +195,60 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                 <table className="min-w-full bg-slate-800/10 backdrop-blur-sm overflow-hidden">
                     <thead>
                         <tr className="bg-[#0f172a]/60 border-b border-white/5">
-                            <th className="px-5 py-3 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
-                            <th className="px-5 py-3 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test</th>
-                            <th className="px-5 py-3 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test</th>
-                            <th className="px-5 py-3 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Normalizovaný zisk (g)</th>
+                            <th className="px-6 py-4 text-left text-slate-400 font-bold uppercase tracking-widest text-[11px]">Študent</th>
+                            <th className="px-6 py-4 text-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">Vstupný test</th>
+                            <th className="px-6 py-4 text-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">Záverečný test</th>
+                            <th className="px-6 py-4 text-right text-slate-400 font-bold uppercase tracking-widest text-[11px]">Normalizovaný zisk (g)</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700/40">
                         {studentsProgress.map(student => (
                             <tr key={student.id} className="hover:bg-white/5 transition-all group">
-                                <td className="px-5 py-3">
+                                <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0">
+                                        <div className="w-9 h-9 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[11px] shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0">
                                             {student.username.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="font-bold text-white text-sm leading-tight group-hover:text-blue-400 transition-colors">{student.username}</div>
-                                            <div className="text-[10px] text-slate-500 font-medium truncate">{student.email}</div>
+                                            <div className="font-bold text-white text-[15px] leading-tight group-hover:text-blue-400 transition-colors">{student.username}</div>
+                                            <div className="text-[11px] text-slate-500 font-medium truncate mt-0.5">{student.email}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-5 py-3 text-center">
+                                <td className="px-6 py-4 text-center">
                                     {student.entryScore !== null ? (
-                                        <span className="text-sm font-black text-white">
+                                        <span className="text-base font-black text-white">
                                             {student.entryScore}
-                                            <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>
+                                            <span className="text-[11px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>
                                         </span>
                                     ) : (
-                                        <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[9px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
+                                        <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
                                     )}
                                 </td>
-                                <td className="px-5 py-3 text-center">
+                                <td className="px-6 py-4 text-center">
                                     {exitTest ? (
                                         student.exitScore !== null ? (
-                                            <span className="text-sm font-black text-white">
+                                            <span className="text-base font-black text-white">
                                                 {student.exitScore}
-                                                <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>
+                                                <span className="text-[11px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>
                                             </span>
                                         ) : (
-                                            <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[9px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
+                                            <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
                                         )
                                     ) : (
-                                        <span className="text-slate-700 font-bold text-[10px] uppercase tracking-tighter">Čaká sa...</span>
+                                        <span className="text-slate-700 font-bold text-[11px] uppercase tracking-tighter">Čaká sa...</span>
                                     )}
                                 </td>
-                                <td className="px-5 py-3 text-right">
+                                <td className="px-6 py-4 text-right">
                                     {student.progress !== null ? (() => {
                                         const cls = classifyGain(student.progress);
                                         return (
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg border text-sm font-black ${cls.bg} ${cls.border} ${cls.text}`}>
                                                 {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
                                             </span>
                                         );
                                     })() : (
-                                        <span className="text-slate-700 font-bold text-[10px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
+                                        <span className="text-slate-700 font-bold text-[11px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
                                     )}
                                 </td>
                             </tr>
@@ -290,15 +266,6 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                 </div>
             )}
 
-            {chartOpen && (
-                <ProgressChartModal
-                    studentsProgress={studentsProgress}
-                    entryTest={entryTest}
-                    exitTest={exitTest}
-                    globalGain={summaryData.globalNormalizedGain}
-                    onClose={() => setChartOpen(false)}
-                />
-            )}
         </div>
     );
 };
