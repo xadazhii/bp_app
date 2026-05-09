@@ -58,11 +58,11 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
     }
 
     return (
-        <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
-            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+        <div className="space-y-4 animate-fade-in pb-12">
+            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
                 <div className="max-w-xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 tracking-tight">Analýza progresu</h2>
-                    <p className="text-slate-400 mt-2 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-3">
+                    <p className="text-slate-400 mt-1 text-xs sm:text-sm leading-relaxed flex flex-col sm:flex-row sm:items-center gap-2">
                         Objektívne meranie progresu pomocou Hakeho normalizovaného zisku.
                         {!exitTest && (
                             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/5 border border-blue-500/10 rounded-full text-[10px] font-bold text-blue-400/80 uppercase tracking-wider">
@@ -73,106 +73,103 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                     </p>
                 </div>
                 {studentsProgress.length > 0 && (
-                <div className="flex flex-col sm:flex-row gap-3 self-start lg:self-auto w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2.5 self-start lg:self-auto w-full sm:w-auto">
                     {exitTest && (
                         <button
                             onClick={() => setChartOpen(true)}
                             type="button"
-                            className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 shadow-xl transition-all hover:border-blue-500/30 hover:bg-slate-800/20 group w-full sm:w-auto text-left active:scale-[0.98]"
+                            className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg transition-all hover:border-blue-500/30 hover:bg-slate-800/20 group w-full sm:w-auto text-left active:scale-[0.98]"
                         >
-                            <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
-                                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                                <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M3 3v18h18" />
                                     <circle cx="8" cy="14" r="1.5" fill="currentColor" />
                                     <circle cx="13" cy="9" r="1.5" fill="currentColor" />
                                     <circle cx="18" cy="6" r="1.5" fill="currentColor" />
                                 </svg>
                             </div>
-                            <div>
-                                <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Vizualizácia</p>
-                                <p className="text-base sm:text-lg font-black text-white tracking-tight">Zobraziť graf</p>
-                                <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Pre vs. Post · Hakeho zóny</p>
+                            <div className="leading-tight">
+                                <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Vizualizácia</p>
+                                <p className="text-sm font-black text-white tracking-tight">Zobraziť graf</p>
                             </div>
                         </button>
                     )}
-                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-5 shadow-xl transition-all hover:border-blue-500/30 group w-full sm:w-auto">
-                        <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
-                            <TrendingUpIcon className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
+                    <div className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg transition-all hover:border-blue-500/30 group w-full sm:w-auto">
+                        <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                            <TrendingUpIcon className="w-4 h-4 text-blue-400" />
                         </div>
-                        <div>
-                            <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Globálny rast</p>
-                            <p className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-1">
+                        <div className="leading-tight">
+                            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Globálny rast</p>
+                            <p className="text-lg font-black text-white flex items-baseline gap-1">
                                 {exitTest ? (
                                     <>
                                         {avgProgress >= 0 ? '+' : ''}{avgProgress.replace('.', ',')}
-                                        <span className="text-base sm:text-lg text-blue-400 font-bold">%</span>
+                                        <span className="text-xs text-blue-400 font-bold">%</span>
+                                        {summaryData.globalNormalizedGain != null && (() => {
+                                            const cls = classifyGain(summaryData.globalNormalizedGain);
+                                            return cls ? (
+                                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${cls.bg} ${cls.border} ${cls.text} border`}>
+                                                    {cls.label}
+                                                </span>
+                                            ) : null;
+                                        })()}
                                     </>
                                 ) : (
-                                    <span className="text-slate-600 italic">—</span>
+                                    <span className="text-slate-600 italic text-sm">—</span>
                                 )}
                             </p>
-                            {exitTest && summaryData.globalNormalizedGain != null && (() => {
-                                const cls = classifyGain(summaryData.globalNormalizedGain);
-                                return cls ? (
-                                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${cls.bg} ${cls.border} ${cls.text} border`}>
-                                        {cls.label}
-                                    </span>
-                                ) : null;
-                            })()}
                         </div>
                     </div>
                 </div>
                 )}
             </div>
 
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-2.5">
                 {studentsProgress.map(student => (
-                    <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-5 shadow-lg group">
-                        <div className="flex items-center gap-4 mb-5 pb-4 border-b border-white/5">
-                            <div className="w-10 h-10 rounded-2xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs uppercase shadow-inner">
+                    <div key={student.id} className="bg-slate-800/10 backdrop-blur-sm border border-white/5 rounded-2xl p-4 shadow-lg group">
+                        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-white/5">
+                            <div className="w-8 h-8 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] uppercase shadow-inner flex-shrink-0">
                                 {student.username.substring(0, 2)}
                             </div>
                             <div className="min-w-0">
-                                <div className="font-bold text-white text-base truncate">{student.username}</div>
-                                <div className="text-xs text-slate-500 truncate">{student.email}</div>
+                                <div className="font-bold text-white text-sm leading-tight truncate">{student.username}</div>
+                                <div className="text-[10px] text-slate-500 truncate">{student.email}</div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Vstupný test</p>
-                                <p className="text-lg font-black text-white">
-                                    {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
-                                    {student.entryScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">Vstupný test</p>
+                                <p className="text-sm font-black text-white">
+                                    {student.entryScore !== null ? student.entryScore : <span className="text-slate-600 italic text-xs font-normal">N/A</span>}
+                                    {student.entryScore !== null && <span className="text-[9px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>}
                                 </p>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Záverečný test</p>
-                                <p className="text-lg font-black text-white">
+                            <div>
+                                <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">Záverečný test</p>
+                                <p className="text-sm font-black text-white">
                                     {exitTest ? (
                                         <>
-                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-sm font-normal">N/A</span>}
-                                            {student.exitScore !== null && <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>}
+                                            {student.exitScore !== null ? student.exitScore : <span className="text-slate-600 italic text-xs font-normal">N/A</span>}
+                                            {student.exitScore !== null && <span className="text-[9px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>}
                                         </>
                                     ) : (
-                                        <span className="text-slate-700 font-bold text-sm">Zatiaľ neprístupné</span>
+                                        <span className="text-slate-700 font-bold text-xs">Čaká sa...</span>
                                     )}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-start">
-                            <p className="text-xs font-bold text-slate-400">Normalizovaný zisk (g):</p>
+                        <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center gap-2">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Zisk (g)</p>
                             {student.progress !== null ? (() => {
                                 const cls = classifyGain(student.progress);
                                 return (
-                                    <div className="flex flex-col items-end gap-0.5">
-                                        <span className={`flex items-center gap-1.5 font-black text-lg ${cls.text}`}>
-                                            {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                            <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
-                                        </span>
-                                        <span className={`text-[9px] font-bold uppercase tracking-wider ${cls.text}`}>{cls.label}</span>
-                                    </div>
+                                    <span className={`inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                        {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
+                                        <span className="opacity-50 font-normal">·</span>
+                                        <span className="text-[9px] uppercase tracking-wider opacity-90 font-bold">{cls.label}</span>
+                                    </span>
                                 );
                             })() : (
                                 <span className="text-slate-600 text-[10px] uppercase font-bold italic">Nedostupné</span>
@@ -182,65 +179,63 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                 ))}
             </div>
 
-            <div className="hidden lg:block overflow-x-auto rounded-[2rem] border border-white/5 shadow-2xl">
+            <div className="hidden lg:block overflow-x-auto rounded-2xl border border-white/5 shadow-xl">
                 <table className="min-w-full bg-slate-800/10 backdrop-blur-sm overflow-hidden">
                     <thead>
                         <tr className="bg-[#0f172a]/60 border-b border-white/5">
-                            <th className="px-8 py-5 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
-                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test</th>
-                            <th className="px-8 py-5 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test</th>
-                            <th className="px-8 py-5 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Normalizovaný zisk (g)</th>
+                            <th className="px-5 py-3 text-left text-slate-400 font-bold uppercase tracking-widest text-[10px]">Študent</th>
+                            <th className="px-5 py-3 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Vstupný test</th>
+                            <th className="px-5 py-3 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Záverečný test</th>
+                            <th className="px-5 py-3 text-right text-slate-400 font-bold uppercase tracking-widest text-[10px]">Normalizovaný zisk (g)</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700/50">
+                    <tbody className="divide-y divide-slate-700/40">
                         {studentsProgress.map(student => (
                             <tr key={student.id} className="hover:bg-white/5 transition-all group">
-                                <td className="px-8 py-5">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-2xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-xs shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <td className="px-5 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-300 font-black text-[10px] shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0">
                                             {student.username.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="font-bold text-white text-sm group-hover:text-blue-400 transition-colors">{student.username}</div>
-                                            <div className="text-[11px] text-slate-500 font-medium truncate">{student.email}</div>
+                                            <div className="font-bold text-white text-sm leading-tight group-hover:text-blue-400 transition-colors">{student.username}</div>
+                                            <div className="text-[10px] text-slate-500 font-medium truncate">{student.email}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-8 py-5 text-center">
+                                <td className="px-5 py-3 text-center">
                                     {student.entryScore !== null ? (
-                                        <span className="text-lg font-black text-white">
+                                        <span className="text-sm font-black text-white">
                                             {student.entryScore}
                                             <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[entryTest.id] ?? entryTest.maxScore}b</span>
                                         </span>
                                     ) : (
-                                        <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                        <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[9px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
                                     )}
                                 </td>
-                                <td className="px-8 py-5 text-center">
+                                <td className="px-5 py-3 text-center">
                                     {exitTest ? (
                                         student.exitScore !== null ? (
-                                            <span className="text-lg font-black text-white">
+                                            <span className="text-sm font-black text-white">
                                                 {student.exitScore}
                                                 <span className="text-[10px] text-slate-500 font-bold ml-1">/ {student.maxScores[exitTest.id] ?? exitTest.maxScore}b</span>
                                             </span>
                                         ) : (
-                                            <span className="px-3 py-1 bg-slate-800/20 text-slate-500/50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-white/5">Chýba</span>
+                                            <span className="px-2 py-0.5 bg-slate-800/20 text-slate-500/50 text-[9px] uppercase font-black tracking-widest rounded border border-white/5">Chýba</span>
                                         )
                                     ) : (
-                                        <span className="text-slate-700 font-bold text-xs uppercase tracking-tighter">Čaká sa...</span>
+                                        <span className="text-slate-700 font-bold text-[10px] uppercase tracking-tighter">Čaká sa...</span>
                                     )}
                                 </td>
-                                <td className="px-8 py-5 text-right">
+                                <td className="px-5 py-3 text-right">
                                     {student.progress !== null ? (() => {
                                         const cls = classifyGain(student.progress);
                                         return (
-                                            <div className="inline-flex flex-col items-end gap-1">
-                                                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border font-black text-base shadow-sm ${cls.bg} ${cls.border} ${cls.text}`}>
-                                                    {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
-                                                    <TrendingUpIcon className={`w-5 h-5 ${student.progress < 0 ? 'rotate-180' : ''}`} />
-                                                </div>
-                                                <span className={`text-[9px] font-bold uppercase tracking-wider ${cls.text}`}>{cls.label}</span>
-                                            </div>
+                                            <span className={`inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-black ${cls.bg} ${cls.border} ${cls.text}`}>
+                                                {student.progress >= 0 ? '+' : ''}{student.progress.toFixed(1).replace('.', ',')}%
+                                                <span className="opacity-50 font-normal">·</span>
+                                                <span className="text-[9px] uppercase tracking-wider opacity-90 font-bold">{cls.label}</span>
+                                            </span>
                                         );
                                     })() : (
                                         <span className="text-slate-700 font-bold text-[10px] uppercase tracking-widest italic">{exitTest ? 'N/A' : 'Nedostupné'}</span>
