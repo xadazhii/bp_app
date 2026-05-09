@@ -84,15 +84,51 @@ export const ProgressAnalysis = ({ summaryData, currentWeek }) => {
                             ?
                             {legendOpen && (
                                 <div
-                                    className="absolute left-0 top-full mt-2 z-30 w-64 bg-slate-900 border border-white/10 rounded-xl shadow-2xl p-3 text-left cursor-default"
+                                    className="absolute left-0 top-full mt-2 z-30 w-80 bg-slate-900 border border-white/10 rounded-xl shadow-2xl p-4 text-left cursor-default"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Hakeho klasifikácia</p>
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20"></span><span className="text-slate-300 font-medium">Vysoký zisk</span><span className="text-slate-500 ml-auto font-mono">g ≥ 70%</span></div>
-                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-blue-400 ring-2 ring-blue-400/20"></span><span className="text-slate-300 font-medium">Stredný zisk</span><span className="text-slate-500 ml-auto font-mono">30 - 70%</span></div>
-                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-400/20"></span><span className="text-slate-300 font-medium">Nízky zisk</span><span className="text-slate-500 ml-auto font-mono">0 - 30%</span></div>
-                                        <div className="flex items-center gap-2 text-[11px]"><span className="w-2.5 h-2.5 rounded-full bg-rose-400 ring-2 ring-rose-400/20"></span><span className="text-slate-300 font-medium">Regresia</span><span className="text-slate-500 ml-auto font-mono">g &lt; 0%</span></div>
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">Hakeho klasifikácia ⟨g⟩</p>
+                                    <div className="space-y-3">
+                                        <div className="flex items-start gap-2.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20 flex-shrink-0 mt-1"></span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="text-emerald-400 font-bold text-[12px]">high-g</span>
+                                                    <span className="text-slate-500 font-mono text-[10px]">⟨g⟩ &gt; 0,7</span>
+                                                </div>
+                                                <p className="text-slate-400 text-[10px] leading-snug mt-0.5">Vysoká miera aktívneho učenia</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 ring-2 ring-blue-400/20 flex-shrink-0 mt-1"></span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="text-blue-400 font-bold text-[12px]">medium-g</span>
+                                                    <span className="text-slate-500 font-mono text-[10px]">0,3 ≤ ⟨g⟩ ≤ 0,7</span>
+                                                </div>
+                                                <p className="text-slate-400 text-[10px] leading-snug mt-0.5">Stredný stupeň interaktívneho zapojenia</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-400/20 flex-shrink-0 mt-1"></span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="text-amber-400 font-bold text-[12px]">low-g</span>
+                                                    <span className="text-slate-500 font-mono text-[10px]">⟨g⟩ &lt; 0,3</span>
+                                                </div>
+                                                <p className="text-slate-400 text-[10px] leading-snug mt-0.5">Pasívna výučba</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2.5 pt-2 border-t border-white/5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-rose-400 ring-2 ring-rose-400/20 flex-shrink-0 mt-1"></span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="text-rose-400 font-bold text-[12px]">regresia</span>
+                                                    <span className="text-slate-500 font-mono text-[10px]">⟨g⟩ &lt; 0</span>
+                                                </div>
+                                                <p className="text-slate-400 text-[10px] leading-snug mt-0.5">Strata vedomostí (rozšírenie)</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
